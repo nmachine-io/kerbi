@@ -8,10 +8,11 @@
 ## What is Kerbi?
 
 **Kerbi is a templating engine** for generating Kubernetes manifests. 
-It operates almost exactly like Helm, turning variables + templates into Kubernetes-bound YAML, and even has similar command line API.
+On the outside, it operates very similarly to [Helm](https://helm.sh/), turning 
+variables + templates into Kubernetes-bound YAML, and even has similar command line API.
 
 **Versus Helm**, it is designed to have 1) a better developer experience, 2) more power, 3) more flexibility. 
-It is also a pure templating engine, it does not "package" or "deploy", it just turns X into YAML.
+It is also a pure templating engine - it does not "package" things, or talk to Kubernetes for you, it just turns X into YAML.
 
 **The name Kerbi** is an acronym for Kubernetes [ERB](https://www.stuartellis.name/articles/erb/) Interpolator. 
 And just like the [pink Kirby](https://en.wikipedia.org/wiki/Kirby_(character)), 
