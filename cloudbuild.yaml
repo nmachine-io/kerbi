@@ -1,0 +1,49 @@
+steps:
+
+  - id: "Fetch Secrets"
+    name: gcr.io/cloud-builders/gcloud
+    waitFor: []
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - 'echo $(gcloud secrets versions access latest --secret=rubygems-api-key) > rubygems-api-key.txt;
+         echo $(gcloud secrets versions access latest --secret=kerbi-codecov-token) > kerbi-codecov-token.txt;
+        '
+
+  - id: "Build base image"
+    name: 'gcr.io/cloud-builders/docker'
+    waitFor: []
+    args:
+      - 'build'
+      - '.'
+      - '-t'
+      - 'kerbi'
+
+  - id: 'Run tests and push coverage'
+    name: 'gcr.io/cloud-builders/docker'
+    waitFor:
+      - 'Build base image'
+      - 'Fetch Secrets'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - 'docker run
+        --env CODECOV_TOKEN="$(cat kerbi-codecov-token.txt)"
+        --env VCS_COMMIT_ID="$COMMIT_SHA"
+        --env VCS_BRANCH_NAME="$BRANCH_NAME"
+        --env CI_BUILD_ID="$BUILD_ID"
+        --env CODECOV_TOKEN="$(cat kerbi-codecov-token.txt)"
+        kerbi test
+      '
+
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'Publish Gem'
+    entrypoint: 'bash'
+    waitFor:
+      - 'Run tests and push coverage'
+    args:
+      - '-c'
+      - 'docker run
+         --env RUBYGEMS_API_KEY=$(cat rubygems-api-key.txt)
+         kerbi publish
+         '

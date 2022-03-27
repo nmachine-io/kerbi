@@ -1,0 +1,9 @@
+module <%= (module_name = data[:user_module_name]) %>
+  class RootMixer < Kerbi::Mixer
+    def mix
+      push dict(hello: values[:message])
+    end
+  end
+end
+
+Kerbi::Globals.mixers << <%= module_name %>::RootMixer

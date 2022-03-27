@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: unwanted
+annotations:
+  source: resources.yaml
+data:
+  foo: bar

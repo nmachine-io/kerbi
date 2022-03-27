@@ -1,0 +1,5 @@
+.idea
+/coverage
+*.gem
+.yardoc
+regem.sh

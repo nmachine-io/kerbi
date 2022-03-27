@@ -1,0 +1,9 @@
+.idea
+/coverage
+*.gem
+.gitignore
+cloudbuild.yaml
+docs
+README.md
+_config.yml
+Kerbi-engine.png
