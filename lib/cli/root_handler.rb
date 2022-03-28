@@ -1,4 +1,16 @@
 module Kerbi
+
+  class Console
+    attr_reader :values
+    def initialize(values)
+      @values = values
+    end
+
+    def to_s
+      "kerbi"
+    end
+  end
+
   module Cli
 
     ##
@@ -8,9 +20,9 @@ module Kerbi
       cmd_schemas = Kerbi::Consts::CommandSchemas
 
       thor_meta cmd_schemas::TEMPLATE
-      # @param [String] path root dir from which to search for kerbifile.rb
       # @param [String] release_name helm-like Kubernetes release name
-      def template(path, release_name)
+      # @param [String] path root dir from which to search for kerbifile.rb
+      def template(release_name, path)
         utils::Cli.load_kerbifile(path)
         values = self.compile_values
         mixer_classes = Kerbi::Globals.mixers
@@ -21,8 +33,11 @@ module Kerbi
       thor_meta cmd_schemas::CONSOLE
       def console
         utils::Cli.load_kerbifile(".")
+        values = self.compile_values
         ARGV.clear
-        IRB.start("#{Dir.pwd}/kerbifile.rb")
+        IRB.setup(eval("__FILE__"), argv: [])
+        workspace = IRB::WorkSpace.new(Console.new(values))
+        IRB::Irb.new(workspace).run(IRB.conf)
       end
 
       thor_sub_meta cmd_schemas::VALUES_SUPER, ValuesHandler

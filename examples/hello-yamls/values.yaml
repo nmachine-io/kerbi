@@ -1,3 +1,0 @@
-container:
-  image: "busybox"
-  command: "echo 'hello kerbi''"

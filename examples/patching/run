@@ -1,3 +1,0 @@
-#!/usr/bin/env ruby
-require_relative "./../../lib/kerbi"
-Kerbi::Cli::RootHandler.start(ARGV)

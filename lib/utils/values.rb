@@ -1,9 +1,11 @@
 module Kerbi
   module Utils
-
     ##
     # Utilities module for all value loading functionality.
     module Values
+
+      DEFAULT_VALUE_PATH = "values"
+
       def self.from_files(fname_exprs, **opts)
         final_paths = resolve_fname_exprs(fname_exprs, **opts)
         load_yaml_files(final_paths)
@@ -19,13 +21,13 @@ module Kerbi
       # @param [Hash] opts downstream options for file-loading methods
       # @return [Array<String>] list of unique absolute filenames
       def self.resolve_fname_exprs(fname_exprs, **opts)
-        final_exprs = ['values', *fname_exprs].uniq
+        final_exprs = [self::DEFAULT_VALUE_PATH, *fname_exprs].uniq
         final_exprs.map do |fname_expr|
           path = resolve_fname_expr(fname_expr, **opts)
           if fname_expr != 'values' && !path
             raise "Could not resolve file '#{fname_expr}'"
           end
-          path
+          path.presence
         end.compact.uniq
       end
 
@@ -62,7 +64,8 @@ module Kerbi
       def self.resolve_fname_expr(expr, **opts)
         candidate_paths = self.values_paths(expr, **opts)
         candidate_paths.find do |candidate_path|
-          File.exists?(candidate_path)
+          File.exists?(candidate_path) && \
+          !File.directory?(candidate_path)
         end
       end
 
@@ -112,10 +115,10 @@ module Kerbi
           "#{root}#{fname}.yaml",
           "#{root}#{fname}.json",
           "#{root}#{fname}.yaml.erb",
-          "#{root}/values/#{fname}",
-          "#{root}/values/#{fname}.yaml.erb",
-          "#{root}/values/#{fname}.yaml",
-          "#{root}/values/#{fname}.json"
+          "#{root}values/#{fname}",
+          "#{root}values/#{fname}.yaml.erb",
+          "#{root}values/#{fname}.yaml",
+          "#{root}values/#{fname}.json"
         ]
       end
 
