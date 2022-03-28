@@ -1,5 +1,5 @@
 
-# The Kerbi Templating Engine
+# The Kerbi Templating Engine for Kubernetes
 
 [![codecov](https://codecov.io/gh/nectar-cs/kerbi/branch/master/graph/badge.svg)](https://codecov.io/gh/nectar-cs/kerbi)
 [![Gem Version](https://badge.fury.io/rb/kerbi.svg)](https://badge.fury.io/rb/kerbi)
@@ -28,15 +28,16 @@ Install the `kerbi` RubyGem globally:
 $ gem install kerbi
 ```
 
-Now use the new `kerbi` executable to initialize a project:
+Now use the new `kerbi` executable to initialize a project and install the dependencies:
 
 ```bash
 $ kerbi project new hello-kerbi
 Created project at /home/<my-workspace>/hello-kerbi
 Created file hello-kerbi/Gemfile
-Created file hello-kerbi/kerbifile.rb
-Created file hello-kerbi/values.yaml
-Created file hello-kerbi/.gitignore
+#...
+
+$ cd hello-kerbi
+$ bundle install
 ```
 
 Voila. Generate your first manifest with:
