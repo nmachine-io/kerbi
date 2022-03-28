@@ -4,6 +4,7 @@
 .gitignore
 cloudbuild.yaml
 docs
+.yardoc
 README.md
 _config.yml
-Kerbi-engine.png
+doc
