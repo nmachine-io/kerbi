@@ -53,11 +53,20 @@ message: default message
 
 # The Developer Experience
 
-Kerbi lets you write **Mixers**, where you can orchestrate your templating  
-. Extractor
-methods like `file()` and `chart()` load 
+As a user, the main difference between Helm and Kerbi projects is this:
+
+**🚦 Kerbi requires an Explicit Control Flow**. Where Helm uses a directory structure convention
+to figure out what to do with your files, Kerbi makes you write **Mixers** in plain Ruby, 
+where you explictly say "template this file here and that chart there".
+
+**📁 Kerbi accepts various types of files**. Because Kerbi has your write actual programs,
+you can easily use or build new **extractor methods** like `file()` to load, interpolate, and normailze
+anything into `dicts` (e.g `Array<Hash>`), which are Kerbi thinks in.
 
 ## Mixers
+
+Mixers don't exist in Helm. They may seem like an extra step, but when your logic starts to grows,
+mixers are an excellent way to stay DRY, readable, and organized.
 
 **`backend/mixer.rb`**
 ```ruby
@@ -81,6 +90,8 @@ class Hooli::Backend::Mixer < Kerbi::Mixer
   end
 end
 ```
+Extractor methods like `file()` and `dir()` load 
+
 ## Templating
 
 Most of the actual templating happens in `.yaml.erb` files, which the mixer above loads:
@@ -90,7 +101,7 @@ Most of the actual templating happens in `.yaml.erb` files, which the mixer abov
 apiVersion: appsV1
 kind: Deployment
 metadata:
-  name: backend
+  name: <% Hooli::Backend::Consts::NAME %>
   namespace: <%= release_name %>
   labels: <%= embed(common_labels) %>
 spec: 
@@ -102,26 +113,35 @@ spec:
 
 ## Values
 
-And like with Helm, you pass values with a default `values.yaml` plus any custom files:
+Like with Helm, values for your templating logic come from YAML files, namely your default
+`values.yaml`, inline assignments in the command like `--set backend.ingress.enabled=false`, 
+plus any custom files you load via CLI, e.g `-f production.yaml`:
 
 **`values/production.yaml`**
 ```yaml
-deployment:
-  replicas: 10
+backend:
+  deployment:
+    replicas: 10
 ```
 
 ## CLI
 
-You then generate your final Kubernetes-bound YAML like this:
+Generate your final Kubernetes-bound YAML or JSON as you do with Helm:
 
 ```bash
-$ kerbi template my-namespace . -f production.yaml
+$ kerbi template my-namespace . -f production.yaml -o json
+```
+
+Print out values etc with other commands like
+
+```bash
+$ kerbi values show --set backend.ingress.enabled=false
 ```
  
-## Sandbox
+## Interactive Console
  
-Kerbi can also be run in interactive mode (via IRB), making it easy to play
-with your code:
+Kerbi can also be run in interactive mode (via IRB), making it super easy to play
+with your code and debug things:
 
 ```ruby
 $ kerbi console --set backend.database.enabled=true
@@ -139,8 +159,8 @@ irb(kerbi):003:0> Hooli::Backend::Mixer.new(values).run
 
 ## Why use Kerbi over Helm?
 
-The thesis with Kerbi is this: reality is messy, and our templating needs often break structural 
-molds (like Helm's), so let's make an engine with less structure and more power, 
+The thesis with Kerbi is this: reality is messy, and our templating needs often break clean 
+structural molds like Helm's, so let's make an engine with less structure and more power, 
 so that you can model it to your needs.
 
 **🔀 More ways to template and manipulate data**. 
@@ -156,11 +176,13 @@ You can also add functionality in any way you want, being constrained only by Ru
 **💎 Ruby at its best**. 
 Ruby is not longer a top tier language for web apps 😞. 
 But when it comes to narrow programs that involve DSLs and config mgmt, Ruby remains second to none. 
-The developer experience in Ruby is way better to what you get for these kinds of programs with Go in Helm.
+While Helm can feel a bit mysterious, 
 
 ## Why use Helm over Kerbi?
 
-You can do stupid things.
+With great Turing-completeness comes the potential for great stupidity. If you love over-engineering, 
+re-inventing wheels, obsessing over DRYness, or library-creeping, then you are at risk of abusing
+Kerbi and plunging your team into tyranny. Kerbi responsibly.
 
 ## Running the Examples
 
