@@ -107,7 +107,10 @@ spec:
   replicas: <%= values[:deployment][:replicas] %>
   template:
     spec:
-      containers: <%= embed_array(file('containers') + mixer(Hooli::Traekik::ContainerMixer))) %>
+      containers: <%= embed_array(
+                        file('containers') + 
+                        mixer(Hooli::Traefik::ContainerMixer))
+                   ) %>
 ```
 
 ## Values
