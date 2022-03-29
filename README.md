@@ -107,7 +107,7 @@ spec:
   replicas: <%= values[:deployment][:replicas] %>
   template:
     spec:
-      containers: <%= embed_array(file('containers')) %>
+      containers: <%= embed_array(file('containers') + mixer(Hooli::Traekik::ContainerMixer))) %>
 ```
 
 ## Values
@@ -183,7 +183,24 @@ With great Turing-completeness comes the potential for great stupidity. If you l
 re-inventing wheels, obsessing over DRYness, or library-creeping, then you are at risk of abusing
 Kerbi and plunging your team into tyranny. Kerbi responsibly.
 
-## Running the Examples
+# State of the project
+
+## Maturity
+
+Kerbi is **not** mature. I use it for my personal Kubernetes projects, but it has not yet been
+disciplined by the community. At this point, the goal is to get eyes and hands on.
+
+## Getting Involved
+
+If you're interesting in getting involved, thank you ❤️. 
+
+[CONTRIBUTING.md](https://github.com/nmachine-io/kerbi/blob/master/CONTRIBUTING.md)
+
+Email: xavier@nmachine.io
+
+Discord: https://discord.gg/ntAs6TaD
+
+# Running the Examples
 
 Have a look at the [examples](https://github.com/nmachine-io/kerbi/tree/master/examples) directory. 
 If you want to go a step further and run them from source, clone the project, `cd` into the example you 
@@ -193,7 +210,3 @@ want. For instance:
 $ cd examples/hello-kerbi
 $ kerbi template default .
 ```
-
-## Contributing
-
-See [CONTRIBUTING.md](https://github.com/nmachine-io/kerbi/blob/master/CONTRIBUTING.md)
