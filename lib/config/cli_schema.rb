@@ -7,6 +7,7 @@ module Kerbi
       VALUE_FNAMES = "values-file"
       USE_STATE_VALUES = "use-state-values"
       RUBY_VER = "ruby-version"
+      VERBOSE = "verbose"
     end
 
     module OptionSchemas
@@ -40,6 +41,12 @@ module Kerbi
         key: OptionKeys::RUBY_VER,
         desc: "Specify ruby version for Gemfile in a new project"
       }
+
+      VERBOSE = {
+        key: OptionKeys::VERBOSE,
+        desc: "Run in verbose mode",
+        enum: %w[true false]
+      }
     end
 
     module CommandSchemas
@@ -67,13 +74,18 @@ module Kerbi
       CONSOLE = {
         name: "console",
         desc: "Opens an IRB console so you can play with your mixers",
+        options: [
+          OptionSchemas::VALUE_FNAMES,
+          OptionSchemas::INLINE_ASSIGNMENT
+        ]
       }
 
       NEW_PROJECT = {
         name: "new",
         desc: "Create a new directory with boilerplate files",
         options: [
-          OptionSchemas::RUBY_VER
+          OptionSchemas::RUBY_VER,
+          OptionSchemas::VERBOSE
         ]
       }
 

@@ -4,26 +4,29 @@ module Kerbi
 
       # @param [Hash] dict hash or array
       # @return [String] encoded string
-      def embed(dict, indentation)
+      def embed(dict, indent: 25)
         _dict = dict.is_a?(Array) ? dict.first : dict
         raw = YAML.dump(_dict).sub("---", "")
         indented_lines = raw.split("\n").map do |line|
-          line.indent(indentation)
+          line.indent(indent)
         end
         "\n#{indented_lines.join("\n")}"
       end
 
       # @param [Array|Hash] dicts hash or array
       # @return [String] encoded string
-      def embed_array(dicts, indentation)
-        dicts = [] if dicts.nil?
+      def embed_array(dicts, indent: 25)
+        return "[]" unless dicts.present?
+
         unless dicts.is_a?(Array)
           raise "embed_array called with non-array #{dicts.class} #{dicts}"
         end
+
         raw = YAML.dump(dicts).sub("---", "")
         indented_lines = raw.split("\n").map do |line|
-          line.indent(indentation)
+          line.indent(indent)
         end
+
         "\n#{indented_lines.join("\n")}"
       end
 
