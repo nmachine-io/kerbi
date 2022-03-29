@@ -108,12 +108,16 @@ Kerbi can also be run in interactive mode (via IRB), making it easy to play
 with your code:
 
 ```ruby
-$ kerbi console
-backend_mixer = Hooli::Backend::Mixer.new(@values)
-backend_mixer.persistence_enabled?
+$ kerbi console --set backend.database.enabled=true
+
+irb(kerbi):001:0> values
+=> {:backend=>{:database=>{:enabled=>"true"}}}
+
+irb(kerbi):002:0> Hooli::Backend::Mixer.new(values).persistence_enabled?
 => true
-backend_mixer.file("deployment")
-=> [{apiVersion: "appsV1", kind: "Deployment", #...}]
+
+irb(kerbi):003:0> Hooli::Backend::Mixer.new(values).run
+=> [{:apiVersion=>"appsV1", :kind=>"Deployment", :metadata=>{:name=>"backend", :namespace=>"default"}, :spec=>"foo"}]
 ```
 
 
