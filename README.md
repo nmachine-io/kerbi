@@ -5,7 +5,7 @@
 [![Gem Version](https://badge.fury.io/rb/kerbi.svg)](https://badge.fury.io/rb/kerbi)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## What is Kerbi?
+# What is Kerbi?
 
 **Kerbi is a templating engine** for generating Kubernetes manifests. 
 On the outside, it operates very similarly to [Helm](https://helm.sh/), turning 
@@ -22,7 +22,7 @@ it sucks up just about anything, and spits out something useful.
 
 **[Documentation Site.](https://xavier-9.gitbook.io/untitled/walkthroughs/getting-started)**
 
-## Getting Started
+# Getting Started
 
 Install the `kerbi` RubyGem globally: 
 
@@ -51,9 +51,13 @@ message: default message
 
 **[See the complete walkthroughs and more.](https://xavier-9.gitbook.io/untitled/walkthroughs/getting-started)**
 
-## The Developer Experience
+# The Developer Experience
 
-Kerbi lets you write programmatic mixers in Ruby to orchestrate complex (or silly) templating logic:    
+Kerbi lets you write **Mixers**, where you can orchestrate your templating  
+. Extractor
+methods like `file()` and `chart()` load 
+
+## Mixers
 
 **`backend/mixer.rb`**
 ```ruby
@@ -77,6 +81,7 @@ class Hooli::Backend::Mixer < Kerbi::Mixer
   end
 end
 ```
+## Templating
 
 Most of the actual templating happens in `.yaml.erb` files, which the mixer above loads:
 
@@ -87,10 +92,15 @@ kind: Deployment
 metadata:
   name: backend
   namespace: <%= release_name %>
-  labels: <%= embed(common_labels, indent: 3) %>
+  labels: <%= embed(common_labels) %>
 spec: 
   replicas: <%= values[:deployment][:replicas] %>
+  template:
+    spec:
+      containers: <%= embed_array(file('containers')) %>
 ```
+
+## Values
 
 And like with Helm, you pass values with a default `values.yaml` plus any custom files:
 
@@ -100,11 +110,15 @@ deployment:
   replicas: 10
 ```
 
+## CLI
+
 You then generate your final Kubernetes-bound YAML like this:
 
 ```bash
 $ kerbi template my-namespace . -f production.yaml
 ```
+ 
+## Sandbox
  
 Kerbi can also be run in interactive mode (via IRB), making it easy to play
 with your code:
@@ -123,7 +137,7 @@ irb(kerbi):003:0> Hooli::Backend::Mixer.new(values).run
 ```
 
 
-## Why Kerbi over Helm?
+## Why use Kerbi over Helm?
 
 The thesis with Kerbi is this: reality is messy, and our templating needs often break structural 
 molds (like Helm's), so let's make an engine with less structure and more power, 
@@ -144,6 +158,9 @@ Ruby is not longer a top tier language for web apps 😞.
 But when it comes to narrow programs that involve DSLs and config mgmt, Ruby remains second to none. 
 The developer experience in Ruby is way better to what you get for these kinds of programs with Go in Helm.
 
+## Why use Helm over Kerbi?
+
+You can do stupid things.
 
 ## Running the Examples
 
