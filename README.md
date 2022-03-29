@@ -149,15 +149,11 @@ The developer experience in Ruby is way better to what you get for these kinds o
 
 Have a look at the [examples](https://github.com/nmachine-io/kerbi/tree/master/examples) directory. 
 If you want to go a step further and run them from source, clone the project, `cd` into the example you 
-want, and run 
-```bash
-$ ./run [CLI COMMAND AND OPTIONS] 
-```
-This will use the local code instead of your global `kerbi` executable. For example:
+want. For instance:
 
 ```bash
-$ cd examples/hello-yaml
-$ ./run template default .
+$ cd examples/hello-kerbi
+$ kerbi template default .
 ```
 
 ## Contributing
