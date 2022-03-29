@@ -18,6 +18,8 @@ It is also a pure templating engine - it does not "package" things, or talk to K
 And just like the [pink Kirby](https://en.wikipedia.org/wiki/Kirby_(character)), 
 it sucks up just about anything, and spits out something useful.
 
+![](https://storage.googleapis.com/kerbi/images/kerbi-intro.png)
+
 **[Documentation Site.](https://xavier-9.gitbook.io/untitled/walkthroughs/getting-started)**
 
 ## Getting Started
