@@ -176,7 +176,7 @@ You can also add functionality in any way you want, being constrained only by Ru
 **💎 Ruby at its best**. 
 Ruby is not longer a top tier language for web apps 😞. 
 But when it comes to narrow programs that involve DSLs and config mgmt, Ruby remains second to none. 
-While Helm can feel a bit mysterious, 
+While Helm can feel a bit mysterious, Kerbi feel familiar to anyone familiar with programming and libraries in general.
 
 ## Why use Helm over Kerbi?
 
