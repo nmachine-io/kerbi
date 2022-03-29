@@ -90,7 +90,6 @@ class Hooli::Backend::Mixer < Kerbi::Mixer
   end
 end
 ```
-Extractor methods like `file()` and `dir()` load 
 
 ## Templating
 
