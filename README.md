@@ -155,7 +155,7 @@ $ kerbi template see-food . \
 $ kubectl apply -f manifest.yaml
 
 # kubernetes didn't reject it, so let's save the 1.0.1 for next time
-$ kerbi state write
+$ kerbi state write candidate->1.0.1
 
 $ kerbi state list -n see-food
 <commited> 1.1.1 configmap Thurs 3 4-changes
