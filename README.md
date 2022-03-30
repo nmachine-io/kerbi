@@ -11,8 +11,9 @@
 On the outside, it operates very similarly to [Helm](https://helm.sh/), turning 
 variables + templates into Kubernetes-bound YAML, and even has similar command line API.
 
-**Versus Helm**, it is designed to have 1) a better developer experience, 2) more power, 3) more flexibility. 
-It is also a pure templating engine - it does not "package" things, or talk to Kubernetes for you, it just turns X into YAML.
+**Versus Helm**, on the templating front, it is designed to have 1) a better developer 
+experience, 2) more power, 3) more flexibility. On the Kubernetes front, it is far more
+decoupled.
 
 **The name Kerbi** is an acronym for Kubernetes [ERB](https://www.stuartellis.name/articles/erb/) Interpolator. 
 And just like the [pink Kirby](https://en.wikipedia.org/wiki/Kirby_(character)), 
@@ -126,17 +127,43 @@ backend:
 
 ## CLI
 
-Generate your final Kubernetes-bound YAML or JSON as you do with Helm:
+Intuitive and familiar command structure:
 
 ```bash
 $ kerbi template my-namespace . -f production.yaml -o json
+$ kerbi values show
+$ kerbi state commit --namespace=default
+$ kerbi state show --storage=configmap
 ```
 
-Print out values etc with other commands like
+## State Management
+
+Kerbi will never do "cluster stuff" as a side effect without your explict
+instruction to do so.
+
 
 ```bash
-$ kerbi values show --set backend.ingress.enabled=false
+# time to upgrade the backend to version 1.0.1
+
+$ kerbi template see-food . \
+        --read-state latest \
+        --write-state candidate \
+        --namespace see-food \
+        --set backend.image=our-image.1.0.1 \
+        >> manifest.yaml
+
+$ kubectl apply -f manifest.yaml
+
+# kubernetes didn't reject it, so let's save the 1.0.1 for next time
+$ kerbi state write
+
+$ kerbi state list -n see-food
+<commited> 1.1.1 configmap Thurs 3 4-changes
+<commited> 1.1.1 configmap Thurs 3 4-changes
+
+$ kerbi values show --read-state latest
 ```
+
  
 ## Interactive Console
  
