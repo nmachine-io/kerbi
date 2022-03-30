@@ -36,10 +36,6 @@ Now use the new `kerbi` executable to initialize a project and install the depen
 
 ```bash
 $ kerbi project new hello-kerbi
-Created project at /home/<my-workspace>/hello-kerbi
-Created file hello-kerbi/Gemfile
-#...
-
 $ cd hello-kerbi
 $ bundle install
 ```
