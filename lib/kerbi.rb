@@ -22,6 +22,7 @@ require 'active_support/core_ext/string/indent.rb'
 
 require_relative './utils/misc'
 require_relative './utils/k8s_auth'
+require_relative './state/entry'
 
 require_relative './config/cli_schema'
 require_relative './config/state_consts'
@@ -43,7 +44,7 @@ require_relative './main/mixer'
 
 require_relative './state/base'
 require_relative './state/state_cm'
-require_relative './state/config_map'
+require_relative './state/config_map_backend'
 
 require_relative './cli/base'
 require_relative './cli/values_handler'

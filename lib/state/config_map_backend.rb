@@ -19,9 +19,9 @@ module Kerbi
 
       # @return [Array<Kerbi::State::Entry>] entries
       def read_entries
-        result_dict = load_resource
-        json_entries = result_dict[:data][:entries]
-        JSON.parse(json_entries).first
+        str_entries = load_resource[:data][:entries]
+        json_entries = JSON.parse(str_entries)
+        json_entries.map {|e| Kerbi::State::Entry.from_dict(e) }
       end
 
       def apply_resource(resource_desc)
@@ -31,7 +31,7 @@ module Kerbi
       # @param [Array<Kerbi::State::Entry>] entries
       def template_resource(entries)
         consts = Kerbi::State::Consts
-        values = { consts::ENTRIES_ATTR => entries }
+        values = { consts::ENTRIES_ATTR => entries.map(&:serialize) }
         Kerbi::State::ConfigMapMixer.new(
           values,
           release_name: namespace
