@@ -4,7 +4,6 @@ module Kerbi
       include Kerbi::Mixins::ResourceStateBackendHelpers
 
       attr_reader :auth_bundle
-      attr_reader :client
       attr_reader :namespace
 
       def initialize(auth_bundle, namespace)
@@ -18,22 +17,30 @@ module Kerbi
       def resource_exists?
       end
 
-      def read_resource
-        read_resource! rescue nil
+      # @return [Array<Kerbi::State::Entry>] entries
+      def read_entries
+        result_dict = load_resource
+        json_entries = result_dict[:data][:entries]
+        JSON.parse(json_entries).first
+      end
+
+      def apply_resource(resource_desc)
+        client!("v1").create_config_map(resource_desc)
       end
 
       # @param [Array<Kerbi::State::Entry>] entries
       def template_resource(entries)
         consts = Kerbi::State::Consts
-        values = { consts::ENTRIES_ATTR => entries.map(&:to_json) }
+        values = { consts::ENTRIES_ATTR => entries }
         Kerbi::State::ConfigMapMixer.new(
           values,
           release_name: namespace
-        ).run
+        ).run.first
       end
 
-      def read_resource!
-        raise "asdas"
+      def load_resource
+        name = Kerbi::State::Consts::RESOURCE_NAME
+        client!("v1").get_config_map(name, namespace).to_h
       end
 
       # @return [Array<Kerbi::State::Entry>]
@@ -41,17 +48,13 @@ module Kerbi
 
       end
 
-      def read(version)
-
-      end
-
       protected
 
-      def make_client(bundle, api_name)
+      def client!(api_name="v1")
         Kubeclient::Client.new(
-          bundle[:endpoint],
+          auth_bundle[:endpoint],
           api_name,
-          **bundle[:options]
+          **auth_bundle[:options]
         )
       end
 

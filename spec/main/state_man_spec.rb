@@ -10,9 +10,31 @@ RSpec.describe Kerbi::State::ConfigMapBackend do
   end
 
   describe "#template_resource" do
+    context "with 0 entries" do
+      it "outputs a descriptor with the right basic properties" do
+        result = make_subject("xyz").template_resource([])
+        expect(result[:kind]).to eq('ConfigMap')
+        expect(result[:metadata][:name]).to eq('kerbi-state-tracker')
+        expect(result[:metadata][:namespace]).to eq('xyz')
+        expect(result[:data][:entries]).to eq("[]")
+      end
+    end
+  end
+
+  describe "#apply_resource" do
     it "works" do
-      thing = make_subject("default")
-      puts thing.template_resource([])
+      subject = make_subject("default")
+      descriptor = subject.template_resource([{foo: "bar"}])
+      subject.apply_resource(descriptor)
+    end
+  end
+
+  describe "#read_entries" do
+    it "works" do
+      subject = make_subject("default")
+      result = subject.read_entries
+      puts result
+      puts result.class
     end
   end
 

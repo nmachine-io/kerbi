@@ -24,6 +24,7 @@ require_relative './utils/misc'
 require_relative './utils/k8s_auth'
 
 require_relative './config/cli_schema'
+require_relative './config/state_consts'
 require_relative './config/manager'
 require_relative './config/globals'
 require_relative './config/cli_opts'

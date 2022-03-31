@@ -3,11 +3,12 @@ module Kerbi
     module ResourceStateBackendHelpers
 
       def test_connection(options={})
+        res_name = Kerbi::State::Consts::RESOURCE_NAME
         exceptions = []
 
         schema = [
           {
-            method: :test_create_client,
+            method: :client!,
             message: "1. Create Kubernetes client"
           },
           {
@@ -19,14 +20,14 @@ module Kerbi
             message: "3. Target namespace #{namespace} exists"
           },
           {
-            method: :read_resource!,
-            message: "3. Resource #{namespace}/cm/#{'state'} exists"
+            method: :load_resource,
+            message: "4. Resource #{namespace}/cm/#{res_name} exists"
           }
         ]
 
         schema.each do |spec|
           begin
-            send(spec[:method])
+            self.send(spec[:method])
             puts_outcome(spec[:message], true)
           rescue Exception => e
             puts_outcome(spec[:message], false)
@@ -44,17 +45,12 @@ module Kerbi
         end
       end
 
-      def test_create_client
-        client = make_client(auth_bundle, "v1")
-        @client = client
-      end
-
       def test_list_namespaces
-        client.get_namespaces.any?
+        client!("v1").get_namespaces.any?
       end
 
       def test_target_ns_exists
-        client.get_namespace namespace
+        client!.get_namespace namespace
       end
 
       #noinspection RubyResolve
