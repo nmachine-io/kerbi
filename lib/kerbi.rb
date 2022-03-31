@@ -29,6 +29,7 @@ require_relative './config/globals'
 require_relative './config/cli_opts'
 
 require_relative './mixins/mixer'
+require_relative './mixins/resource_state_backend_helpers'
 
 require_relative './utils/mixing'
 require_relative './utils/helm'

@@ -1,32 +1,15 @@
 module Kerbi
   module StateBackend
     class ConfigMap < Kerbi::StateBackend::Base
+      include Kerbi::Mixins::ResourceStateBackendHelpers
 
       attr_reader :auth_bundle
-
       attr_reader :client
+      attr_reader :namespace
 
-      def initialize(auth_bundle)
-        super
+      def initialize(auth_bundle, namespace)
         @auth_bundle = auth_bundle.freeze
-      end
-
-      def test_connection(options={})
-        exceptions = []
-        client = nil
-        begin
-          client = make_client(auth_bundle, "v1")
-          @client = client
-        rescue Exception => e
-          exceptions << e
-        end
-        puts "Create Kubernetes client: #{success_col(client)}"
-      end
-
-      def success_col(thing)
-        message = thing.present? ? "Success" : "Failure"
-        color = thing.present? ? :green : :red
-        message.colorize(color)
+        @namespace = namespace.freeze
       end
 
       def namespace_exists?
@@ -40,6 +23,7 @@ module Kerbi
       end
 
       def read_resource!
+        raise "asdas"
       end
 
       # @return [Array<Kerbi::StateBackend::Entry>]

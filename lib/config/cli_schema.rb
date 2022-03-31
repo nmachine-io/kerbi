@@ -12,7 +12,7 @@ module Kerbi
       WRITE_STATE = "write-state"
       NAMESPACE = "namespace"
 
-      STATE_BACKEND_TYPE = "configmap"
+      STATE_BACKEND_TYPE = "state-backend"
 
       K8S_AUTH_TYPE = "auth-type"
       KUBE_CONFIG_PATH = "kube-config-path"

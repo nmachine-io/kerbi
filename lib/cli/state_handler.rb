@@ -5,7 +5,7 @@ module Kerbi
       thor_meta Kerbi::Consts::CommandSchemas::TEST_STATE
       def test_connection
         backend = make_state_backend
-        backend.test_connection
+        backend.test_connection(verbose: cli_opts.verbose?)
       end
 
       thor_meta Kerbi::Consts::CommandSchemas::LIST_STATE
@@ -18,7 +18,10 @@ module Kerbi
       def make_state_backend
         if cli_opts.state_backend_type == 'configmap'
           auth_bundle = make_k8s_auth_bundle
-          Kerbi::StateBackend::ConfigMap.new(auth_bundle)
+          Kerbi::StateBackend::ConfigMap.new(
+            auth_bundle,
+            cli_opts.cluster_namespace
+          )
         end
       end
 

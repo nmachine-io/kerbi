@@ -40,6 +40,10 @@ module Kerbi
       options[consts::USE_STATE_VALUES].presence
     end
 
+    def verbose?
+      options[consts::VERBOSE]
+    end
+
     def reads_state?
       read_state_from.present?
     end
@@ -57,7 +61,7 @@ module Kerbi
     end
 
     def cluster_namespace
-      options[consts::NAMESPACE]
+      options[consts::NAMESPACE]  || 'default'
     end
 
     def state_backend_type
