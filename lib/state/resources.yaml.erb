@@ -1,0 +1,17 @@
+<% consts = Kerbi::State::Consts %>
+
+<% entries_json = JSON.dump(values[consts::ENTRIES_ATTR]) %>
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: <%= consts::RESOURCE_NAME %>
+  namespace: <%= release_name %>
+data: <%= embed({consts::ENTRIES_ATTR => entries_json}) %>
+
+---
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: <%= release_name %>

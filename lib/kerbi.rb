@@ -38,7 +38,10 @@ require_relative './utils/cli'
 require_relative './utils/values'
 require_relative './main/code_gen'
 
+require_relative './main/mixer'
+
 require_relative './state/base'
+require_relative './state/state_cm'
 require_relative './state/config_map'
 
 require_relative './cli/base'
@@ -46,5 +49,5 @@ require_relative './cli/values_handler'
 require_relative './cli/project_handler'
 require_relative './cli/state_handler'
 require_relative './cli/root_handler'
-require_relative './main/mixer'
+
 

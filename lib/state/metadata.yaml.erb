@@ -1,0 +1,11 @@
+<% consts = Kerbi::State::Consts %>
+
+metadata:
+  labels: <%= embed({
+    consts::CREATOR_ATTR => consts::CREATOR_VAL
+  }) %>
+
+  annotations: <%= embed({
+    consts::CREATOR_ATTR => consts::CREATOR_VAL,
+    description: "used by kerbi to keep records of previously applied values"
+  }) %>

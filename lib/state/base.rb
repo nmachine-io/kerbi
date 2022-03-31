@@ -1,15 +1,6 @@
 module Kerbi
-  module StateBackend
-    class Entry
-      attr_reader :id
-
-      def candidate?
-        id == 'candidate'
-      end
-    end
-
-    class Base
-
+  module State
+    class BaseBackend
       def initialize(options={})
 
       end
@@ -53,8 +44,6 @@ module Kerbi
       def utils
         Kerbi::Utils
       end
-
-
     end
   end
 end

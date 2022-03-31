@@ -1,6 +1,6 @@
 module Kerbi
-  module StateBackend
-    class ConfigMap < Kerbi::StateBackend::Base
+  module State
+    class ConfigMapBackend < Kerbi::State::BaseBackend
       include Kerbi::Mixins::ResourceStateBackendHelpers
 
       attr_reader :auth_bundle
@@ -22,11 +22,21 @@ module Kerbi
         read_resource! rescue nil
       end
 
+      # @param [Array<Kerbi::State::Entry>] entries
+      def template_resource(entries)
+        consts = Kerbi::State::Consts
+        values = { consts::ENTRIES_ATTR => entries.map(&:to_json) }
+        Kerbi::State::ConfigMapMixer.new(
+          values,
+          release_name: namespace
+        ).run
+      end
+
       def read_resource!
         raise "asdas"
       end
 
-      # @return [Array<Kerbi::StateBackend::Entry>]
+      # @return [Array<Kerbi::State::Entry>]
       def list()
 
       end

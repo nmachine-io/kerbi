@@ -18,7 +18,7 @@ module Kerbi
       def make_state_backend
         if cli_opts.state_backend_type == 'configmap'
           auth_bundle = make_k8s_auth_bundle
-          Kerbi::StateBackend::ConfigMap.new(
+          Kerbi::State::ConfigMapBackend.new(
             auth_bundle,
             cli_opts.cluster_namespace
           )
