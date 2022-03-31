@@ -53,6 +53,17 @@ module Kerbi
         kmd("apply -f #{tmp_fname} #{append}", print_err: true)
         File.delete(tmp_fname)
       end
+
+      def self.kubectl_get_cm(res_name, opts={})
+        kmd = "get configmap #{res_name} #{opts[:kubectl_args]}"
+        Utils::Kubectl.jkmd(kmd, **opts)
+      end
+
+      def self.read_cm_data(configmap)
+        json_enc_vars = configmap.dig(:data, :variables) || '{}'
+        JSON.parse(json_enc_vars).deep_symbolize_keys
+      end
+
     end
   end
 end

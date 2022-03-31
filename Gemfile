@@ -3,10 +3,10 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
 ruby '2.6.3'
 
-gem "http"
 gem "activesupport"
 gem "thor"
 gem 'colorize'
+gem 'kubeclient'
 
 group :test do
   gem 'rspec', '~> 3.0'

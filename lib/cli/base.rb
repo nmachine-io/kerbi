@@ -43,6 +43,18 @@ module Kerbi
         @_options_obj ||= Kerbi::CliOpts.new(self.options)
       end
 
+      def state_manager
+        # @_state_man
+        if cli_opts.reads_state?
+          case cli_opts.read_state_from
+          when a
+            puts "asd"
+          else
+            puts "asd"
+          end
+        end
+      end
+
       ##
       # Convenience class method for declaring a Thor subcommand
       # metadata bundle, in accordance with the schema in

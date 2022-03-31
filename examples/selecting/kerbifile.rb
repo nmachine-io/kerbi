@@ -1,4 +1,3 @@
-
 class FilteringExample < Kerbi::Mixer
   ACCEPT = [{kind: "PersistentVolume.*"}]
   REJECT = [{name: "unwanted"}]

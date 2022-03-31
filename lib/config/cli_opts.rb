@@ -8,7 +8,7 @@ module Kerbi
     attr_reader :options
 
     def initialize(options={})
-      @options = options.deep_dup
+      @options = options.deep_dup.freeze
     end
 
     def output_format
@@ -36,8 +36,44 @@ module Kerbi
       options[consts::INLINE_ASSIGNMENT] || []
     end
 
-    def use_state?
-      options[consts::USE_STATE_VALUES].present?
+    def read_state_from
+      options[consts::USE_STATE_VALUES].presence
+    end
+
+    def reads_state?
+      read_state_from.present?
+    end
+
+    def k8s_auth_type
+      options[consts::K8S_AUTH_TYPE] || "kube-config"
+    end
+
+    def kube_config_path
+      options[consts::KUBE_CONFIG_PATH]
+    end
+
+    def kube_context_name
+      options[consts::KUBE_CONFIG_CONTEXT]
+    end
+
+    def cluster_namespace
+      options[consts::NAMESPACE]
+    end
+
+    def state_backend_type
+      options[consts::STATE_BACKEND_TYPE] || "configmap"
+    end
+
+    def k8s_auth_username
+      options[consts::K8S_USERNAME]
+    end
+
+    def k8s_auth_password
+      options[consts::K8S_PASSWORD]
+    end
+
+    def k8s_auth_token
+      options[consts::K8S_TOKEN]
     end
 
     private

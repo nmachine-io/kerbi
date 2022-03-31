@@ -1,8 +1,8 @@
 # require_relative './../spec_helper'
 
-# RSpec.describe Kerbi::StateManager do
+# RSpec.describe Kerbi::StateBackendager do
 #
-#   subject { Kerbi::StateManager.new }
+#   subject { Kerbi::StateBackendager.new }
 #
 #   context = ENV['KERBI_RSPEC_K8S_CONTEXT'] || 'kind-kind'
 #

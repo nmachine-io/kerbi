@@ -21,4 +21,5 @@ Gem::Specification.new do |s|
   s.add_dependency 'activesupport', "~>6.0", ">=6.0.3.2"
   s.add_dependency 'thor', "~>1.1", ">=1.1.0"
   s.add_dependency 'colorize', "~>0.8", ">=0.8.1"
+  s.add_dependency "kubeclient", "~>4.9", ">=4.9.1"
 end

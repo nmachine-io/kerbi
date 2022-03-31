@@ -42,6 +42,7 @@ module Kerbi
 
       thor_sub_meta cmd_schemas::VALUES_SUPER, ValuesHandler
       thor_sub_meta cmd_schemas::PROJECT_SUPER, ProjectHandler
+      thor_sub_meta cmd_schemas::STATE_SUPER, StateHandler
     end
   end
 end

@@ -13,4 +13,5 @@ module HelloKerbi
   end
 end
 
+Kerbi::Globals.default_version = 3
 Kerbi::Globals.mixers << HelloKerbi::Mixer
