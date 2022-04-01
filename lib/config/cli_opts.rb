@@ -11,13 +11,17 @@ module Kerbi
       @options = options.deep_dup.freeze
     end
 
-    def output_format(default="yaml")
+    def output_format
       value = options[consts::OUTPUT_FMT]
       value || default
     end
 
     def outputs_yaml?
       self.output_format == 'yaml'
+    end
+
+    def outputs_table?
+      self.output_format == 'table'
     end
 
     def outputs_json?
@@ -29,11 +33,11 @@ module Kerbi
     end
 
     def fname_exprs
-      options[consts::VALUE_FNAMES] || []
+      options[consts::VALUE_FNAMES]
     end
 
     def inline_val_exprs
-      options[consts::INLINE_ASSIGNMENT] || []
+      options[consts::INLINE_ASSIGNMENT]
     end
 
     def read_state_from
@@ -49,7 +53,7 @@ module Kerbi
     end
 
     def k8s_auth_type
-      options[consts::K8S_AUTH_TYPE] || "kube-config"
+      options[consts::K8S_AUTH_TYPE]
     end
 
     def kube_config_path
@@ -61,11 +65,11 @@ module Kerbi
     end
 
     def cluster_namespace
-      options[consts::NAMESPACE]  || 'default'
+      options[consts::NAMESPACE]
     end
 
     def state_backend_type
-      options[consts::STATE_BACKEND_TYPE] || "configmap"
+      options[consts::STATE_BACKEND_TYPE]
     end
 
     def k8s_auth_username

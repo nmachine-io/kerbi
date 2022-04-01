@@ -47,7 +47,7 @@ module Kerbi
         )
       end
 
-      def serialize
+      def to_h
         {
           tag: tag,
           message: message,
@@ -56,6 +56,7 @@ module Kerbi
           created_at: created_at.to_s
         }
       end
+      alias_method :serialize, :to_h
 
       def to_json
         JSON.dump(serialize)

@@ -27,7 +27,7 @@ module Kerbi
         values = self.compile_values
         mixer_classes = Kerbi::Globals.mixers
         res_dicts = utils::Cli.run_mixers(mixer_classes, values, release_name)
-        print_dicts(res_dicts)
+        echo_data(res_dicts, coerce_type: "Array")
       end
 
       thor_meta cmd_schemas::CONSOLE

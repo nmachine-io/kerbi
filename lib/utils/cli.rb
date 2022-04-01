@@ -17,6 +17,20 @@ module Kerbi
         end
       end
 
+      def self.coerce_hash_or_array(actual, **options)
+        if (type = options[:coerce_type]).present?
+          if type == 'Array'
+            actual.is_a?(Array) ? actual : [actual]
+          elsif type == 'Hash'
+            actual.is_a?(Array) ? actual[0].to_h : actual.to_h
+          else
+            raise "Unrecognized type coercion #{type}"
+          end
+        else
+          actual
+        end
+      end
+
       ##
       # Turns list of key-symbol dicts into their
       # pretty YAML representation.
@@ -31,6 +45,17 @@ module Kerbi
         else
           as_yaml = YAML.dump(dicts.deep_stringify_keys)
           as_yaml.gsub("---\n", "")
+        end
+      end
+
+      # @param [Array<Object>] entries
+      def self.list_to_table(entries, serializer_cls)
+        if entries.is_a?(Array)
+          table = Terminal::Table.new(
+            headings: serializer_cls.header_titles,
+            rows: entries.map(&:values)
+          )
+          table.to_s
         end
       end
 

@@ -7,32 +7,52 @@ module Kerbi
 
       protected
 
+      def resolve_serializer(options={})
+        if cli_opts.outputs_json?
+          winner = options[:json_serializer]
+        elsif cli_opts.outputs_yaml?
+          winner = options[:yaml_serializer]
+        elsif cli_opts.outputs_table?
+          winner = options[:table_serializer]
+        else
+          raise "Unknown output format '#{cli_opts.output_format}'"
+        end
+        winner || options[:serializer]
+      end
+
       ##
       # Convenience method for printing dicts as YAML or JSON,
       # according to the CLI options.
       # @param [Hash|Array<Hash>] dicts
-      # @param [Kerbi::Cli::BaseSerializer] serializer
-      def print_dicts(dicts, serializer=nil)
-        dicts = serialize_for_user(dicts, serializer)
+      def echo_data(items, **opts)
+        utils = Kerbi::Utils::Cli
+        serializer = resolve_serializer(opts)
+        items = utils.coerce_hash_or_array(items, opts)
+        if serializer
+          if items.is_a?(Array)
+            items = items.map{ |e| serializer.new(e).serialize}
+          else
+            items = serializer.new(items).serialize
+          end
+        end
+
         if self.cli_opts.outputs_yaml?
-          printable_str = Kerbi::Utils::Cli.dicts_to_yaml(dicts)
+          printable_str = utils.dicts_to_yaml(items)
         elsif self.cli_opts.outputs_json?
-          printable_str = Kerbi::Utils::Cli.dicts_to_json(dicts)
+          printable_str = utils.dicts_to_json(items)
+        elsif self.cli_opts.outputs_table?
+          printable_str = utils.list_to_table(items, serializer)
         else
           raise "Unknown output format '#{cli_opts.output_format}'"
         end
+
         puts printable_str
       end
 
-      # @param [Array<Object>|Object] dicts
-      # @param [Kerbi::Cli::BaseSerializer] serializer
-      def serialize_for_user(dicts, serializer=nil)
-        return dicts unless serializer
-        if dicts.is_a?(Array)
-          dicts.map{|e|serializer.new(e).serialize}
-        else
-          serializer.new(dicts).serialize
-        end
+      # @param [Kube::State::Entry] entry
+      def print_describe(entry)
+        data = serializer_cls.new(entry).serialize
+        puts data
       end
 
       ##
@@ -88,10 +108,22 @@ module Kerbi
       def self.thor_meta(_schema)
         schema = _schema.deep_dup
         desc(schema[:name], schema[:desc])
+        defaults = schema[:defaults]
         (schema[:options] || []).each do |opt_schema|
-          opt_key = opt_schema.delete(:key).to_sym
-          self.option opt_key, opt_schema
+          thor_option(opt_schema, defaults)
         end
+      end
+
+      def self.thor_option(opt_schema, defaults)
+        opt_key = opt_schema.delete(:key).to_sym
+
+        final_defaults = defaults || Kerbi::Consts::OptionDefaults::BASE
+
+        if final_defaults.has_key?(opt_key.to_s)
+          opt_schema.merge!(default: final_defaults[opt_key.to_s])
+        end
+
+        self.option opt_key, opt_schema
       end
 
       def self.exit_on_failure?

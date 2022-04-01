@@ -102,6 +102,10 @@ module Kerbi
         @attributes = attrs.map(&:to_sym)
       end
 
+      def self.header_titles
+        attributes.map(&:to_s).map(&:upcase)
+      end
+
       def self.serialize(object, context={})
         instance = new(object, context)
         instance.serialize

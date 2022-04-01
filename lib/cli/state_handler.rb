@@ -11,8 +11,14 @@ module Kerbi
 
       thor_meta Kerbi::Consts::CommandSchemas::LIST_STATE
       def list
+        # puts options
         backend = make_state_backend
-        print_state_list(backend.read_entries)
+        echo_data(
+          backend.read_entries,
+          table_serializer: Kerbi::Cli::EntrySerializer,
+          serializer: Kerbi::Cli::BigEntrySerializer,
+          coerce_type: "Array"
+        )
       end
 
       thor_meta Kerbi::Consts::CommandSchemas::SHOW_STATE
