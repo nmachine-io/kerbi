@@ -2,6 +2,12 @@ module Kerbi
   module Mixins
     module StatePrinting
 
+      # @param [Kube::State::Entry] entry
+      def print_describe(entry)
+        data = serializer_cls.new(entry).serialize
+
+      end
+
       # @param [Array<Kube::State::Entry>] entries
       def print_state_list(entries)
         if cli_opts.output_format("table") == 'table'

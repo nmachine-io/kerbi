@@ -19,4 +19,14 @@ RSpec.describe Kerbi::Utils::Misc do
       end
     end
   end
+
+  describe ".deep_hash_diff" do
+    it "works" do
+      result = subject.deep_hash_diff(
+        {a: "a"},
+        {a: "b"}
+      )
+      puts result
+    end
+  end
 end

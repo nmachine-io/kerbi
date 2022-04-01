@@ -21,6 +21,7 @@ require 'active_support/core_ext/hash/keys'
 require 'active_support/core_ext/hash/deep_merge'
 require 'active_support/core_ext/object/blank'
 require 'active_support/core_ext/string/indent.rb'
+require 'active_support/core_ext/string/filters'
 
 require_relative './utils/misc'
 require_relative './utils/k8s_auth'

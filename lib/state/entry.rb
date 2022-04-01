@@ -21,6 +21,14 @@ module Kerbi
         !candidate? && is_latest
       end
 
+      def default_new_delta
+        if values.is_a?(Hash) & default_values.is_a?(Hash)
+          Kerbi::Utils::Misc.deep_hash_diff(default_values, values)
+        else
+          nil
+        end
+      end
+
       def candidate?
         tag.start_with? 'candidate'
       end

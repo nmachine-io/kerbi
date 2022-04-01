@@ -36,6 +36,23 @@ module Kerbi
           end
         end
       end
+
+      ##
+      # Credit: https://gist.github.com/henrik/146844
+      # @param [Hash] hash_a
+      # @param [Hash] hash_b
+      def self.deep_hash_diff(hash_a, hash_b)
+        (hash_a.keys | hash_b.keys).inject({}) do |diff, k|
+          if hash_a[k] != hash_b[k]
+            if hash_a[k].is_a?(Hash) && hash_b[k].is_a?(Hash)
+              diff[k] = deep_hash_diff(hash_a[k], hash_b[k])
+            else
+              diff[k] = [hash_a[k], hash_b[k]]
+            end
+          end
+          diff
+        end
+      end
     end
   end
 end

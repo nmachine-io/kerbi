@@ -15,7 +15,18 @@ module Kerbi
         print_state_list(backend.read_entries)
       end
 
+      thor_meta Kerbi::Consts::CommandSchemas::SHOW_STATE
+      def show(tag)
+        entry = find_entry(tag)
+        print_describe(entry)
+      end
+
       protected
+
+      def find_entry(tag)
+        backend = make_state_backend
+        backend.find_entry(tag)
+      end
 
       def make_state_backend
         if cli_opts.state_backend_type == 'configmap'

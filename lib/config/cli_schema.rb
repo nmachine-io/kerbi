@@ -174,10 +174,18 @@ defaults to $(kubectl config current-context)"
 
       LIST_STATE = {
         name: "list",
-        desc: "Tabulate past states",
+        desc: "Print all recorded states for this namespace",
         options: [
           *OptionSchemas::KUBERNETES_OPTIONS,
           OptionSchemas::OUTPUT_FMT
+        ]
+      }
+
+      SHOW_STATE = {
+        name: "show [TAG]",
+        desc: "Print summary of state identified by [TAG]",
+        options: [
+          *OptionSchemas::KUBERNETES_OPTIONS
         ]
       }
 

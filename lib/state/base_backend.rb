@@ -8,6 +8,16 @@ module Kerbi
       def load_source
       end
 
+      def read_entries
+        raise NotImplementedError
+      end
+
+      # @param [String] tag
+      # @return [Kerbi::State::Entry]
+      def find_entry(tag)
+        read_entries.find { |entry| entry.tag == tag }
+      end
+
       private
 
       def utils
@@ -18,7 +28,7 @@ module Kerbi
       # @return [Array<Kerbi::State::Entry>]
       def self.post_process_entries(entries)
         sort_by_created_at(entries)
-        entries.first.is_latest = true if entries.any?
+        entries[0].is_latest = true if entries.any?
         entries
       end
 
