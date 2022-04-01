@@ -17,8 +17,9 @@ module Kerbi
         end
       end
 
+      # @return [TrueClass, FalseClass]
       def latest?
-        !candidate? && is_latest
+        !!(!candidate? && is_latest)
       end
 
       def default_new_delta

@@ -207,8 +207,10 @@ defaults to $(kubectl config current-context)"
         name: "show [TAG]",
         desc: "Print summary of state identified by [TAG]",
         options: [
-          *OptionSchemas::KUBERNETES_OPTIONS
-        ]
+          *OptionSchemas::KUBERNETES_OPTIONS,
+          OptionSchemas::OUTPUT_FMT
+        ],
+        defaults: OptionDefaults::LIST_STATE
       }.freeze
 
       SHOW_VALUES = {

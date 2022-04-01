@@ -11,27 +11,32 @@ module Kerbi
 
       thor_meta Kerbi::Consts::CommandSchemas::LIST_STATE
       def list
-        # puts options
         backend = make_state_backend
         echo_data(
           backend.read_entries,
-          table_serializer: Kerbi::Cli::EntrySerializer,
-          serializer: Kerbi::Cli::BigEntrySerializer,
-          coerce_type: "Array"
+          table_serializer: Kerbi::Cli::EntryRowSerializer,
+          serializer: Kerbi::Cli::EntryYamlJsonSerializer
         )
       end
 
       thor_meta Kerbi::Consts::CommandSchemas::SHOW_STATE
       def show(tag)
-        entry = find_entry(tag)
-        print_describe(entry)
+        entry = find_entry!(tag)
+        echo_data(
+          entry,
+          table_serializer: Kerbi::Cli::EntryYamlJsonSerializer,
+          serializer: Kerbi::Cli::EntryYamlJsonSerializer
+        )
       end
 
       protected
 
-      def find_entry(tag)
+      def find_entry!(tag)
         backend = make_state_backend
-        backend.find_entry(tag)
+        unless( entry = backend.find_entry(tag))
+          raise "Entry #{tag} not found"
+        end
+        entry
       end
 
       def make_state_backend

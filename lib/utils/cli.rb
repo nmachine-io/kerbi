@@ -56,6 +56,15 @@ module Kerbi
             rows: entries.map(&:values)
           )
           table.to_s
+        else
+          table = Terminal::Table.new do |t|
+            entries.each do |key, value|
+              _value = value.is_a?(Hash) ? JSON.pretty_generate(value) : value
+              t.add_row [key.upcase.to_s.bold, _value]
+            end
+            t.style = {all_separators: true}
+          end
+          table.to_s
         end
       end
 

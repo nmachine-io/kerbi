@@ -1,20 +1,6 @@
 module Kerbi
   module Cli
     module EntrySerializationHelpers
-      def tag
-        if object.latest?
-          str = "#{object.tag} [latest]"
-        else
-          str = object.tag
-        end
-        #noinspection RubyResolve
-        str.bold
-      end
-
-      def message
-        (object.message || "").truncate(27)
-      end
-
       def defined_or_na(actual_value)
         if !(value = actual_value).nil?
           if block_given?
@@ -32,32 +18,21 @@ module Kerbi
       end
     end
 
-    class BigEntrySerializer < Kerbi::Cli::BaseSerializer
+    class EntryYamlJsonSerializer < Kerbi::Cli::BaseSerializer
       include Kerbi::Cli::EntrySerializationHelpers
 
       has_attributes(
         :tag,
         :message,
+        :is_latest,
         :created_at,
         :values,
         :default_values,
-        :differences
+        :default_new_delta
       )
-
-      def values
-        defined_or_na(object.values) { |v| JSON.dump(v) }
-      end
-
-      def default_values
-        defined_or_na(object.default_values) { |v| JSON.dump(v) }
-      end
-
-      def differences
-        defined_or_na(object.default_new_delta) { |v| JSON.dump(v) }
-      end
     end
 
-    class EntrySerializer < Kerbi::Cli::BaseSerializer
+    class EntryRowSerializer < Kerbi::Cli::BaseSerializer
       include Kerbi::Cli::EntrySerializationHelpers
 
       has_attributes(
@@ -67,6 +42,20 @@ module Kerbi
         :overrides,
         :created_at
       )
+
+      def tag
+        if object.latest?
+          str = "#{object.tag} [latest]"
+        else
+          str = object.tag
+        end
+        #noinspection RubyResolve
+        str.bold
+      end
+
+      def message
+        (object.message || "").truncate(27)
+      end
 
       def assignments
         defined_or_na(object.values) do |values|
