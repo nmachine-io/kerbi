@@ -7,6 +7,7 @@ gem "activesupport"
 gem "thor"
 gem 'colorize'
 gem 'kubeclient'
+gem 'terminal-table'
 
 group :test do
   gem 'rspec', '~> 3.0'

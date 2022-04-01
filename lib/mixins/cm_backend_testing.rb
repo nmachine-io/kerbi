@@ -1,6 +1,6 @@
 module Kerbi
   module Mixins
-    module ResourceStateBackendHelpers
+    module CmBackendTesting
 
       def test_connection(options={})
         res_name = Kerbi::State::Consts::RESOURCE_NAME

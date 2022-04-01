@@ -11,9 +11,9 @@ module Kerbi
       @options = options.deep_dup.freeze
     end
 
-    def output_format
+    def output_format(default="yaml")
       value = options[consts::OUTPUT_FMT]
-      value || "yaml"
+      value || default
     end
 
     def outputs_yaml?

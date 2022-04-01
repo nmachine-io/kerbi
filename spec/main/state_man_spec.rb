@@ -2,6 +2,9 @@ require_relative './../spec_helper'
 
 RSpec.describe Kerbi::State::ConfigMapBackend do
 
+  let(:namespace) { "kerbi-spec" }
+  let(:cm_name) { Kerbi::State::Consts::RESOURCE_NAME }
+
   def mk_entry(opts={})
     default = {
       tag: "tag",
@@ -16,9 +19,6 @@ RSpec.describe Kerbi::State::ConfigMapBackend do
     opts = { err: File::NULL, out: File::NULL }
     system("kubectl #{command} --context kind-kind", **opts)
   end
-
-  let(:namespace) { "kerbi-spec" }
-  let(:cm_name) { Kerbi::State::Consts::RESOURCE_NAME }
 
   before :each do
     kmd("create ns #{namespace}")
@@ -48,20 +48,23 @@ RSpec.describe Kerbi::State::ConfigMapBackend do
   describe "#apply_resource and #read_entries" do
     let(:entries) do
       [
-        mk_entry(tag: "1"),
-        mk_entry(tag: "2"),
+        mk_entry(tag: "1", created_at: "2022-01-01T00:00:00+00:00"),
+        mk_entry(tag: "2", created_at: "2022-02-01T00:00:00+00:00"),
       ]
     end
 
-    let(:expected) { entries.map(&:serialize) }
+    let(:expected) { entries.map(&:serialize).reverse }
 
     it "creates a configmap with the right contents" do
       subject = make_subject(namespace)
       descriptor = subject.template_resource(entries)
       subject.apply_resource(descriptor)
       sleep(1)
-      result = subject.read_entries
-      expect(result.map(&:serialize)).to match_array(expected)
+      entries = subject.read_entries
+      serialized_entries = entries.map(&:serialize)
+      expect(serialized_entries).to eq(expected)
+      expect(entries[0].latest?).to be_truthy
+      expect(entries[1].latest?).to be_falsey
     end
   end
 

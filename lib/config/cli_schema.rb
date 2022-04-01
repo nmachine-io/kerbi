@@ -57,8 +57,8 @@ defaults to $(kubectl config current-context)"
 
       OUTPUT_FMT = {
         key: OptionKeys::OUTPUT_FMT,
-        desc: "Specify YAML or JSON. Defaults to YAML",
-        enum: %w[yaml json]
+        desc: "Specify YAML, JSON, or table",
+        enum: %w[yaml json table]
       }
 
       USE_STATE_VALUES = {

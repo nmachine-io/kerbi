@@ -1,29 +1,41 @@
 module Kerbi
   module State
     class Entry
+
+      ATTRS = %i[tag message values default_values created_at]
+
       attr_reader :tag
       attr_reader :message
+      attr_reader :default_values
       attr_reader :values
       attr_reader :created_at
+      attr_accessor :is_latest
 
       def initialize(dict)
-        %i[tag message values created_at].each do |attr|
+        ATTRS.each do |attr|
           instance_variable_set("@#{attr}", dict[attr].freeze)
         end
       end
 
+      def latest?
+        self.is_latest
+      end
+
       def candidate?
-        tag == 'candidate'
+        tag.start_with? 'candidate'
       end
 
       # @param [Hash] dict
       # @return [Kerbi::State::Entry]
       def self.from_dict(dict={})
         dict.deep_symbolize_keys!
-        created_at = DateTime.new(dict.delete(:created_at)) rescue nil
+        dict.slice!(*ATTRS)
+
         self.new(
           **dict,
-          created_at: created_at
+          values: dict[:values] || {},
+          default_values: dict[:default_values] || {},
+          created_at: (Time.parse(dict[:created_at]) rescue nil)
         )
       end
 
@@ -32,6 +44,7 @@ module Kerbi
           tag: tag,
           message: message,
           values: values || {},
+          default_values: default_values || {},
           created_at: created_at.to_s
         }
       end

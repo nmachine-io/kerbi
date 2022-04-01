@@ -3,14 +3,16 @@
 #
 require 'erb'
 require "irb"
-require 'open3'
 require 'json'
 require 'yaml'
+require 'time'
 require "thor"
+require 'open3'
 require "base64"
 require 'optparse'
 require 'colorize'
 require 'kubeclient'
+require 'terminal-table'
 
 require 'active_support/concern'
 require 'active_support/inflector'
@@ -31,7 +33,7 @@ require_relative './config/globals'
 require_relative './config/cli_opts'
 
 require_relative './mixins/mixer'
-require_relative './mixins/resource_state_backend_helpers'
+require_relative './mixins/cm_backend_testing'
 
 require_relative './utils/mixing'
 require_relative './utils/helm'
@@ -42,8 +44,10 @@ require_relative './main/code_gen'
 
 require_relative './main/mixer'
 
-require_relative './state/base'
-require_relative './state/state_cm'
+require_relative './mixins/state_printing'
+
+require_relative './state/base_backend'
+require_relative './state/mixers'
 require_relative './state/config_map_backend'
 
 require_relative './cli/base'
@@ -51,5 +55,3 @@ require_relative './cli/values_handler'
 require_relative './cli/project_handler'
 require_relative './cli/state_handler'
 require_relative './cli/root_handler'
-
-

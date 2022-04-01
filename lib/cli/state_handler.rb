@@ -1,6 +1,7 @@
 module Kerbi
   module Cli
     class StateHandler < BaseHandler
+      include Kerbi::Mixins::StatePrinting
 
       thor_meta Kerbi::Consts::CommandSchemas::TEST_STATE
       def test_connection
@@ -11,6 +12,7 @@ module Kerbi
       thor_meta Kerbi::Consts::CommandSchemas::LIST_STATE
       def list_entries
         backend = make_state_backend
+        print_state_list(backend.read_entries)
       end
 
       protected
