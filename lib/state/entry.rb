@@ -18,7 +18,7 @@ module Kerbi
       end
 
       def latest?
-        self.is_latest
+        !candidate? && is_latest
       end
 
       def candidate?

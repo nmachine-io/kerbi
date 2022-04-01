@@ -57,6 +57,7 @@ defaults to $(kubectl config current-context)"
 
       OUTPUT_FMT = {
         key: OptionKeys::OUTPUT_FMT,
+        aliases: "-o",
         desc: "Specify YAML, JSON, or table",
         enum: %w[yaml json table]
       }
@@ -175,7 +176,8 @@ defaults to $(kubectl config current-context)"
         name: "list",
         desc: "Tabulate past states",
         options: [
-          *OptionSchemas::KUBERNETES_OPTIONS
+          *OptionSchemas::KUBERNETES_OPTIONS,
+          OptionSchemas::OUTPUT_FMT
         ]
       }
 

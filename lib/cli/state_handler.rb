@@ -10,7 +10,7 @@ module Kerbi
       end
 
       thor_meta Kerbi::Consts::CommandSchemas::LIST_STATE
-      def list_entries
+      def list
         backend = make_state_backend
         print_state_list(backend.read_entries)
       end

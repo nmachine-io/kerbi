@@ -11,7 +11,9 @@ module Kerbi
       # Convenience method for printing dicts as YAML or JSON,
       # according to the CLI options.
       # @param [Hash|Array<Hash>] dicts
-      def print_dicts(dicts)
+      # @param [Kerbi::Cli::BaseSerializer] serializer
+      def print_dicts(dicts, serializer=nil)
+        dicts = serialize_for_user(dicts, serializer)
         if self.cli_opts.outputs_yaml?
           printable_str = Kerbi::Utils::Cli.dicts_to_yaml(dicts)
         elsif self.cli_opts.outputs_json?
@@ -20,6 +22,17 @@ module Kerbi
           raise "Unknown output format '#{cli_opts.output_format}'"
         end
         puts printable_str
+      end
+
+      # @param [Array<Object>|Object] dicts
+      # @param [Kerbi::Cli::BaseSerializer] serializer
+      def serialize_for_user(dicts, serializer=nil)
+        return dicts unless serializer
+        if dicts.is_a?(Array)
+          dicts.map{|e|serializer.new(e).serialize}
+        else
+          serializer.new(dicts).serialize
+        end
       end
 
       ##
