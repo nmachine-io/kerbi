@@ -6,7 +6,7 @@ module Kerbi
       def new_project(project_name)
         generator = Kerbi::CodeGen::ProjectGenerator.new(
           project_name: project_name,
-          ruby_version: cli_opts.ruby_version,
+          ruby_version: run_opts.ruby_version,
           verbose: true
         )
         success = generator.run

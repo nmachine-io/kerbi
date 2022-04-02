@@ -28,7 +28,7 @@ module Kerbi
       # @return [Array<Kerbi::State::Entry>]
       def self.post_process_entries(entries)
         sort_by_created_at(entries)
-        entries[0].is_latest = true if entries.any?
+        entries[0]&.is_latest = true
         entries
       end
 

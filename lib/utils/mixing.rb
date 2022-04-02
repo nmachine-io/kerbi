@@ -24,7 +24,7 @@ module Kerbi
         contents = File.read(fname)
         begin
           self.yaml_str_to_dicts(contents, **opts)
-        rescue Exception => e
+        rescue Error => e
           STDERR.puts "Exception below from file #{fname}"
           raise e
         end

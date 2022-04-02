@@ -4,8 +4,6 @@ module Kerbi
     # Utilities module for all value loading functionality.
     module Values
 
-      DEFAULT_VALUE_PATH = "values"
-
       def self.from_files(fname_exprs, **opts)
         final_paths = resolve_fname_exprs(fname_exprs, **opts)
         load_yaml_files(final_paths)
@@ -21,7 +19,7 @@ module Kerbi
       # @param [Hash] opts downstream options for file-loading methods
       # @return [Array<String>] list of unique absolute filenames
       def self.resolve_fname_exprs(fname_exprs, **opts)
-        final_exprs = [self::DEFAULT_VALUE_PATH, *fname_exprs].uniq
+        final_exprs = fname_exprs.uniq
         final_exprs.map do |fname_expr|
           path = resolve_fname_expr(fname_expr, **opts)
           if fname_expr != 'values' && !path

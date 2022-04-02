@@ -37,7 +37,7 @@ module Kerbi
             end
             nil
           end
-        rescue Exception => e
+        rescue Error => e
           if print_err
             puts "Command \"#{cmd}\" failed with message:"
             puts e.message

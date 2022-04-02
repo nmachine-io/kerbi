@@ -26,6 +26,7 @@ RSpec.describe Kerbi::State::ConfigMapBackend do
     sleep(2)
   end
 
+  # @return [Kerbi::State::ConfigMapBackend]
   def make_subject(namespace)
     Kerbi::State::ConfigMapBackend.new(
       Kerbi::Utils::K8sAuth.kube_config_bundle,
@@ -41,6 +42,19 @@ RSpec.describe Kerbi::State::ConfigMapBackend do
         expect(result[:metadata][:name]).to eq('kerbi-state-tracker')
         expect(result[:metadata][:namespace]).to eq('xyz')
         expect(result[:data][:entries]).to eq("[]")
+      end
+    end
+  end
+
+  describe "#namespace_exists?" do
+    context "when the namespace exists" do
+      it "returns true" do
+        expect(make_subject("default").namespace_exists?).to be_truthy
+      end
+    end
+    context "when the namespace does not exist" do
+      it "returns false" do
+        expect(make_subject("nope").namespace_exists?).to be_falsey
       end
     end
   end

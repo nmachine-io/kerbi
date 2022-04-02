@@ -4,55 +4,56 @@ module Kerbi
     ##
     # Superclass for all Thor CLI handlers.
     class BaseHandler < Thor
+      include Kerbi::Mixins::CliStateHelpers
 
       protected
 
+      ##
+      # Looks at the CLI options to determine which
+      # data serializer should be used.
+      # @param [Hash] options
+      # @return [Class<Kerbi::Cli::BaseSerializer>|null]
       def resolve_serializer(options={})
-        if cli_opts.outputs_json?
+        if run_opts.output_json?
           winner = options[:json_serializer]
-        elsif cli_opts.outputs_yaml?
+        elsif run_opts.output_yaml?
           winner = options[:yaml_serializer]
-        elsif cli_opts.outputs_table?
+        elsif run_opts.output_table?
           winner = options[:table_serializer]
         else
-          raise "Unknown output format '#{cli_opts.output_format}'"
+          raise "Unknown output format '#{run_opts.output_format}'"
         end
         winner || options[:serializer]
       end
 
       ##
-      # Convenience method for printing dicts as YAML or JSON,
-      # according to the CLI options.
-      # @param [Hash|Array<Hash>] dicts
+      # Pretty prints data to STDOUT selecting the right
+      # serializer, and coercing data if requested by the
+      # caller.
+      # @param [Hash|Array<Object>] dicts
       def echo_data(items, **opts)
         utils = Kerbi::Utils::Cli
         serializer = resolve_serializer(opts)
         items = utils.coerce_hash_or_array(items, opts)
         if serializer
           if items.is_a?(Array)
-            items = items.map{ |e| serializer.new(e).serialize}
+            items = items.map{ |e| serializer.new(e).serialize }
           else
             items = serializer.new(items).serialize
           end
         end
 
-        if self.cli_opts.outputs_yaml?
+        if run_opts.output_yaml?
           printable_str = utils.dicts_to_yaml(items)
-        elsif self.cli_opts.outputs_json?
+        elsif run_opts.output_json?
           printable_str = utils.dicts_to_json(items)
-        elsif self.cli_opts.outputs_table?
+        elsif run_opts.output_table?
           printable_str = utils.list_to_table(items, serializer)
         else
-          raise "Unknown output format '#{cli_opts.output_format}'"
+          raise "Unknown output format '#{run_opts.output_format}'"
         end
 
         puts printable_str
-      end
-
-      # @param [Kube::State::Entry] entry
-      def print_describe(entry)
-        data = serializer_cls.new(entry).serialize
-        puts data
       end
 
       ##
@@ -62,30 +63,29 @@ module Kerbi
       # state ConfigMap.
       # @return [Hash] symbol-keyed dict of all loaded values
       def compile_values
-        utils = Kerbi::Utils::Values
-        file_values = utils.from_files(cli_opts.fname_exprs)
-        inline_values = utils.from_inlines(cli_opts.inline_val_exprs)
-        file_values.deep_merge(inline_values)
+        @_compiled_values ||=
+          begin
+            utils = Kerbi::Utils::Values
+
+            fname_exprs = run_opts.fname_exprs.dup
+            fname_exprs = ["values", *fname_exprs] if run_opts.load_defaults?
+
+            file_values = utils.from_files(fname_exprs)
+            inline_values = utils.from_inlines(run_opts.inline_val_exprs)
+            state_values = read_state_values
+
+            file_values.
+              deep_merge(inline_values).
+              deep_merge(state_values)
+          end
       end
 
       ##
       # Returns a re-usable instance of the CLI-args
       # wrapper Kerbi::CliOpts
-      # @return [Kerbi::CliOpts] re-usable instance
-      def cli_opts
-        @_options_obj ||= Kerbi::CliOpts.new(self.options)
-      end
-
-      def state_manager
-        # @_state_man
-        if cli_opts.reads_state?
-          case cli_opts.read_state_from
-          when a
-            puts "asd"
-          else
-            puts "asd"
-          end
-        end
+      # @return [Kerbi::RunOpts] re-usable instance
+      def run_opts
+        @_options_obj ||= Kerbi::RunOpts.new(self.options)
       end
 
       ##

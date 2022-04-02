@@ -4,15 +4,16 @@ module Kerbi
     module OptionKeys
       OUTPUT_FMT = "output"
       INLINE_ASSIGNMENT = "inline-value"
+      LOAD_DEFAULT_VALUES = "load-defaults"
       VALUE_FNAMES = "values-file"
-      USE_STATE_VALUES = "use-state-values"
+
       RUBY_VER = "ruby-version"
       VERBOSE = "verbose"
+
+      STATE_BACKEND_TYPE = "state-backend"
       READ_STATE = "read-state"
       WRITE_STATE = "write-state"
       NAMESPACE = "namespace"
-
-      STATE_BACKEND_TYPE = "state-backend"
 
       K8S_AUTH_TYPE = "auth-type"
       KUBE_CONFIG_PATH = "kube-config-path"
@@ -64,6 +65,13 @@ defaults to $(kubectl config current-context)"
         desc: "Kubernetes auth password for basic password auth"
       }.freeze
 
+      LOAD_DEFAULT_VALUES = {
+        key: OptionKeys::K8S_PASSWORD,
+        desc: "Automatically load values.yaml. Defaults to true.",
+        type: "boolean",
+        default: true
+      }
+
       K8S_TOKEN = {
         key: OptionKeys::K8S_TOKEN,
         desc: "Kubernetes auth bearer token for token auth"
@@ -80,12 +88,6 @@ defaults to $(kubectl config current-context)"
         aliases: "-o",
         desc: "Specify YAML, JSON, or table",
         enum: %w[yaml json table]
-      }.freeze
-
-      USE_STATE_VALUES = {
-        key: OptionKeys::USE_STATE_VALUES,
-        desc: "If true, merges in values loaded from state ConfigMap",
-        type: "boolean"
       }.freeze
 
       INLINE_ASSIGNMENT = {
@@ -156,6 +158,11 @@ defaults to $(kubectl config current-context)"
         desc: "Command group for state actions: test, list, show"
       }.freeze
 
+      CONFIG_SUPER = {
+        name: "config",
+        desc: "Command group for config actions: set, get, show"
+      }.freeze
+
       TEMPLATE = {
         name: "template [KERBIFILE] [RELEASE_NAME]",
         desc: "Runs mixers for RELEASE_NAME",
@@ -185,8 +192,8 @@ defaults to $(kubectl config current-context)"
       }.freeze
 
       TEST_STATE = {
-        name: "test_connection",
-        desc: "Tries to read the state tracker, prints true/false",
+        name: "status",
+        desc: "Verbosely assesses the readiness of your state-tracking backend.",
         options: [
           *OptionSchemas::KUBERNETES_OPTIONS,
           OptionSchemas::VERBOSE
@@ -201,6 +208,15 @@ defaults to $(kubectl config current-context)"
           OptionSchemas::OUTPUT_FMT
         ],
         defaults: OptionDefaults::LIST_STATE
+      }.freeze
+
+      INIT_STATE = {
+        name: "init",
+        desc: "Provision the resources for persisting the state",
+        options: [
+          *OptionSchemas::KUBERNETES_OPTIONS,
+          OptionSchemas::VERBOSE
+        ]
       }.freeze
 
       SHOW_STATE = {

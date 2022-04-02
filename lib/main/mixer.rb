@@ -45,7 +45,7 @@ module Kerbi
     def run
       begin
         self.mix
-      rescue Exception => e
+      rescue Error => e
         puts "Exception below caused by mixer #{self.class.name}"
         raise e
       end

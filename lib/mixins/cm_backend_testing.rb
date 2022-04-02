@@ -29,7 +29,7 @@ module Kerbi
           begin
             self.send(spec[:method])
             puts_outcome(spec[:message], true)
-          rescue Exception => e
+          rescue Error => e
             puts_outcome(spec[:message], false)
             exceptions << { exception: e, test: spec[:message] }
           end
@@ -59,6 +59,15 @@ module Kerbi
         color = result.present? ? :green : :red
         outcome_str = outcome_str.colorize(color)
         puts "#{msg}: #{outcome_str}".bold
+      end
+
+      def puts_init(msg, result, options={})
+        if options[:verbose]
+          outcome_str = result.present? ? "Already existed" : "Created"
+          color = result.present? ? :green : :blue
+          outcome_str = outcome_str.colorize(color)
+          puts "#{msg}: #{outcome_str}".bold
+        end
       end
     end
   end

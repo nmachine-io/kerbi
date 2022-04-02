@@ -34,7 +34,7 @@ module Kerbi
       ##
       # Turns list of key-symbol dicts into their
       # pretty YAML representation.
-      # @param [Array<Hash>] dicts dicts to YAMLify
+      # @param [Array<Hash>|Hash] dicts dicts to YAMLify
       # @return [String] pretty YAML representation of input
       def self.dicts_to_yaml(dicts)
         if dicts.is_a?(Array)
@@ -71,7 +71,7 @@ module Kerbi
       ##
       # Turns list of key-symbol dicts into their
       # pretty JSON representation.
-      # @param [Array<Hash>] dicts dicts to YAMLify
+      # @param [Array<Hash>|Hash] dicts dicts to YAMLify
       # @return [String] pretty JSON representation of input
       def self.dicts_to_json(dicts)
         JSON.pretty_generate(dicts)

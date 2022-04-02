@@ -15,7 +15,7 @@ RSpec.describe Kerbi::Utils::K8sAuth do
     context "with an invalid kube-config options" do
       it "returns a working client" do
         expect {
-          subject.kube_config_client(path: "bad-path")
+          subject.kube_config_client(file_path: "bad-path")
         }. to raise_exception(Exception)
       end
     end
