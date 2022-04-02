@@ -141,27 +141,29 @@ $ kerbi state show --storage=configmap
 Kerbi will never do "cluster stuff" as a side effect without your explict
 instruction to do so.
 
+```bash
+$ kerbi config use-namespace see-food
+$ kerbi state test-connection
+$ kerbi state init
+$ kerbi state test-connection
+```
 
 ```bash
-# time to upgrade the backend to version 1.0.1
-
 $ kerbi template see-food . \
-        --read-state latest \
-        --write-state candidate \
-        --namespace see-food \
         --set backend.image=our-image.1.0.1 \
+        --read-state tag=latest \
+        --write-state tag=candidate \
+        --message "minor tweaks to backend"
         >> manifest.yaml
 
 $ kubectl apply -f manifest.yaml
 
-# kubernetes didn't reject it, so let's save the 1.0.1 for next time
-$ kerbi state write candidate->1.0.1
+$ kerbi state retag candidate 1.0.1
+```
 
-$ kerbi state list -n see-food
-<commited> 1.1.1 configmap Thurs 3 4-changes
-<commited> 1.1.1 configmap Thurs 3 4-changes
-
-$ kerbi values show --read-state latest
+```bash
+$ kerbi state list
+$ kerbi values show latest
 ```
 
  
