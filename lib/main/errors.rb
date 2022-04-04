@@ -22,4 +22,12 @@ module Kerbi
       super
     end
   end
+
+  class BadEntryQueryForWrite < Error
+    MSG = "write-state needs an existing entry id/tag, 'candidate', or 'latest'"
+    def initialize(msg = MSG)
+      super
+    end
+  end
+
 end

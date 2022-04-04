@@ -1,17 +1,20 @@
 module Kerbi
   module State
     class BaseBackend
+      include Kerbi::Mixins::StateEntryCreation
+
 
       def initialize(options={})
-
       end
 
-      def resource
-        @_resource ||= load_resource
-      end
-
+      # @return [Array<Kerbi::State::Entry>]
       def entries
         @_entries ||= read_entries
+      end
+
+      # @return [Kerbi::State::Backend]
+      def state_backend(namespace=nil)
+        @_state_backend ||= generate_state_backend(namespace)
       end
 
       # @param [String] expr target entry id or tag
@@ -23,17 +26,40 @@ module Kerbi
           backend.entries.find(&:candidate?)
         elsif Entry.tag_expr?(expr)
           entries.find { |entry| entry.tag == expr }
-        elsif Entry.id_expr?(expr)
-          entries.find { |entry| entry.id == expr }
         end
       end
 
-      def delete_entry(entry)
-        new_entries = entries.reject { |e| e.id == entry.id }
+      # @param [Kerbi::State::Entry] entry
+      def update_entry(entry, attrs)
+        entry.tag = attrs[:tag] if attrs[:tag].present?
+        entry.values = attrs[:values] unless attrs[:values].nil?
+        entry.created_at = Time.now
+        save
+      end
 
+      # @param [Kerbi::State::Entry] entry
+      def delete_entry(entry)
+        entries.reject! { |e| e.tag == entry.tag }
+        save
+        @_entries = nil
+        @_resource = nil
+      end
+
+      def save
+        update_resource
+        @_entries = nil
+        @_resource = nil
       end
 
       protected
+
+      def resource
+        @_resource ||= load_resource
+      end
+
+      def update_resource
+        raise NotImplementedError
+      end
 
       def read_entries
         raise NotImplementedError

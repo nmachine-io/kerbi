@@ -16,11 +16,9 @@ module Kerbi
           entry_cls = Kerbi::State::Entry
           expr = run_opts.write_state_to
           if (entry = find_entry(expr))
-            puts "cant handle existing yet"
+            state_backend.update_entry(entry, {})
+          elsif entry_cls.auto_inc_expr?(expr)
           else
-            if entry_cls.candidate_expr?(expr)
-
-            end
           end
         end
       end
@@ -29,7 +27,6 @@ module Kerbi
       end
 
       def read_state_values
-        {}
         if run_opts.reads_state?
           entry = find_entry(run_opts.read_state_from)
           entry&.values || {}
@@ -41,31 +38,27 @@ module Kerbi
       # @return [?Kerbi::State::Entry]
       def find_entry(expr)
         backend = state_backend
-        backend.find_entry(expr)
 
-        if expr == 'latest'
+        if Entry.latest_expr?(expr)
           backend.entries.find(&:latest?)
-        elsif expr == 'candidate'
+        elsif Entry.candidate_expr?(expr)
           backend.entries.find(&:candidate?)
         else
           entry = backend.find_entry(expr)
-          raise "Entry #{expr} not found" unless entry
+          raise Kerbi::BadEntryQueryForWrite unless entry
           entry
         end
       end
 
       # @return [Kerbi::State::Backend]
-      def state_backend(namespace=nil)
-        @_state_backend ||=
-          begin
-            if run_opts.state_backend_type == 'configmap'
-              auth_bundle = make_k8s_auth_bundle
-              Kerbi::State::ConfigMapBackend.new(
-                auth_bundle,
-                namespace || run_opts.cluster_namespace
-              )
-            end
-          end
+      def generate_state_backend(namespace=nil)
+        if run_opts.state_backend_type == 'configmap'
+          auth_bundle = make_k8s_auth_bundle
+          Kerbi::State::ConfigMapBackend.new(
+            auth_bundle,
+            namespace || run_opts.cluster_namespace
+          )
+        end
       end
 
       def make_k8s_auth_bundle

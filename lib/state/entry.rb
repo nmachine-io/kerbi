@@ -7,23 +7,24 @@ module Kerbi
 
       ATTRS = %i[id tag message values default_values created_at]
 
-      attr_reader :id
-      attr_reader :tag
-      attr_reader :message
-      attr_reader :default_values
-      attr_reader :values
-      attr_reader :created_at
+      attr_accessor :tag
+      attr_accessor :message
+      attr_accessor :default_values
+      attr_accessor :values
+      attr_accessor :created_at
       attr_accessor :is_latest
+      attr_reader :validation_errors
 
       def initialize(dict)
         ATTRS.each do |attr|
           instance_variable_set("@#{attr}", dict[attr].freeze)
         end
+        @validation_errors = []
       end
 
       # @return [TrueClass, FalseClass]
       def candidate?
-        id == CANDIDATE_KW
+        !self.class.tag_expr?(tag)
       end
 
       # @return [TrueClass, FalseClass]
@@ -73,6 +74,10 @@ module Kerbi
 
       def self.tag_expr?(expr)
         Gem::Version.correct?(expr)
+      end
+
+      def self.auto_inc_expr?(expr)
+        %w[major minor patch].include?(expr)
       end
 
       def self.latest_expr?(expr)

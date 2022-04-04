@@ -14,6 +14,7 @@ module Kerbi
       READ_STATE = "read-state"
       WRITE_STATE = "write-state"
       NAMESPACE = "namespace"
+      WRITE_STATE_MESSAGE = "message"
 
       K8S_AUTH_TYPE = "auth-type"
       KUBE_CONFIG_PATH = "kube-config-path"
@@ -240,7 +241,7 @@ defaults to $(kubectl config current-context)"
       }.freeze
 
       SHOW_STATE = {
-        name: "show [TAG_OR_ID]",
+        name: "show [TAG]",
         desc: "Print summary of state identified by [TAG]",
         options: [
           *OptionSchemas::KUBERNETES_OPTIONS,
@@ -249,9 +250,19 @@ defaults to $(kubectl config current-context)"
         defaults: OptionDefaults::LIST_STATE
       }.freeze
 
+      RETAG_STATE = {
+        name: "retag [OLD_TAG] [NEW_TAG]",
+        desc: "Updates entry's tag given by [OLD_TAG] to [NEW_TAG]",
+        options: [
+          *OptionSchemas::KUBERNETES_OPTIONS,
+          OptionSchemas::OUTPUT_FMT
+        ],
+        defaults: OptionDefaults::LIST_STATE
+      }.freeze
+
       DELETE_STATE = {
-        name: "delete [TAG_OR_ID]",
-        desc: "Deletes the state entry given by [TAG_OR_ID]",
+        name: "delete [TAG]",
+        desc: "Deletes the state entry given by [TAG]",
         options: [
           *OptionSchemas::KUBERNETES_OPTIONS,
         ]

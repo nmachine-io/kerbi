@@ -36,11 +36,18 @@ module Kerbi
         )
       end
 
+      thor_meta Kerbi::Consts::CommandSchemas::RETAG_STATE
+      def retag(old_tag_expr, new_tag)
+        entry = find_entry(old_tag_expr)
+        entry.tag = new_tag
+        entry.created_at = Time.now
+        state_backend.save
+      end
+
       thor_meta Kerbi::Consts::CommandSchemas::DELETE_STATE
       def delete(expr)
-        if(entry = find_entry(expr))
-
-        end
+        entry = find_entry(expr)
+        state_backend.delete_entry(entry)
       end
     end
   end

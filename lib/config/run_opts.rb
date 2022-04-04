@@ -7,8 +7,8 @@ module Kerbi
 
     attr_reader :options
 
-    # @param [Hash{Symbol, Object}] cli_opts
-    # @param [Hash{Symbol, Object}] defaults
+    # @param [Hash{Symbol, Object}] cli_opts CLI args as a hash via Thor
+    # @param [Hash{Symbol, Object}] defaults contextual defaults (per cmd)
     # @return [Kerbi::RunOpts]
     def initialize(cli_opts, defaults)
       @options = defaults.deep_dup.
@@ -121,6 +121,11 @@ module Kerbi
     # @return [String]
     def k8s_auth_token
       options[consts::K8S_TOKEN]
+    end
+
+    # @return [String]
+    def write_state_msg
+      options[consts::WRITE_STATE_MESSAGE]
     end
 
     private

@@ -23,14 +23,6 @@ module Kerbi
         apply_resource(template_resource([]))
       end
 
-      # @param [Array<Kerbi::State::Entry>] entries
-      def update(entries=nil)
-        entries = self.entries if entries.nil?
-        new_resource = template_resource(entries)
-        #noinspection RubyResolve
-        client("v1").update_config_map(new_resource)
-      end
-
       # @param [Hash] resource_desc
       def apply_resource(resource_desc)
         #noinspection RubyResolve
@@ -60,6 +52,12 @@ module Kerbi
       def load_resource
         #noinspection RubyResolve
         client("v1").get_config_map(cm_name, namespace).to_h
+      end
+
+      def update_resource
+        new_resource = template_resource(entries)
+        #noinspection RubyResolve
+        client("v1").update_config_map(new_resource)
       end
 
       # @return [Array<Kerbi::State::Entry>] entries
