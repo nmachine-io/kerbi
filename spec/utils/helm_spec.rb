@@ -11,7 +11,7 @@ RSpec.describe Kerbi::Utils::Helm do
   end
 
   let :config do
-    Kerbi::Config::Manager
+    Kerbi::ConfigFile::Manager
   end
 
   before(:each) do

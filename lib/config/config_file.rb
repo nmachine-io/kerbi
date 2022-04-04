@@ -1,5 +1,6 @@
 module Kerbi
-  module Config
+
+  module ConfigFile
 
     DIR_NAME = ".kerbi"
     FILE_NAME = "config.yaml"
@@ -17,21 +18,27 @@ module Kerbi
         unless Dir.exists?(dir_path)
           Dir.mkdir(dir_path)
         end
-        File.touch(file_path)
+        write({}, skip_check: true)
       end
     end
 
     # @return [Hash{Symbol, String}]
     def self.read
-      create_file_if_missing
-      YAML.load_file(file_path).to_h.symbolize_keys
+      begin
+        create_file_if_missing
+        contents = YAML.load_file(file_path)
+        contents.slice(*legal_keys)
+      rescue StandardError => e
+        puts "[WARN] failed to read config #{file_path} (#{e})"
+        {}
+      end
     end
 
     # @param [Hash] config
-    def self.write(config)
-      create_file_if_missing
-      contents = YAML.dump(config.stringify_keys)
-      File.write(file_path, contents)
+    def self.write(config, skip_check: false)
+      create_file_if_missing unless skip_check
+      config = config.deep_dup.stringify_keys.slice(*legal_keys)
+      File.write(file_path, YAML.dump(config))
     end
 
     # @param [Hash] config
@@ -39,6 +46,10 @@ module Kerbi
       existing_config = read
       new_config = existing_config.merge(config)
       write(new_config)
+    end
+
+    def self.legal_keys
+      Kerbi::Consts::OptionKeys::LEGAL_CONFIG_FILE_KEYS
     end
   end
 end

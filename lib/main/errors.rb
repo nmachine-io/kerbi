@@ -15,4 +15,11 @@ module Kerbi
       super
     end
   end
+
+  class IllegalConfigWrite < Error
+    LEGAL = Kerbi::Consts::OptionKeys::LEGAL_CONFIG_FILE_KEYS
+    def initialize(msg = "Illegal config file assignment. Only #{LEGAL}")
+      super
+    end
+  end
 end

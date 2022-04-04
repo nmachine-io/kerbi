@@ -67,7 +67,7 @@ module Kerbi
           begin
             utils = Kerbi::Utils::Values
 
-            fname_exprs = run_opts.fname_exprs.dup
+            fname_exprs = run_opts.fname_exprs
             fname_exprs = ["values", *fname_exprs] if run_opts.load_defaults?
 
             file_values = utils.from_files(fname_exprs)
@@ -83,9 +83,19 @@ module Kerbi
       ##
       # Returns a re-usable instance of the CLI-args
       # wrapper Kerbi::CliOpts
+      def prep_opts(defaults)
+        @_options_obj = Kerbi::RunOpts.new(options, defaults)
+      end
+
+      ##
+      # Returns a re-usable instance of the CLI-args
+      # wrapper Kerbi::CliOpts
       # @return [Kerbi::RunOpts] re-usable instance
       def run_opts
-        @_options_obj ||= Kerbi::RunOpts.new(self.options)
+        @_options_obj ||= Kerbi::RunOpts.new(
+          options,
+          Kerbi::Consts::OptionDefaults::BASE
+        )
       end
 
       ##
@@ -100,6 +110,18 @@ module Kerbi
         subcommand schema[:name], handler_cls
       end
 
+      def self.option_defaults_hash
+        @_option_defaults_hash ||= {}
+      end
+
+      def self.find_method_option_defaults(method_name)
+      end
+
+      def self.set_default_options_for_next(defaults)
+        defaults ||= Kerbi::Consts::OptionDefaults::BASE
+        option_defaults_hash[:__next__] = defaults.deep_dup
+      end
+
       ##
       # Convenience class method for declaring a Thor command
       # metadata bundle, in accordance with the schema in
@@ -108,22 +130,11 @@ module Kerbi
       def self.thor_meta(_schema)
         schema = _schema.deep_dup
         desc(schema[:name], schema[:desc])
-        defaults = schema[:defaults]
+        set_default_options_for_next(schema[:defaults])
         (schema[:options] || []).each do |opt_schema|
-          thor_option(opt_schema, defaults)
+          opt_key = opt_schema.delete(:key)
+          self.option opt_key, opt_schema
         end
-      end
-
-      def self.thor_option(opt_schema, defaults)
-        opt_key = opt_schema.delete(:key).to_sym
-
-        final_defaults = defaults || Kerbi::Consts::OptionDefaults::BASE
-
-        if final_defaults.has_key?(opt_key.to_s)
-          opt_schema.merge!(default: final_defaults[opt_key.to_s])
-        end
-
-        self.option opt_key, opt_schema
       end
 
       def self.exit_on_failure?

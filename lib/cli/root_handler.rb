@@ -2,6 +2,7 @@ module Kerbi
 
   class Console
     attr_reader :values
+
     def initialize(values)
       @values = values
     end
@@ -49,10 +50,15 @@ module Kerbi
         IRB::Irb.new(workspace).run(IRB.conf)
       end
 
+      thor_meta cmd_schemas::SHOW_VERSION
+      def version
+        puts "1"
+      end
+
       thor_sub_meta cmd_schemas::VALUES_SUPER, ValuesHandler
       thor_sub_meta cmd_schemas::PROJECT_SUPER, ProjectHandler
       thor_sub_meta cmd_schemas::STATE_SUPER, StateHandler
-      thor_sub_meta cmd_schemas::STATE_SUPER, ConfigHandler
+      thor_sub_meta cmd_schemas::CONFIG_SUPER, ConfigHandler
     end
   end
 end

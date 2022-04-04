@@ -3,7 +3,7 @@ module Kerbi
     module Helm
 
       def self.config
-        Kerbi::Config::Manager
+        Kerbi::ConfigFile::Manager
       end
 
       ##

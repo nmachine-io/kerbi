@@ -26,12 +26,13 @@ module Kerbi
       end
 
       def read_state_values
-        if run_opts.reads_state?
-          entry = find_entry(run_opts.read_state_from)
-          entry&.values || {}
-        else
-          {}
-        end
+        {}
+        # if run_opts.reads_state?
+        #   entry = find_entry(run_opts.read_state_from)
+        #   entry&.values || {}
+        # else
+        #   {}
+        # end
       end
 
       # @return [Kerbi::State::Entry]
@@ -57,14 +58,14 @@ module Kerbi
       end
 
         # @return [Kerbi::State::ConfigMapBackend]
-      def state_backend
+      def state_backend(namespace=nil)
         @_state_backend ||=
           begin
             if run_opts.state_backend_type == 'configmap'
               auth_bundle = make_k8s_auth_bundle
               Kerbi::State::ConfigMapBackend.new(
                 auth_bundle,
-                run_opts.cluster_namespace
+                namespace || run_opts.cluster_namespace
               )
             end
           end
@@ -74,7 +75,7 @@ module Kerbi
         case run_opts.k8s_auth_type
         when "kube-config"
           Kerbi::Utils::K8sAuth.kube_config_bundle(
-            file_path: run_opts.kube_config_path,
+            path: run_opts.kube_config_path,
             name: run_opts.kube_context_name
           )
         when "basic"

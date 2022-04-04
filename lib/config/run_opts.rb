@@ -7,97 +7,125 @@ module Kerbi
 
     attr_reader :options
 
-    def initialize(options={})
-      @options = Config.read.deep_merge(options.deep_dup).freeze
+    # @param [Hash{Symbol, Object}] cli_opts
+    # @param [Hash{Symbol, Object}] defaults
+    # @return [Kerbi::RunOpts]
+    def initialize(cli_opts, defaults)
+      @options = defaults.deep_dup.
+        merge(Kerbi::ConfigFile.read.deep_dup).
+        merge(cli_opts.deep_dup).
+        freeze
     end
 
+    # @return [String]
     def output_format
       value = options[consts::OUTPUT_FMT]
       value || default
     end
 
+    # @return [TrueClass, FalseClass]
     def output_yaml?
       self.output_format == 'yaml'
     end
 
+    # @return [TrueClass, FalseClass]
     def output_table?
       self.output_format == 'table'
     end
 
+    # @return [TrueClass, FalseClass]
     def output_json?
       self.output_format == 'json'
     end
 
+    # @return [String]
     def ruby_version
       options[consts::RUBY_VER]
     end
 
+    # @return [Array<String>]
     def fname_exprs
       options[consts::VALUE_FNAMES]
     end
 
+    # @return [Array<String>]
     def inline_val_exprs
       options[consts::INLINE_ASSIGNMENT]
     end
 
+    # @return [TrueClass, FalseClass]
     def load_defaults?
-      !options[consts::LOAD_DEFAULT_VALUES]
+      options[consts::LOAD_DEFAULT_VALUES].present?
     end
 
+    # @return [String]
     def read_state_from
       options[consts::READ_STATE].presence
     end
 
+    # @return [String]
     def write_state_to
       options[consts::WRITE_STATE].presence
     end
 
+    # @return [TrueClass, FalseClass]
     def verbose?
-      options[consts::VERBOSE]
+      options[consts::VERBOSE].present?
     end
 
+    # @return [TrueClass, FalseClass]
     def reads_state?
       read_state_from.present?
     end
 
+    # @return [TrueClass, FalseClass]
     def writes_state?
       write_state_to.present?
     end
 
+    # @return [String]
     def k8s_auth_type
       options[consts::K8S_AUTH_TYPE]
     end
 
+    # @return [String]
     def kube_config_path
       options[consts::KUBE_CONFIG_PATH]
     end
 
+    # @return [String]
     def kube_context_name
       options[consts::KUBE_CONFIG_CONTEXT]
     end
 
+    # @return [String]
     def cluster_namespace
       options[consts::NAMESPACE]
     end
 
+    # @return [String]
     def state_backend_type
       options[consts::STATE_BACKEND_TYPE]
     end
 
+    # @return [String]
     def k8s_auth_username
       options[consts::K8S_USERNAME]
     end
 
+    # @return [String]
     def k8s_auth_password
       options[consts::K8S_PASSWORD]
     end
 
+    # @return [String]
     def k8s_auth_token
       options[consts::K8S_TOKEN]
     end
 
     private
 
+    # @return [Module<Kerbi::Consts::OptionKeys>]
     def consts
       Kerbi::Consts::OptionKeys
     end
