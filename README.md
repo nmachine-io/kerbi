@@ -141,6 +141,7 @@ $ kerbi state show --storage=configmap
 Kerbi will never do "cluster stuff" as a side effect without your explict
 instruction to do so.
 
+### Setup Kerbi State Management
 ```bash
 $ kerbi config use-namespace see-food
 $ kerbi state test-connection
@@ -148,18 +149,34 @@ $ kerbi state init
 $ kerbi state test-connection
 ```
 
+### Template and Save a Candidate State
 ```bash
 $ kerbi template see-food . \
         --set backend.image=our-image.1.0.1 \
-        --read-state tag=latest \
-        --write-state tag=candidate \
-        --message "minor tweaks to backend"
+        --read-state @latest \
+        --write-state @candidate \       
         >> manifest.yaml
+```
 
+### Inspect the State
+```
+$ kerbi state list
+
+$ kerbi values show --read-state @candidate
+
+$ kerbi values show --read-state @latest
+```
+
+### Kubectl Apply and Commit the State
+
+```
 $ kubectl apply -f manifest.yaml
 
-$ kerbi state retag candidate 1.0.1
+# Everything worked, so we can commit this state for real
+
+$ kerbi state retag @candidate @random --message "minor tweaks to backend"
 ```
+
 
 ```bash
 $ kerbi state list
