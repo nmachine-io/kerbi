@@ -30,4 +30,12 @@ module Kerbi
     end
   end
 
+  class IllegalWriteStateTagWordError < Error
+    MSG = "Tag names for writing cannot contain special words exclusive to tag "
+  end
+
+  class StateNotFoundError < Error
+    MSG = "State given by tag not found"
+  end
+
 end

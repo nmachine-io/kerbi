@@ -12,6 +12,7 @@ require "base64"
 require 'optparse'
 require 'colorize'
 require 'kubeclient'
+require 'spicy-proton'
 require 'terminal-table'
 
 require 'active_support/inflector'
@@ -49,7 +50,9 @@ require_relative './main/mixer'
 
 require_relative './cli/entry_serializers'
 
-require_relative './mixins/state_entry_creation'
+require_relative './mixins/entry_tag_logic'
+require_relative './state/entry_set'
+
 require_relative './state/base_backend'
 require_relative './state/mixers'
 require_relative './state/config_map_backend'

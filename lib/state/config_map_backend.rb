@@ -64,8 +64,7 @@ module Kerbi
       def read_entries
         str_entries = resource[:data][:entries]
         dict_entries = JSON.parse(str_entries)
-        entries = dict_entries.map { |h| Entry.from_dict(h) }
-        self.class.post_process_entries(entries)
+        dict_entries.map { |h| Entry.from_dict(h) }
       end
 
       def client(api_name="v1")

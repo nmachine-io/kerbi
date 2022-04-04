@@ -8,6 +8,7 @@ gem "thor"
 gem 'colorize'
 gem 'kubeclient'
 gem 'terminal-table'
+gem 'spicy-proton'
 
 group :test do
   gem 'rspec', '~> 3.0'

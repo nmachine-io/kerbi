@@ -2,34 +2,44 @@ module Kerbi
   module State
     class Entry
 
-      CANDIDATE_KW = "candidate"
+      CANDIDATE_PREFIX = "cand-"
       LATEST_KW = "latest"
 
       ATTRS = %i[id tag message values default_values created_at]
+
+      attr_accessor :set
 
       attr_accessor :tag
       attr_accessor :message
       attr_accessor :default_values
       attr_accessor :values
       attr_accessor :created_at
-      attr_accessor :is_latest
+
       attr_reader :validation_errors
 
-      def initialize(dict)
+      def initialize(set, dict)
+        @set = set
         ATTRS.each do |attr|
           instance_variable_set("@#{attr}", dict[attr].freeze)
         end
+        @is_latest = false
         @validation_errors = []
       end
 
       # @return [TrueClass, FalseClass]
       def candidate?
-        !self.class.tag_expr?(tag)
+        tag.start_with?(CANDIDATE_PREFIX)
+      end
+
+      # @return [TrueClass, FalseClass]
+      def committed?
+        !candidate?
       end
 
       # @return [TrueClass, FalseClass]
       def latest?
-        !!(!candidate? && is_latest)
+        return set&.latest&.tag == tag if committed?
+        set&.latest_candidate&.tag == tag if candidate?
       end
 
       def default_new_delta
@@ -56,11 +66,12 @@ module Kerbi
 
       # @param [Hash] dict
       # @return [Kerbi::State::Entry]
-      def self.from_dict(dict={})
+      def self.from_dict(set, dict={})
         dict.deep_symbolize_keys!
         dict.slice!(*ATTRS)
 
         self.new(
+          set,
           **dict,
           values: dict[:values] || {},
           default_values: dict[:default_values] || {},
@@ -69,10 +80,10 @@ module Kerbi
       end
 
       def self.new_candidate(options={})
-        dict = options.merge(id: CANDIDATE_KW)
+        dict = options.merge(id: CANDIDATE_PREFIX)
       end
 
-      def self.tag_expr?(expr)
+      def self.versioned?(expr)
         Gem::Version.correct?(expr)
       end
 
@@ -84,13 +95,8 @@ module Kerbi
         expr == LATEST_KW
       end
 
-      def self.id_expr?(expr)
-        return false unless expr.is_a?(String)
-        !tag_expr?(expr)
-      end
-
       def self.candidate_expr?(expr)
-        expr == CANDIDATE_KW
+        expr == CANDIDATE_PREFIX
       end
     end
   end

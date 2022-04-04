@@ -10,44 +10,29 @@ module Kerbi
         end
       end
 
+      # @return [Hash{Symbol->String}]
+      def read_state_values(opts={})
+        if run_opts.reads_state?
+          expr = run_opts.write_state_to
+          entry = entry_set.find_entry_for_read(expr, opts)
+          entry&.values&.deep_dup.deep_symbolize_keys || {}
+        end
+      end
+
       def persist_compiled_values
         if run_opts.writes_state?
           raise_unless_backend_ready
-          entry_cls = Kerbi::State::Entry
           expr = run_opts.write_state_to
-          if (entry = find_entry(expr))
-            state_backend.update_entry(entry, {})
-          elsif entry_cls.auto_inc_expr?(expr)
-          else
-          end
+          entry = entry_set.find_or_init_entry_for_write(expr)
+          patch_entry_attrs(entry)
+          state_backend.save
         end
       end
 
-      def create_entry(q_expr)
-      end
-
-      def read_state_values
-        if run_opts.reads_state?
-          entry = find_entry(run_opts.read_state_from)
-          entry&.values || {}
-        else
-          {}
-        end
-      end
-
-      # @return [?Kerbi::State::Entry]
-      def find_entry(expr)
-        backend = state_backend
-
-        if Entry.latest_expr?(expr)
-          backend.entries.find(&:latest?)
-        elsif Entry.candidate_expr?(expr)
-          backend.entries.find(&:candidate?)
-        else
-          entry = backend.find_entry(expr)
-          raise Kerbi::BadEntryQueryForWrite unless entry
-          entry
-        end
+      # @param [Kerbi::State::Entry] entry
+      def patch_entry_attrs(entry)
+        entry.
+        entry.created_at = Time.now
       end
 
       # @return [Kerbi::State::Backend]
