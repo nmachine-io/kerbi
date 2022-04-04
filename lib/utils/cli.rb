@@ -52,7 +52,7 @@ module Kerbi
       def self.list_to_table(entries, serializer_cls)
         if entries.is_a?(Array)
           table = Terminal::Table.new(
-            headings: serializer_cls.header_titles,
+            headings: serializer_cls.header_titles.map(&:bold),
             rows: entries.map(&:values)
           )
           table.to_s

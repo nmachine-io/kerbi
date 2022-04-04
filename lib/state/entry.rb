@@ -2,6 +2,9 @@ module Kerbi
   module State
     class Entry
 
+      CANDIDATE_KW = "candidate"
+      LATEST_KW = "latest"
+
       ATTRS = %i[id tag message values default_values created_at]
 
       attr_reader :id
@@ -16,8 +19,11 @@ module Kerbi
         ATTRS.each do |attr|
           instance_variable_set("@#{attr}", dict[attr].freeze)
         end
+      end
 
-        raise Kerbi::IllegalEntryTag if tag == 'latest'
+      # @return [TrueClass, FalseClass]
+      def candidate?
+        id == CANDIDATE_KW
       end
 
       # @return [TrueClass, FalseClass]
@@ -33,8 +39,18 @@ module Kerbi
         end
       end
 
-      def candidate?
-        tag.start_with? 'candidate'
+      def to_h
+        special_ser = {
+          values: values || {},
+          default_values: default_values || {},
+          created_at: created_at.to_s
+        }
+        Hash[ATTRS.map{|k|[k, send(k)]}].merge(special_ser)
+      end
+      alias_method :serialize, :to_h
+
+      def to_json
+        JSON.dump(serialize)
       end
 
       # @param [Hash] dict
@@ -51,18 +67,25 @@ module Kerbi
         )
       end
 
-      def to_h
-        special_ser = {
-          values: values || {},
-          default_values: default_values || {},
-          created_at: created_at.to_s
-        }
-        Hash[ATTRS.map{|k|[k, send(k)]}].merge(special_ser)
+      def self.new_candidate(options={})
+        dict = options.merge(id: CANDIDATE_KW)
       end
-      alias_method :serialize, :to_h
 
-      def to_json
-        JSON.dump(serialize)
+      def self.tag_expr?(expr)
+        Gem::Version.correct?(expr)
+      end
+
+      def self.latest_expr?(expr)
+        expr == LATEST_KW
+      end
+
+      def self.id_expr?(expr)
+        return false unless expr.is_a?(String)
+        !tag_expr?(expr)
+      end
+
+      def self.candidate_expr?(expr)
+        expr == CANDIDATE_KW
       end
     end
   end

@@ -2,13 +2,35 @@ module Kerbi
   module Mixins
     module CmBackendTesting
 
+      # @return [TrueClass, FalseClass]
+      def namespace_exists?
+        begin
+          !!client("v1").get_namespace(namespace)
+        rescue Kubeclient::ResourceNotFoundError
+          false
+        end
+      end
+
+      def resource_exists?
+        begin
+          !!resource
+        rescue Kubeclient::ResourceNotFoundError
+          false
+        end
+      end
+
+      def read_write_ready?
+        namespace_exists?
+        resource_exists?
+      end
+
       def test_connection(options={})
         res_name = Kerbi::State::Consts::RESOURCE_NAME
         exceptions = []
 
         schema = [
           {
-            method: :client!,
+            method: :client,
             message: "1. Create Kubernetes client"
           },
           {
@@ -46,11 +68,11 @@ module Kerbi
       end
 
       def test_list_namespaces
-        client!("v1").get_namespaces.any?
+        client("v1").get_namespaces.any?
       end
 
       def test_target_ns_exists
-        client!.get_namespace namespace
+        client.get_namespace namespace
       end
 
       #noinspection RubyResolve

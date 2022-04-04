@@ -13,51 +13,48 @@ module Kerbi
       def persist_compiled_values
         if run_opts.writes_state?
           raise_unless_backend_ready
-          if (entry = find_entry(run_opts.write_state_to))
+          entry_cls = Kerbi::State::Entry
+          expr = run_opts.write_state_to
+          if (entry = find_entry(expr))
             puts "cant handle existing yet"
           else
+            if entry_cls.candidate_expr?(expr)
 
+            end
           end
         end
       end
 
       def create_entry(q_expr)
-
       end
 
       def read_state_values
         {}
-        # if run_opts.reads_state?
-        #   entry = find_entry(run_opts.read_state_from)
-        #   entry&.values || {}
-        # else
-        #   {}
-        # end
+        if run_opts.reads_state?
+          entry = find_entry(run_opts.read_state_from)
+          entry&.values || {}
+        else
+          {}
+        end
       end
 
-      # @return [Kerbi::State::Entry]
-      def find_entry(q_expr)
+      # @return [?Kerbi::State::Entry]
+      def find_entry(expr)
         backend = state_backend
+        backend.find_entry(expr)
 
-        if q_expr == 'latest'
-          backend.read_entries[0]
-        elsif q_expr == 'candidate'
-          backend.read_entries[0]
+        if expr == 'latest'
+          backend.entries.find(&:latest?)
+        elsif expr == 'candidate'
+          backend.entries.find(&:candidate?)
         else
-          entry = backend.find_entry(q_expr)
-          raise "Entry #{q_expr} not found" unless entry
+          entry = backend.find_entry(expr)
+          raise "Entry #{expr} not found" unless entry
           entry
         end
       end
 
-      # @return [Kerbi::State::ConfigMapBackend]
-      def state_backend!
-        backend = state_backend
-        raise Kerbi::StateBackendNotReadyError unless backend
-        backend
-      end
-
-        # @return [Kerbi::State::ConfigMapBackend]
+      # @return [Kerbi::State::Backend]
       def state_backend(namespace=nil)
         @_state_backend ||=
           begin
@@ -93,7 +90,6 @@ module Kerbi
           raise "Bad k8s connect type '#{run_opts.k8s_auth_type}'"
         end
       end
-
     end
   end
 end

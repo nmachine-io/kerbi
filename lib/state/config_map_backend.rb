@@ -23,42 +23,18 @@ module Kerbi
         apply_resource(template_resource([]))
       end
 
-      # @return [TrueClass, FalseClass]
-      def namespace_exists?
-        begin
-          !!client!("v1").get_namespace(namespace)
-        rescue Kubeclient::ResourceNotFoundError
-          false
-        end
+      # @param [Array<Kerbi::State::Entry>] entries
+      def update(entries=nil)
+        entries = self.entries if entries.nil?
+        new_resource = template_resource(entries)
+        #noinspection RubyResolve
+        client("v1").update_config_map(new_resource)
       end
 
-      def resource_exists?
-        begin
-          !!load_resource
-        rescue Kubeclient::ResourceNotFoundError
-          false
-        end
-      end
-
-      def read_write_ready?
-        namespace_exists?
-        resource_exists?
-      end
-
-      def add_entry()
-      end
-
-      # @return [Array<Kerbi::State::Entry>] entries
-      def read_entries
-        str_entries = load_resource[:data][:entries]
-        json_entries = JSON.parse(str_entries)
-        entries = json_entries.map {|e| Kerbi::State::Entry.from_dict(e) }
-        self.class.post_process_entries(entries)
-      end
-
+      # @param [Hash] resource_desc
       def apply_resource(resource_desc)
         #noinspection RubyResolve
-        client!("v1").create_config_map(resource_desc)
+        client("v1").create_config_map(resource_desc)
       end
 
       # @param [Array<Kerbi::State::Entry>] entries
@@ -72,12 +48,7 @@ module Kerbi
         opts = { release_name: namespace }
         dict = Kerbi::State::NamespaceMixer.new({}, **opts).run.first
         #noinspection RubyResolve
-        client!("v1").create_namespace(dict)
-      end
-
-      def load_resource
-        #noinspection RubyResolve
-        client!("v1").get_config_map(cm_name, namespace).to_h
+        client("v1").create_namespace(dict)
       end
 
       # @return [Array<Kerbi::State::Entry>]
@@ -86,7 +57,20 @@ module Kerbi
 
       protected
 
-      def client!(api_name="v1")
+      def load_resource
+        #noinspection RubyResolve
+        client("v1").get_config_map(cm_name, namespace).to_h
+      end
+
+      # @return [Array<Kerbi::State::Entry>] entries
+      def read_entries
+        str_entries = resource[:data][:entries]
+        dict_entries = JSON.parse(str_entries)
+        entries = dict_entries.map { |h| Entry.from_dict(h) }
+        self.class.post_process_entries(entries)
+      end
+
+      def client(api_name="v1")
         Kubeclient::Client.new(
           auth_bundle[:endpoint],
           api_name,

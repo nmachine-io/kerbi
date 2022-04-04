@@ -143,11 +143,13 @@ defaults to $(kubectl config current-context)"
       }.freeze
 
       KUBERNETES_OPTIONS = [
+        NAMESPACE,
         STATE_BACKEND_TYPE,
+        READ_STATE,
+        WRITE_STATE,
         K8S_AUTH_TYPE,
         KUBE_CONFIG_PATH,
-        KUBE_CONFIG_CONTEXT,
-        NAMESPACE
+        KUBE_CONFIG_CONTEXT
       ].freeze
 
     end
@@ -180,7 +182,8 @@ defaults to $(kubectl config current-context)"
         options: [
           OptionSchemas::OUTPUT_FMT,
           OptionSchemas::VALUE_FNAMES,
-          OptionSchemas::INLINE_ASSIGNMENT
+          OptionSchemas::INLINE_ASSIGNMENT,
+          *OptionSchemas::KUBERNETES_OPTIONS
         ]
       }.freeze
 
@@ -237,7 +240,7 @@ defaults to $(kubectl config current-context)"
       }.freeze
 
       SHOW_STATE = {
-        name: "show [TAG]",
+        name: "show [TAG_OR_ID]",
         desc: "Print summary of state identified by [TAG]",
         options: [
           *OptionSchemas::KUBERNETES_OPTIONS,
@@ -246,11 +249,19 @@ defaults to $(kubectl config current-context)"
         defaults: OptionDefaults::LIST_STATE
       }.freeze
 
+      DELETE_STATE = {
+        name: "delete [TAG_OR_ID]",
+        desc: "Deletes the state entry given by [TAG_OR_ID]",
+        options: [
+          *OptionSchemas::KUBERNETES_OPTIONS,
+        ]
+      }.freeze
+
       SHOW_VERSION = {
         name: "version",
         desc: "Print kerbi version",
         options: []
-      }
+      }.freeze
 
       SHOW_VALUES = {
         name: "show",
@@ -265,17 +276,17 @@ defaults to $(kubectl config current-context)"
       CONFIG_LOCATION = {
         name: "location",
         desc: "Prints out filesystem path for global Kerbi config"
-      }
+      }.freeze
 
       CONFIG_SET = {
         name: "set [KEY] [VALUE]",
         desc: "Writes an x=y configuration to the global kerbi config"
-      }
+      }.freeze
 
       CONFIG_GET = {
         name: "get [KEY]",
         desc: "Prints out the value of KEY as loaded into the options"
-      }
+      }.freeze
 
       CONFIG_SHOW = {
         name: "show",
@@ -283,8 +294,7 @@ defaults to $(kubectl config current-context)"
         options: [
           OptionSchemas::OUTPUT_FMT
         ]
-      }
-
+      }.freeze
     end
   end
 end

@@ -5,6 +5,7 @@ module Kerbi
     # ALl *_bundle methods return a custom-schema hash
     # that is to be used to create a Kubeclient::Client instance.
     # See its constructor docs to understand.
+    # Underlying lib credit: https://github.com/ManageIQ/kubeclient
     module K8sAuth
 
       ##

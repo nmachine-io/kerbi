@@ -48,7 +48,6 @@ require_relative './main/code_gen'
 require_relative './main/mixer'
 
 require_relative './cli/entry_serializers'
-require_relative './mixins/state_printing'
 
 require_relative './state/base_backend'
 require_relative './state/mixers'

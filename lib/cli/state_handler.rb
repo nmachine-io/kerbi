@@ -19,7 +19,7 @@ module Kerbi
       def list
         prep_opts(Kerbi::Consts::OptionDefaults::LIST_STATE)
         echo_data(
-          state_backend.read_entries,
+          state_backend.entries,
           table_serializer: Kerbi::Cli::EntryRowSerializer,
           serializer: Kerbi::Cli::EntryYamlJsonSerializer
         )
@@ -34,6 +34,13 @@ module Kerbi
           table_serializer: Kerbi::Cli::EntryYamlJsonSerializer,
           serializer: Kerbi::Cli::EntryYamlJsonSerializer
         )
+      end
+
+      thor_meta Kerbi::Consts::CommandSchemas::DELETE_STATE
+      def delete(expr)
+        if(entry = find_entry(expr))
+
+        end
       end
     end
   end
