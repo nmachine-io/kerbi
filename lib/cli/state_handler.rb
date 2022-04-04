@@ -28,7 +28,8 @@ module Kerbi
       thor_meta Kerbi::Consts::CommandSchemas::SHOW_STATE
       def show(tag)
         prep_opts(Kerbi::Consts::OptionDefaults::LIST_STATE)
-        entry = find_entry(tag)
+        entry = entry_set.find_entry_for_read(tag)
+        raise Kerbi::StateNotFoundError unless entry
         echo_data(
           entry,
           table_serializer: Kerbi::Cli::EntryYamlJsonSerializer,
@@ -38,7 +39,8 @@ module Kerbi
 
       thor_meta Kerbi::Consts::CommandSchemas::RETAG_STATE
       def retag(old_tag_expr, new_tag)
-        entry = find_entry(old_tag_expr)
+        entry = entry_set.find_entry_for_read(old_tag_expr)
+        raise Kerbi::StateNotFoundError unless entry
         entry.tag = new_tag
         entry.created_at = Time.now
         state_backend.save
@@ -46,7 +48,8 @@ module Kerbi
 
       thor_meta Kerbi::Consts::CommandSchemas::DELETE_STATE
       def delete(expr)
-        entry = find_entry(expr)
+        entry = entry_set.find_entry_for_read(expr)
+        raise Kerbi::StateNotFoundError unless entry
         state_backend.delete_entry(entry)
       end
     end

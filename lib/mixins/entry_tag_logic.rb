@@ -4,10 +4,9 @@ module Kerbi
       extend ActiveSupport::Concern
 
       SPECIAL_CHAR = "@"
-
       CANDIDATE_WORD = "candidate"
       LATEST_WORD = "latest"
-      RANDOM_WORD = "latest"
+      RANDOM_WORD = "random"
 
       SPECIAL_READ_WORDS = [
         CANDIDATE_WORD,
@@ -25,9 +24,10 @@ module Kerbi
       def resolve_write_tag(tag_expr)
         resolved_tag = tag_expr
         SPECIAL_WRITE_WORDS.each do |special_word|
-          if tag_expr.include?(special_word)
-            resolved_word = self.resolve_word(special_word, 'write')
-            resolved_tag = resolved_tag.gsub(special_word, resolved_word)
+          part = "#{SPECIAL_CHAR}#{special_word}"
+          if tag_expr.include?(part)
+            resolved_word = resolve_word(special_word, 'write')
+            resolved_tag = resolved_tag.gsub(part, resolved_word)
           end
         end
         resolved_tag
@@ -36,9 +36,10 @@ module Kerbi
       def resolve_read_tag(tag_expr)
         resolved_tag = tag_expr
         SPECIAL_READ_WORDS.each do |special_word|
-          if tag_expr.include?(special_word)
-            resolved_word = self.resolve_word(special_word, 'read')
-            resolved_tag = resolved_tag.gsub(special_word, resolved_word)
+          part = "#{SPECIAL_CHAR}#{special_word}"
+          if tag_expr.include?(part)
+            resolved_word = resolve_word(special_word, 'read')
+            resolved_tag = resolved_tag.gsub(part, resolved_word)
           end
         end
         resolved_tag

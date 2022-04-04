@@ -44,13 +44,8 @@ module Kerbi
       )
 
       def tag
-        if object.latest?
-          str = "#{object.tag} [latest]"
-        else
-          str = object.tag
-        end
         #noinspection RubyResolve
-        str.bold
+        object.tag.bold
       end
 
       def message
