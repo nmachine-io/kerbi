@@ -60,11 +60,10 @@ module Kerbi
         client("v1").update_config_map(new_resource)
       end
 
-      # @return [Array<Kerbi::State::Entry>] entries
+      # @return [Array<Hash>] entries
       def read_entries
         str_entries = resource[:data][:entries]
-        dict_entries = JSON.parse(str_entries)
-        dict_entries.map { |h| Entry.from_dict(h) }
+        JSON.parse(str_entries)
       end
 
       def client(api_name="v1")

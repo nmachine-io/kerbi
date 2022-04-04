@@ -1,25 +1,18 @@
 module Kerbi
   module State
     class BaseBackend
-      include Kerbi::Mixins::EntryTagLogic
-
 
       def initialize(options={})
       end
 
       # @return [Kerbi::State::EntrySet]
       def entry_set
-        @_entry_set ||= read_entries
+        @_entry_set ||= EntrySet.new(read_entries)
       end
 
       # @return [Array<Kerbi::State::Entry>]
       def entries
         entry_set.entries
-      end
-
-      # @return [Kerbi::State::Backend]
-      def state_backend(namespace=nil)
-        @_state_backend ||= generate_state_backend(namespace)
       end
 
       # @param [Kerbi::State::Entry] entry
@@ -46,7 +39,7 @@ module Kerbi
         raise NotImplementedError
       end
 
-      # @return [Kerbi::State::EntrySet]
+      # @return [Array<Hash>]
       def read_entries
         raise NotImplementedError
       end

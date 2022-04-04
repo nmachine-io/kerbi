@@ -280,7 +280,8 @@ defaults to $(kubectl config current-context)"
         options: [
           OptionSchemas::OUTPUT_FMT,
           OptionSchemas::VALUE_FNAMES,
-          OptionSchemas::INLINE_ASSIGNMENT
+          OptionSchemas::INLINE_ASSIGNMENT,
+          *OptionSchemas::KUBERNETES_OPTIONS
         ]
       }.freeze
 

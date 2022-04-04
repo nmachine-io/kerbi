@@ -4,6 +4,10 @@ module Kerbi
 
       protected
 
+      def entry_set
+        state_backend.entry_set
+      end
+
       def raise_unless_backend_ready
         unless state_backend.read_write_ready?
           raise Kerbi::StateBackendNotReadyError
@@ -16,6 +20,8 @@ module Kerbi
           expr = run_opts.write_state_to
           entry = entry_set.find_entry_for_read(expr, opts)
           entry&.values&.deep_dup.deep_symbolize_keys || {}
+        else
+          {}
         end
       end
 
@@ -31,7 +37,8 @@ module Kerbi
 
       # @param [Kerbi::State::Entry] entry
       def patch_entry_attrs(entry)
-        entry.
+        entry.values = compile_values.deep_dup
+        entry.default_values = compile_default_values.deep_dup
         entry.created_at = Time.now
       end
 

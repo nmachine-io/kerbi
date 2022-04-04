@@ -24,7 +24,7 @@ module Kerbi
       has_attributes(
         :tag,
         :message,
-        :is_latest,
+        :latest?,
         :created_at,
         :values,
         :default_values,

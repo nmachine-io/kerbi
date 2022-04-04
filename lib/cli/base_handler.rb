@@ -8,6 +8,11 @@ module Kerbi
 
       protected
 
+      # @return [Kerbi::State::Backend]
+      def state_backend(namespace=nil)
+        @_state_backend ||= generate_state_backend(namespace)
+      end
+
       ##
       # Looks at the CLI options to determine which
       # data serializer should be used.
@@ -80,6 +85,15 @@ module Kerbi
           end
       end
 
+      def compile_default_values
+        utils = Kerbi::Utils::Values
+        if run_opts.load_defaults?
+          utils.from_files(['values'])
+        else
+          {}
+        end
+      end
+
       ##
       # Returns a re-usable instance of the CLI-args
       # wrapper Kerbi::CliOpts
@@ -114,13 +128,10 @@ module Kerbi
         @_option_defaults_hash ||= {}
       end
 
-      def self.find_method_option_defaults(method_name)
-      end
-
-      def self.set_default_options_for_next(defaults)
-        defaults ||= Kerbi::Consts::OptionDefaults::BASE
-        option_defaults_hash[:__next__] = defaults.deep_dup
-      end
+      # def self.set_default_options_for_next(defaults)
+      #   defaults ||= Kerbi::Consts::OptionDefaults::BASE
+      #   option_defaults_hash[:__next__] = defaults.deep_dup
+      # end
 
       ##
       # Convenience class method for declaring a Thor command
@@ -130,7 +141,7 @@ module Kerbi
       def self.thor_meta(_schema)
         schema = _schema.deep_dup
         desc(schema[:name], schema[:desc])
-        set_default_options_for_next(schema[:defaults])
+        # set_default_options_for_next(schema[:defaults])
         (schema[:options] || []).each do |opt_schema|
           opt_key = opt_schema.delete(:key)
           self.option opt_key, opt_schema

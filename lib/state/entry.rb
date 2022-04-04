@@ -2,10 +2,9 @@ module Kerbi
   module State
     class Entry
 
-      CANDIDATE_PREFIX = "cand-"
-      LATEST_KW = "latest"
+      CANDIDATE_PREFIX = "c/"
 
-      ATTRS = %i[id tag message values default_values created_at]
+      ATTRS = %i[tag message values default_values created_at]
 
       attr_accessor :set
 
@@ -79,24 +78,8 @@ module Kerbi
         )
       end
 
-      def self.new_candidate(options={})
-        dict = options.merge(id: CANDIDATE_PREFIX)
-      end
-
       def self.versioned?(expr)
         Gem::Version.correct?(expr)
-      end
-
-      def self.auto_inc_expr?(expr)
-        %w[major minor patch].include?(expr)
-      end
-
-      def self.latest_expr?(expr)
-        expr == LATEST_KW
-      end
-
-      def self.candidate_expr?(expr)
-        expr == CANDIDATE_PREFIX
       end
     end
   end

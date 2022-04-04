@@ -9,17 +9,17 @@ module Kerbi
       # @param [Array<Hash>] dicts
       def initialize(dicts)
         @entries = dicts.map { |h| Entry.from_dict(self, h) }
-        post_process_entries
+        sort_by_created_at
       end
 
       # @return [Array<Kerbi::State::Entry>]
       def committed
-        entries.select(&:committed)
+        entries.select(&:committed?)
       end
 
       # @return [Array<Kerbi::State::Entry>]
       def candidates
-        entries.reject(&:committed)
+        entries.reject(&:committed?)
       end
 
       # @return [?Kerbi::State::Entry]
@@ -42,22 +42,21 @@ module Kerbi
         latest_versioned&.tag
       end
 
-      def add_or_update(tag_expr, options)
-        raise_if_illegal_tag_expr(tag_expr)
-      end
-
       # @param [String] tag_expr
       # @return [?Kerbi::State::Entry]
       def find_entry_for_read(tag_expr, opts={})
         resolved_tag = resolve_read_tag(tag_expr)
         if(result = find_by_literal_tag(resolved_tag))
           result
-        elsif exactly_latest?(tag_expr) && opts[:latest_miss] == 'raise'
-          raise Kerbi::StateNotFoundError
-        elsif exactly_candidate?(tag_expr) && opts[:candidate_miss] == 'raise'
+        elsif exactly_latest?(tag_expr)
+          raise Kerbi::StateNotFoundError if opts[:latest_miss] == 'raise'
+          return nil
+        elsif exactly_candidate?(tag_expr)
+          raise Kerbi::StateNotFoundError if opts[:candidate_miss] == 'raise'
+          return nil
+        else
           raise Kerbi::StateNotFoundError
         end
-        nil
       end
 
       ## Has side effect!
@@ -87,17 +86,6 @@ module Kerbi
       def raise_if_illegal_tag_expr(tag_expr)
         illegal = self.class.illegal_write_tag_expr?(tag_expr)
         raise Kerbi::IllegalWriteStateTagWordError if illegal
-      end
-
-      def post_process_entries
-        sort_by_created_at
-        entries.each do |entry|
-          unless entry.candidate?
-            entries.is_latest = true
-            break
-          end
-        end
-        entries
       end
 
       def sort_by_created_at
