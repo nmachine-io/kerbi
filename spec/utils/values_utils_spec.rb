@@ -57,15 +57,6 @@ RSpec.describe Kerbi::Utils::Values do
       Kerbi::Testing.make_yaml("y.yaml", "n/a")
     end
 
-    context "with no missing files and values present" do
-      let(:expected) { %W[#{root}/values.yaml #{root}/x.yaml ] }
-
-      it "returns the expect list of final paths" do
-        Kerbi::Testing.make_yaml("values.yaml", "n/a")
-        expect(func(["x.yaml"])).to eq(expected)
-      end
-    end
-
     context "with no missing file other than 'values'" do
       it "returns the expect list of final paths" do
         expect(func(["x.yaml"])).to eq(["#{root}/x.yaml"])

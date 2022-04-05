@@ -5,16 +5,6 @@ RSpec.describe Kerbi::State::ConfigMapBackend do
   let(:namespace) { "kerbi-spec" }
   let(:cm_name) { Kerbi::State::Consts::RESOURCE_NAME }
 
-  def mk_entry(opts={})
-    default = {
-      tag: "tag",
-      message: "message",
-      values: {x: {y: "z"}},
-      created_at: "2022-01-01T00:00:00+00:00",
-    }
-    Kerbi::State::Entry.from_dict(default.merge(opts))
-  end
-
   def kmd(command)
     opts = { err: File::NULL, out: File::NULL }
     system("kubectl #{command} --context kind-kind", **opts)
@@ -23,7 +13,7 @@ RSpec.describe Kerbi::State::ConfigMapBackend do
   before :each do
     kmd("create ns #{namespace}")
     kmd("delete cm #{cm_name} -n #{namespace}")
-    sleep(2)
+    # sleep(2) #ADD ME BACK IF WEIRD ERRORS... :/
   end
 
   # @return [Kerbi::State::ConfigMapBackend]
@@ -44,6 +34,15 @@ RSpec.describe Kerbi::State::ConfigMapBackend do
         expect(result[:data][:entries]).to eq("[]")
       end
     end
+
+    context "with some entries (for puts only, uncomment)" do
+      it "puts it" do
+        # entry = new_state("1", created_at: "2022-01-01T00:00:00+00:00")
+        # puts entry.to_h
+        # result = make_subject("xyz").template_resource([entry])
+        # puts result
+      end
+    end
   end
 
   describe "#namespace_exists?" do
@@ -62,32 +61,22 @@ RSpec.describe Kerbi::State::ConfigMapBackend do
   describe "#apply_resource and #read_entries" do
     let(:entries) do
       [
-        mk_entry(tag: "1", created_at: "2022-01-01T00:00:00+00:00"),
-        mk_entry(tag: "2", created_at: "2022-02-01T00:00:00+00:00"),
+        new_state("one", message: "m-one", created_at: "2022-01-01T00:00:00+00:00"),
+        new_state("two", message: "m-two", created_at: "2022-02-01T00:00:00+00:00"),
       ]
     end
-
-    let(:expected) { entries.map(&:serialize).reverse }
 
     it "creates a configmap with the right contents" do
       subject = make_subject(namespace)
       descriptor = subject.template_resource(entries)
       subject.apply_resource(descriptor)
       sleep(1)
-      entries = subject.read_entries
-      serialized_entries = entries.map(&:serialize)
-      expect(serialized_entries).to eq(expected)
-      expect(entries[0].latest?).to be_truthy
-      expect(entries[1].latest?).to be_falsey
-    end
-  end
+      actual = subject.send(:read_entries)
+      expect(actual.count).to eq(2)
 
-  describe "#read_entries" do
-    it "works" do
-      subject = make_subject(namespace)
-      result = subject.read_entries
-      puts result
-      puts result.map(&:serialize)
+      actual_one = actual[0].values_at("tag", "message", "created_at")
+      expected_one = entries[0].to_h.values_at(:tag, :message, :created_at)
+      expect(actual_one).to eq(expected_one)
     end
   end
 end

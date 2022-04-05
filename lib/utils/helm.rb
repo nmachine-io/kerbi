@@ -2,15 +2,14 @@ module Kerbi
   module Utils
     module Helm
 
-      def self.config
-        Kerbi::ConfigFile::Manager
-      end
-
+      HELM_EXEC = "helm"
+      TMP_VALUES_PATH = "/tmp/kerbi-helm-tmp.yaml"
+      
       ##
       # Tests whether Kerbi can invoke Helm commands
       # @return [Boolean] true if helm commands succeed locally
       def self.can_exec?
-        !!system(config.helm_exec, out: File::NULL, err: File::NULL)
+        !!system(HELM_EXEC, out: File::NULL, err: File::NULL)
       end
 
       ##
@@ -18,18 +17,17 @@ module Kerbi
       # @param [Hash] values a hash of values
       # @return [String] the path of the file
       def self.make_tmp_values_file(values)
-        File.open(config.tmp_helm_values_path, 'w') do |f|
-          f.write(YAML.dump((values || {}).deep_stringify_keys))
-        end
-        config.tmp_helm_values_path
+        content = YAML.dump((values || {}).deep_stringify_keys)
+        File.write(TMP_VALUES_PATH, content)
+        TMP_VALUES_PATH
       end
 
       ##
       # Deletes the temp file
       # @return [void]
       def self.del_tmp_values_file
-        if File.exists?(config.tmp_helm_values_path)
-          File.delete(config.tmp_helm_values_path)
+        if File.exists?(TMP_VALUES_PATH)
+          File.delete(TMP_VALUES_PATH)
         end
       end
 
@@ -53,7 +51,7 @@ module Kerbi
         raise "Helm executable not working" unless can_exec?
         tmp_file = make_tmp_values_file(opts[:values])
         inline_flags = encode_inline_assigns(opts[:inline_assigns])
-        command = "#{config.helm_exec} template #{release} #{project}"
+        command = "#{HELM_EXEC} template #{release} #{project}"
         command += " -f #{tmp_file} #{inline_flags} #{opts[:cli_args]}"
         output = `#{command}`
         del_tmp_values_file
