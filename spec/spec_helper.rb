@@ -5,6 +5,17 @@ SimpleCov.start
 
 require_relative './../lib/kerbi'
 
+def new_state(tag, dict={})
+  set = dict.delete(:state)
+  dict[:tag] = tag
+  Kerbi::State::Entry.from_dict(set, dict)
+end
+
+def new_state_set(bundles)
+  dicts = bundles.map { |kv| { tag: kv[0].to_s, **kv[1] } }
+  Kerbi::State::EntrySet.new(dicts)
+end
+
 module Kerbi
   module Testing
 

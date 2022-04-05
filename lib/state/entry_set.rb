@@ -111,6 +111,8 @@ module Kerbi
         return nil unless tag_expr.present?
         entries.find { |e| e.tag == tag_expr }
       end
+      alias_method :get, :find_by_literal_tag
+
 
       def prune_candidates
         entries.select!(&:committed?)

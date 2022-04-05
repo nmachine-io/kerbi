@@ -9,7 +9,9 @@ module Kerbi
       extend ActiveSupport::Concern
 
       SPECIAL_CHAR = "@"
+
       CANDIDATE_WORD = "candidate"
+      NEW_CANDIDATE_WORD = "new-candidate"
       LATEST_WORD = "latest"
       RANDOM_WORD = "random"
 
@@ -21,11 +23,9 @@ module Kerbi
       SPECIAL_WRITE_WORDS = [
         LATEST_WORD,
         CANDIDATE_WORD,
+        NEW_CANDIDATE_WORD,
         RANDOM_WORD
       ]
-
-      EXACTLY_CANDIDATE = "#{SPECIAL_CHAR}#{CANDIDATE_WORD}"
-      EXACTLY_LATEST = "#{SPECIAL_CHAR}#{LATEST_WORD}"
 
       ##
       # Calls #do_resolve_tag_expr with verb=write in order to turn
@@ -97,6 +97,7 @@ module Kerbi
       # @param [String] word a special word ('latest', 'random', 'candidate')
       # @param [Object] verb whether this is a read or write operation
       def resolve_word(word, verb)
+        word = word.gsub("-", "_")
         if respond_to?((method = "resolve_#{word}_#{verb}_word"))
           send(method)
         elsif respond_to?((method = "resolve_#{word}_word"))
@@ -116,24 +117,28 @@ module Kerbi
       end
 
       ##
+      # Single word resolver. Outputs a non-taken random tag (given by
+      # #generate_random_tag) prefixed with candidate flag prefix [cand]-.
+      # @return [String]
+      def resolve_candidate_write_word
+        resolve_candidate_read_word || resolve_new_candidate_word
+      end
+
+      def resolve_new_candidate_word
+        prefix = Kerbi::State::Entry::CANDIDATE_PREFIX
+        begin
+          tag = "#{prefix}#{self.class.generate_random_tag}"
+        end while candidates.find{ |e| e.tag == tag }
+        tag
+      end
+
+      ##
       # Single word resolver. Looks for the latest committed state entry
       # and returns its tag or an empty string if there is no
       # latest committed state.
       # @return [String]
       def resolve_latest_word
         latest&.tag || ""
-      end
-
-      ##
-      # Single word resolver. Outputs a non-taken random tag (given by
-      # #generate_random_tag) prefixed with candidate flag prefix [cand]-.
-      # @return [String]
-      def resolve_candidate_write_word
-        prefix = Kerbi::State::Entry::CANDIDATE_PREFIX
-        begin
-          tag = "#{prefix}#{self.class.generate_random_tag}"
-        end while candidates.find{ |e|e.tag == tag }
-        tag
       end
 
       ##

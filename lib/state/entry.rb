@@ -64,19 +64,6 @@ module Kerbi
       end
 
       ##
-      # Queries the collection from which this entry comes to determine
-      # whether or not this entry has the newest 'created_at'.
-      #
-      # Note that whether this entry is a candidate or not affects the result.
-      # If it is a candidate, it will only compare itself to other candidates.
-      # If it is not, it will only compare itself to non-candidates.
-      # @return [TrueClass, FalseClass]
-      def latest?
-        return set&.latest&.tag == tag if committed?
-        set&.latest_candidate&.tag == tag if candidate?
-      end
-
-      ##
       # Computes a delta between this state's values and its
       # default values.
       # @return [Hash]
