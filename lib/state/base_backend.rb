@@ -24,6 +24,7 @@ module Kerbi
       end
 
       def save
+        entry_set.validate!
         update_resource
         @_entry_set = nil
         @_resource = nil

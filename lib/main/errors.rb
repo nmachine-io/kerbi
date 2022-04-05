@@ -58,4 +58,39 @@ module Kerbi
     end
   end
 
+  class NoSuchStateAttrName < Error
+    MSG = "This attribute does not exist or is not writeable"
+    def initialize(msg = MSG)
+      super(MSG)
+    end
+  end
+
+  class EntryValidationError < Error
+    MSG = "Cannot write state because of validation errors: "
+
+    # @param [Hash] errors
+    def initialize(errors)
+      message = self.class.build_message(errors)
+      super(message)
+    end
+
+    # @param [Hash] errors
+    def self.error_line(error)
+      "#{error[:attr]}['#{error[:value]}']: #{error[:msg]}".indent(1)
+    end
+
+    # @param [String] tag
+    # @param [Array<Hash>] errors
+    def self.entry_line(tag, error_dicts)
+      per_tag_parts = error_dicts.map{ |d| error_line(d) }
+      "Entry['#{tag}'] \n #{per_tag_parts.join("\n")}".indent(1)
+    end
+
+    # @param [Hash] errors
+    def self.build_message(errors)
+      parts = errors.map { |h| entry_line(h[0], h[1]) }
+      "#{MSG} \n#{parts.join("\n")}"
+    end
+  end
+
 end

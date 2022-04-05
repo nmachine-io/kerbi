@@ -8,6 +8,7 @@ module Kerbi
       CANDIDATE_PREFIX = "[cand]-"
 
       ATTRS = %i[tag message values default_values created_at]
+      SETTABLE_ATTRS = %i[message created_at]
 
       attr_accessor :set
 
@@ -24,7 +25,7 @@ module Kerbi
         ATTRS.each do |attr|
           instance_variable_set("@#{attr}", dict[attr].freeze)
         end
-        @is_latest = false
+        @_was_validated = false
         @validation_errors = []
       end
 
@@ -40,6 +41,26 @@ module Kerbi
       # @return [TrueClass, FalseClass]
       def committed?
         !candidate?
+      end
+
+      ##
+      # Ghetto attribute validation. Pushes a attr => msg hash to the
+      # @validation_errors for every problem found. Does not raise on
+      # problems.
+      # @return [NilClass]
+      def validate
+        @validation_errors.push(
+          attr: 'tag',
+          msg: "Cannot be empty",
+          value: tag
+        ) unless tag.present?
+
+        @_was_validated = true
+      end
+
+      def valid?
+        raise "valid? called before #validate" unless @_was_validated
+        validation_errors.empty?
       end
 
       ##
@@ -67,22 +88,39 @@ module Kerbi
         end
       end
 
+      ##
+      # Dynamically assign as a user.
+      # @param [String|Symbol] attr_name
+      # @param [Object] new_value
+      # @return [String] the old value, for convenience
       def assign_attr(attr_name, new_value)
-        setter_name = "#{attr_name}="
-        if self.respond_to?(setter_name)
-          send(setter_name, new_value)
+        if SETTABLE_ATTRS.include?(attr_name.to_sym)
+          old_value = send(attr_name)
+          send("#{attr_name}=", new_value)
+          old_value
         else
-
+          raise Kerbi::NoSuchStateAttrName
         end
       end
 
+      ##
+      # Replace current tag with a new one, where the new
+      # one can contain special interpolatable words like
+      # @candidate.
       # @param [String] new_tag_expr
+      # @return [String] the old tag, for convenience
       def retag(new_tag_expr)
         old_tag = tag
         self.tag = set.resolve_write_tag_expr(new_tag_expr)
         old_tag
       end
 
+      ##
+      # Removes the [cand]- part of the tag, making this
+      # entry lose its candidate status.
+      #
+      # Raises an exception if this entry was not a candidate.
+      # @return [String] the old tag, for convenience
       def promote
         raise Kerbi::StateNotPromotable unless candidate?
         old_tag = tag
@@ -90,6 +128,12 @@ module Kerbi
         old_tag
       end
 
+      ##
+      # Adds the [cand]- flag to this entry's tag, making this
+      # entry gain candidate status.
+      #
+      # Raises an exception if this entry was already a candidate.
+      # @return [String] the old tag, for convenience
       def demote
         raise Kerbi::StateNotDemotable unless committed?
         old_tag = tag
@@ -97,6 +141,9 @@ module Kerbi
         old_tag
       end
 
+      ##
+      # Convenience method to get all overridden keys between
+      # the values and default_values dicts.
       # @return [Array<String>]
       def overridden_keys
         (delta = overrides_delta) ? delta.keys.map(&:to_s) : []

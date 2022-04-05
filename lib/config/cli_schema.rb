@@ -298,6 +298,22 @@ defaults to $(kubectl config current-context)"
         ]
       }.freeze
 
+      SET_STATE_ATTR = {
+        name: "set [TAG] [ATTR_NAME] [NEW_VALUE]",
+        desc: "Updates state entry [TAG], attribute [ATTR_NAME] to value [NEW_VALUE]",
+        options: [
+          *OptionSchemas::KUBERNETES_OPTIONS,
+        ]
+      }.freeze
+
+      PRUNE_CANDIDATES_STATE = {
+        name: "prune-candidates",
+        desc: "Deletes all state entries flagged as candidates",
+        options: [
+          *OptionSchemas::KUBERNETES_OPTIONS,
+        ]
+      }.freeze
+
       SHOW_VERSION = {
         name: "version",
         desc: "Print kerbi version",

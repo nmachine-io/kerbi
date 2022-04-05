@@ -147,36 +147,17 @@ module Kerbi
         tag
       end
 
-      def exactly_candidate?(tag_expr)
-        tag_expr == EXACTLY_CANDIDATE
-      end
-
-      def exactly_latest?(tag_expr)
-        tag_expr == EXACTLY_CANDIDATE
-      end
-
       # private :do_resolve_tag_expr
       # private :resolve_candidate_read_word
 
       module ClassMethods
-
+        ##
+        # Uses the Spicy::Proton gem to generate a convenient,
+        # human-readable random tag for a state entry.
+        # @return [String]
         def generate_random_tag
           gen = Spicy::Proton.new
           "#{gen.adjective(max: 5)}-#{gen.noun(max: 5)}"
-        end
-
-        # @return [Array<String>]
-        def illegal_write_special_exprs
-          intersection = SPECIAL_READ_WORDS & SPECIAL_WRITE_WORDS
-          illegal = SPECIAL_READ_WORDS - intersection
-          illegal.map { |word| "#{SPECIAL_CHAR}#{word}" }
-        end
-
-        def illegal_write_tag_expr?(tag_expr)
-          illegal_write_special_exprs.each do |illegal_words|
-            return true if tag_expr.include?(illegal_words)
-          end
-          false
         end
       end
 

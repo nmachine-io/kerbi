@@ -57,9 +57,11 @@ module Kerbi
         touch_and_save_entry(entry, tag: old_name)
       end
 
-      def set(tag_expr, field, new_value)
+      thor_meta Kerbi::Consts::CommandSchemas::SET_STATE_ATTR
+      def set(tag_expr, attr_name, new_value)
         entry = find_readable_entry(tag_expr)
-
+        old_value = entry.assign_attr(attr_name, new_value)
+        touch_and_save_entry(entry, attr_name => old_value)
       end
 
       thor_meta Kerbi::Consts::CommandSchemas::DELETE_STATE
@@ -67,6 +69,15 @@ module Kerbi
         entry = entry_set.find_entry_for_read(expr)
         raise Kerbi::StateNotFoundError unless entry
         state_backend.delete_entry(entry)
+      end
+
+      thor_meta Kerbi::Consts::CommandSchemas::PRUNE_CANDIDATES_STATE
+      def prune_candidates
+        old_count = entry_set.entries.count
+        entry_set.prune_candidates
+        state_backend.save
+        new_count = entry_set.entries.count
+        puts "Pruned #{old_count - new_count} state entries"
       end
     end
   end
