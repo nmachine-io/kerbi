@@ -8,6 +8,10 @@ module Kerbi
 
       protected
 
+      ##
+      # Convenience method for instantiating (and memoizating) a state
+      # management backend.
+      # @param [String] namespace force a k8s ns, otherwise uses run option's
       # @return [Kerbi::State::Backend]
       def state_backend(namespace=nil)
         @_state_backend ||= generate_state_backend(namespace)
@@ -85,6 +89,10 @@ module Kerbi
           end
       end
 
+      ##
+      # Compiles the values from only the default values file,
+      # e.g values.yaml, or values/values.yaml.
+      # @return [Hash]
       def compile_default_values
         utils = Kerbi::Utils::Values
         if run_opts.load_defaults?
@@ -95,15 +103,17 @@ module Kerbi
       end
 
       ##
-      # Returns a re-usable instance of the CLI-args
-      # wrapper Kerbi::CliOpts
+      # Called by command-methods that need to start with a set
+      # of default options that is not the normal default,
+      # i.e that is not Kerbi::Consts::OptionDefaults::BASE.
+      # @param [Hash] defaults alternative defaults
       def prep_opts(defaults)
         @_options_obj = Kerbi::RunOpts.new(options, defaults)
       end
 
       ##
       # Returns a re-usable instance of the CLI-args
-      # wrapper Kerbi::CliOpts
+      # wrapper Kerbi::RunOpts
       # @return [Kerbi::RunOpts] re-usable instance
       def run_opts
         @_options_obj ||= Kerbi::RunOpts.new(

@@ -12,6 +12,7 @@ module Kerbi
 
       STATE_BACKEND_TYPE = "state-backend"
       READ_STATE = "read-state"
+      STRICT_READ_STATE = "strict-read"
       WRITE_STATE = "write-state"
       NAMESPACE = "namespace"
       WRITE_STATE_MESSAGE = "message"
@@ -78,11 +79,11 @@ defaults to $(kubectl config current-context)"
       }.freeze
 
       LOAD_DEFAULT_VALUES = {
-        key: OptionKeys::K8S_PASSWORD,
+        key: OptionKeys::LOAD_DEFAULT_VALUES,
         desc: "Automatically load values.yaml. Defaults to true.",
         type: "boolean",
         default: true
-      }
+      }.freeze
 
       K8S_TOKEN = {
         key: OptionKeys::K8S_TOKEN,
@@ -93,7 +94,7 @@ defaults to $(kubectl config current-context)"
         key: OptionKeys::STATE_BACKEND_TYPE,
         desc: "Persistent store to keep track of applied values (configmap, secret)",
         enum: %w[configmap secret]
-      }
+      }.freeze
 
       OUTPUT_FMT = {
         key: OptionKeys::OUTPUT_FMT,
@@ -111,7 +112,12 @@ defaults to $(kubectl config current-context)"
 
       READ_STATE = {
         key: OptionKeys::READ_STATE,
-        desc: "merge values from given state record into final values",
+        desc: "Merge values from given state record into final values.",
+      }.freeze
+
+      STRICT_READ_STATE = {
+        key: OptionKeys::STRICT_READ_STATE,
+        desc: "Makes read-state operations fail if the state does not exist for the given tag",
       }.freeze
 
       WRITE_STATE = {
@@ -153,6 +159,11 @@ defaults to $(kubectl config current-context)"
         KUBE_CONFIG_CONTEXT
       ].freeze
 
+      VALUES_OPTIONS = [
+        VALUE_FNAMES,
+        INLINE_ASSIGNMENT,
+        LOAD_DEFAULT_VALUES,
+      ].freeze
     end
 
     module CommandSchemas
@@ -182,8 +193,7 @@ defaults to $(kubectl config current-context)"
         desc: "Runs mixers for RELEASE_NAME",
         options: [
           OptionSchemas::OUTPUT_FMT,
-          OptionSchemas::VALUE_FNAMES,
-          OptionSchemas::INLINE_ASSIGNMENT,
+          *OptionSchemas::VALUES_OPTIONS,
           *OptionSchemas::KUBERNETES_OPTIONS
         ]
       }.freeze
@@ -260,6 +270,26 @@ defaults to $(kubectl config current-context)"
         defaults: OptionDefaults::LIST_STATE
       }.freeze
 
+      PROMOTE_STATE = {
+        name: "promote [TAG]",
+        desc: "Removes the [cand]- prefix from the given entry,
+               removing its candidate status.",
+        options: [
+          *OptionSchemas::KUBERNETES_OPTIONS,
+        ],
+        defaults: OptionDefaults::LIST_STATE
+      }.freeze
+
+      DEMOTE_STATE = {
+        name: "promote [TAG]",
+        desc: "Adds the [cand]- prefix from the given entry,
+               giving it candidate status.",
+        options: [
+          *OptionSchemas::KUBERNETES_OPTIONS,
+        ],
+        defaults: OptionDefaults::LIST_STATE
+      }.freeze
+
       DELETE_STATE = {
         name: "delete [TAG]",
         desc: "Deletes the state entry given by [TAG]",
@@ -279,8 +309,7 @@ defaults to $(kubectl config current-context)"
         desc: "Print out loaded values as YAML",
         options: [
           OptionSchemas::OUTPUT_FMT,
-          OptionSchemas::VALUE_FNAMES,
-          OptionSchemas::INLINE_ASSIGNMENT,
+          *OptionSchemas::VALUES_OPTIONS,
           *OptionSchemas::KUBERNETES_OPTIONS
         ]
       }.freeze

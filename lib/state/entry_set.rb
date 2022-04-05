@@ -43,36 +43,25 @@ module Kerbi
       end
 
       # @param [String] tag_expr
-      # @return [?Kerbi::State::Entry]
-      def find_entry_for_read(tag_expr, opts={})
-        resolved_tag = resolve_read_tag(tag_expr)
-        if(result = find_by_literal_tag(resolved_tag))
-          result
-        elsif exactly_latest?(tag_expr)
-          raise Kerbi::StateNotFoundError if opts[:latest_miss] == 'raise'
-          return nil
-        elsif exactly_candidate?(tag_expr)
-          raise Kerbi::StateNotFoundError if opts[:candidate_miss] == 'raise'
-          return nil
-        else
-          raise Kerbi::StateNotFoundError
-        end
+      # @return [Kerbi::State::Entry]
+      def find_entry_for_read(tag_expr)
+        resolved_tag = resolve_read_tag_expr(tag_expr)
+        entry = find_by_literal_tag(resolved_tag)
+        raise Kerbi::StateNotFoundError unless entry
+        entry
       end
 
       ## Has side effect!
       # @param [String] tag_expr
       # @return [?Kerbi::State::Entry]
       def find_or_init_entry_for_write(tag_expr)
-        resolved_tag = resolve_write_tag(tag_expr)
+        resolved_tag = resolve_write_tag_expr(tag_expr)
         if(existing_entry = find_by_literal_tag(resolved_tag))
           existing_entry
-        elsif exactly_candidate?(tag_expr)
-          new_tag = resolve_candidate_write_word
-          entry = Kerbi::State::Entry.new(self, tag: new_tag)
+        else
+          entry = Kerbi::State::Entry.new(self, tag: resolved_tag)
           entries.unshift(entry)
           entry
-        else
-          raise Kerbi::StateNotFoundError
         end
       end
 

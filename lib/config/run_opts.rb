@@ -79,6 +79,11 @@ module Kerbi
     end
 
     # @return [TrueClass, FalseClass]
+    def reads_state_strictly?
+      options[consts::STRICT_READ_STATE]
+    end
+
+    # @return [TrueClass, FalseClass]
     def writes_state?
       write_state_to.present?
     end

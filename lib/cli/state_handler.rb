@@ -26,24 +26,40 @@ module Kerbi
       end
 
       thor_meta Kerbi::Consts::CommandSchemas::SHOW_STATE
-      def show(tag)
+      def show(tag_expr)
         prep_opts(Kerbi::Consts::OptionDefaults::LIST_STATE)
-        entry = entry_set.find_entry_for_read(tag)
-        raise Kerbi::StateNotFoundError unless entry
+        entry = find_readable_entry(tag_expr)
         echo_data(
           entry,
-          table_serializer: Kerbi::Cli::EntryYamlJsonSerializer,
+          table_serializer: Kerbi::Cli::FullEntryRowSerializer,
           serializer: Kerbi::Cli::EntryYamlJsonSerializer
         )
       end
 
       thor_meta Kerbi::Consts::CommandSchemas::RETAG_STATE
-      def retag(old_tag_expr, new_tag)
-        entry = entry_set.find_entry_for_read(old_tag_expr)
-        raise Kerbi::StateNotFoundError unless entry
-        entry.tag = new_tag
-        entry.created_at = Time.now
-        state_backend.save
+      def retag(old_tag_expr, new_tag_expr)
+        entry = find_readable_entry(old_tag_expr)
+        old_tag = entry.retag(new_tag_expr)
+        touch_and_save_entry(entry, tag: old_tag)
+      end
+
+      thor_meta Kerbi::Consts::CommandSchemas::PROMOTE_STATE
+      def promote(tag_expr)
+        entry = find_readable_entry(tag_expr)
+        old_name = entry.promote
+        touch_and_save_entry(entry, tag: old_name)
+      end
+
+      thor_meta Kerbi::Consts::CommandSchemas::DEMOTE_STATE
+      def demote(tag_expr)
+        entry = find_readable_entry(tag_expr)
+        old_name = entry.demote
+        touch_and_save_entry(entry, tag: old_name)
+      end
+
+      def set(tag_expr, field, new_value)
+        entry = find_readable_entry(tag_expr)
+
       end
 
       thor_meta Kerbi::Consts::CommandSchemas::DELETE_STATE

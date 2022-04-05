@@ -1,8 +1,11 @@
 module Kerbi
   module State
+
+    ##
+    # Represents a single Kerbi state entry.
     class Entry
 
-      CANDIDATE_PREFIX = "c/"
+      CANDIDATE_PREFIX = "[cand]-"
 
       ATTRS = %i[tag message values default_values created_at]
 
@@ -25,28 +28,78 @@ module Kerbi
         @validation_errors = []
       end
 
+      ## A state entry is a 'candidate' if its tag has the
+      # candidate signature - that is it starts with [cand]-.
       # @return [TrueClass, FalseClass]
       def candidate?
         tag.start_with?(CANDIDATE_PREFIX)
       end
 
+      ##
+      # Convenience method that returns the negation of #candidate?
       # @return [TrueClass, FalseClass]
       def committed?
         !candidate?
       end
 
+      ##
+      # Queries the collection from which this entry comes to determine
+      # whether or not this entry has the newest 'created_at'.
+      #
+      # Note that whether this entry is a candidate or not affects the result.
+      # If it is a candidate, it will only compare itself to other candidates.
+      # If it is not, it will only compare itself to non-candidates.
       # @return [TrueClass, FalseClass]
       def latest?
         return set&.latest&.tag == tag if committed?
         set&.latest_candidate&.tag == tag if candidate?
       end
 
-      def default_new_delta
+      ##
+      # Computes a delta between this state's values and its
+      # default values.
+      # @return [Hash]
+      def overrides_delta
         if values.is_a?(Hash) & default_values.is_a?(Hash)
           Kerbi::Utils::Misc.deep_hash_diff(default_values, values)
         else
           nil
         end
+      end
+
+      def assign_attr(attr_name, new_value)
+        setter_name = "#{attr_name}="
+        if self.respond_to?(setter_name)
+          send(setter_name, new_value)
+        else
+
+        end
+      end
+
+      # @param [String] new_tag_expr
+      def retag(new_tag_expr)
+        old_tag = tag
+        self.tag = set.resolve_write_tag_expr(new_tag_expr)
+        old_tag
+      end
+
+      def promote
+        raise Kerbi::StateNotPromotable unless candidate?
+        old_tag = tag
+        self.tag = tag[CANDIDATE_PREFIX.length..]
+        old_tag
+      end
+
+      def demote
+        raise Kerbi::StateNotDemotable unless committed?
+        old_tag = tag
+        self.tag = "#{CANDIDATE_PREFIX}#{tag}"
+        old_tag
+      end
+
+      # @return [Array<String>]
+      def overridden_keys
+        (delta = overrides_delta) ? delta.keys.map(&:to_s) : []
       end
 
       def to_h

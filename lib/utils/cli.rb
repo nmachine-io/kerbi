@@ -1,7 +1,6 @@
 module Kerbi
   module Utils
     module Cli
-
       ##
       # Convenience method for running and compiling the output
       # of several mixers. Returns all result dicts in a flat array
@@ -52,19 +51,35 @@ module Kerbi
       def self.list_to_table(entries, serializer_cls)
         if entries.is_a?(Array)
           table = Terminal::Table.new(
-            headings: serializer_cls.header_titles.map(&:bold),
+            headings: serializer_cls.header_titles,
             rows: entries.map(&:values)
           )
+          table.style = LIST_TABLE_STYLE
           table.to_s
         else
           table = Terminal::Table.new do |t|
+            #noinspection RubyResolve
             entries.each do |key, value|
-              _value = value.is_a?(Hash) ? JSON.pretty_generate(value) : value
-              t.add_row [key.upcase.to_s.bold, _value]
+              new_key = key.upcase.to_s.bold
+              new_value = fmt_table_value(value)
+              t.add_row [new_key, new_value]
             end
-            t.style = {all_separators: true}
+            t.style = DESCRIBE_TABLE_STYLE
+
           end
           table.to_s
+        end
+      end
+
+      def self.fmt_table_value(value)
+        if value.is_a?(Hash)
+          flattened = Kerbi::Utils::Misc.flatten_hash(value)
+          stringified = flattened.deep_stringify_keys
+          dicts_to_yaml(stringified)
+        elsif value.is_a?(Array)
+          value.join(",")
+        else
+          value.to_s
         end
       end
 
@@ -88,6 +103,23 @@ module Kerbi
           load(abs_path)
         end
       end
+
+      LIST_TABLE_STYLE = {
+        border_left: false,
+        border_right: false,
+        border_top: false,
+        border_x: "",
+        border_y: "",
+        border_i: ""
+      }.freeze
+
+      DESCRIBE_TABLE_STYLE = {
+        all_separators: true,
+        border_x: "-",
+        border_y: "",
+        border_i: ""
+      }.freeze
+
     end
   end
 end
