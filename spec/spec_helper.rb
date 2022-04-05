@@ -5,6 +5,19 @@ SimpleCov.start
 
 require_relative './../lib/kerbi'
 
+def kmd(command)
+  opts = { err: File::NULL, out: File::NULL }
+  system("kubectl #{command} --context kind-kind", **opts)
+end
+
+# @return [Kerbi::State::ConfigMapBackend]
+def make_backend(namespace)
+  Kerbi::State::ConfigMapBackend.new(
+    Kerbi::Utils::K8sAuth.kube_config_bundle,
+    namespace
+  )
+end
+
 def new_state(tag, dict={})
   set = dict.delete(:state)
   dict[:tag] = tag
@@ -14,6 +27,34 @@ end
 def new_state_set(bundles)
   dicts = bundles.map { |kv| { tag: kv[0].to_s, **kv[1] } }
   Kerbi::State::EntrySet.new(dicts)
+end
+
+def cli(command)
+  original_stdout = $stdout
+  $stdout = StringIO.new
+  command = command.split(" ") if command.is_a?(String)
+  Kerbi::Cli::RootHandler.start(command)
+  output = $stdout.string
+  $stdout = original_stdout
+  output
+end
+
+def file_exp(dir, file, ext)
+  path = "#{__dir__}/expectations/#{dir}/#{file}.#{ext}"
+  File.read(path)
+end
+
+def expect_cli_eq_file(cmd, dir, file, ext)
+  result = cli(cmd)
+  expected = file_exp(dir, file, ext)
+
+  if ext == 'json'
+    expect(JSON.parse(result)).to eq(JSON.parse(expected))
+  elsif ext == 'yaml'
+    expect(YAML.load_stream(result)).to eq(YAML.load_stream(expected))
+  else
+    expect(result.gsub(/\s+/, "")).to eq(expected.gsub(/\s+/, ""))
+  end
 end
 
 module Kerbi

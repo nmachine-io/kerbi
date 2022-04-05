@@ -35,11 +35,6 @@ RSpec.describe Kerbi::Utils::Helm do
         expect(res_dicts.count).to be_within(40).of(40)
       end
     end
-
-    # it 'cleans up' do
-    #   subject.template('kerbi', chart)
-    #   expect(File.exists?(config.tmp_helm_values_path)).to be_falsey
-    # end
   end
 
   describe '.encode_inline_assigns' do

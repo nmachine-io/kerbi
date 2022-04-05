@@ -127,6 +127,7 @@ defaults to $(kubectl config current-context)"
 
       NAMESPACE = {
         key: OptionKeys::NAMESPACE,
+        aliases: "-n",
         desc: "for state operations, tell kerbi that the state
                configmap/secret is in this namespace"
       }.freeze

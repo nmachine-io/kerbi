@@ -22,7 +22,7 @@ module Kerbi
       # Checks for the namespace and configmap, creating along
       # the way if missing. Does not raise if already exists.
       # @param [Hash] opts for things like verbose
-      def provision_missing_resources(opts={})
+      def provision_missing_resources(**opts)
         create_namespace unless (ns_existed = namespace_exists?)
         puts_init("namespaces/#{namespace}", ns_existed, opts)
 
@@ -38,7 +38,8 @@ module Kerbi
 
       ##
       # Creates the configmap given an exact dict representation
-      # of its contents.
+      # of its contents. This method doesn't actually get used outside
+      # of rspec, but it's super useful there so keeping for time being.
       # @param [Hash] resource_desc
       def apply_resource(resource_desc)
         #noinspection RubyResolve
