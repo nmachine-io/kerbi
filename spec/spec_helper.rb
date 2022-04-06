@@ -53,7 +53,9 @@ def expect_cli_eq_file(cmd, dir, file, ext)
   elsif ext == 'yaml'
     expect(YAML.load_stream(result)).to eq(YAML.load_stream(expected))
   else
-    expect(result.gsub(/\s+/, "")).to eq(expected.gsub(/\s+/, ""))
+    neutered_result = result.gsub(/\s+/, "").gsub("\e", "\\e")
+    neutered_expected = expected.gsub(/\s+/, "")
+    expect(neutered_result).to eq(neutered_expected)
   end
 end
 

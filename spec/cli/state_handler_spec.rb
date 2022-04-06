@@ -43,7 +43,6 @@ RSpec.describe Kerbi::Cli::StateHandler do
 
     context "with --output-format=table" do
       it "outputs the expected text" do
-        puts cli("#{cmd} -o table")
         expect_cli_eq_file("#{cmd} -o table", exps_dir, "list", "txt")
       end
     end
