@@ -10,7 +10,7 @@ metadata:
 spec:
   containers:
     - name: main
-      image: centos:alpine
+      image: busybox:alpine
 
 ---
 

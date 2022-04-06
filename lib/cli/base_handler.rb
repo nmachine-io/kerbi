@@ -92,8 +92,8 @@ module Kerbi
             state_values = read_state_values
 
             file_values.
-              deep_merge(inline_values).
-              deep_merge(state_values)
+              deep_merge(state_values).
+              deep_merge(inline_values)
           end
       end
 
