@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hello-kerbi
+  namespace: foo
+  annotations:
+    author: xavier
+  labels:
+    app: hello-kerbi
+spec:
+  containers:
+    - name: main
+      image: cent_os:alpine
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-kerbi
+  namespace: foo
+  annotations:
+    author: xavier
+  labels:
+    app: hello-kerbi
+spec:
+  type: ClusterIP
+  selector:
+    app: hello-kerbi
+  ports:
+    - port: 80

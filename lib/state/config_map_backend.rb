@@ -24,10 +24,10 @@ module Kerbi
       # @param [Hash] opts for things like verbose
       def provision_missing_resources(**opts)
         create_namespace unless (ns_existed = namespace_exists?)
-        puts_init("namespaces/#{namespace}", ns_existed, opts)
+        echo_init("namespaces/#{namespace}", ns_existed, opts)
 
         create_resource unless (cm_existed = resource_exists?)
-        puts_init("#{namespace}/configmaps/#{cm_name}", cm_existed, opts)
+        echo_init("#{namespace}/configmaps/#{cm_name}", cm_existed, opts)
       end
 
       ##

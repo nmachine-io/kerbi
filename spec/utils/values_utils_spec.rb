@@ -6,9 +6,9 @@ RSpec.describe Kerbi::Utils::Values do
   let(:root) { Kerbi::Testing::TEST_YAMLS_DIR }
   before(:each) { Kerbi::Testing.reset_test_yamls_dir }
 
-  describe ".resolve_fname_expr" do
-    def func(*args, **kwargs)
-      subject.resolve_fname_expr(*args, **kwargs, root: root)
+  describe ".resolve_fname_expr (old)" do
+    def func(fname)
+      subject.resolve_fname_exprs([fname], root: root)
     end
 
     context "when the expression can be resolved" do
@@ -19,9 +19,9 @@ RSpec.describe Kerbi::Utils::Values do
           Kerbi::Testing.make_yaml("x.yaml.erb", "n/a")
         end
         it "returns that file instead over similar ones" do
-          expect(func("x")).to eq("#{root}/x")
-          expect(func("x.yaml")).to eq("#{root}/x.yaml")
-          expect(func("x.yaml.erb")).to eq("#{root}/x.yaml.erb")
+          expect(func("x")).to eq(["#{root}/x"])
+          expect(func("x.yaml")).to eq(["#{root}/x.yaml"])
+          expect(func("x.yaml.erb")).to eq(["#{root}/x.yaml.erb"])
         end
       end
 
@@ -32,16 +32,18 @@ RSpec.describe Kerbi::Utils::Values do
         end
 
         it "returns the closes match" do
-          expect(func("y")).to eq("#{root}/y.yaml")
+          expect(func("y")).to eq(["#{root}/y.yaml"])
           Kerbi::Testing.del_testfile("y.yaml")
-          expect(func("y")).to eq("#{root}/y.yaml.erb")
+          expect(func("y")).to eq(["#{root}/y.yaml.erb"])
         end
       end
     end
 
     context "when the expression cannot be resolved" do
-      it "returns nil" do
-        expect(func("dne")).to be_nil
+      it "raises a Kerbi::ValuesFileNotFoundError with the right message" do
+        cls = Kerbi::ValuesFileNotFoundError
+        msg = "Could not resolve values file 'dne' in /tmp/kerbi-yamls"
+        expect { func("dne") }.to raise_error(cls, msg)
       end
     end
   end

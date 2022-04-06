@@ -64,6 +64,20 @@ module Kerbi
     end
   end
 
+  class ValuesFileNotFoundError < Error
+    def initialize(fname_expr: , root: )
+      msg = "Could not resolve values file '#{fname_expr}' in #{root}"
+      super(msg)
+    end
+  end
+
+  class KerbifileNotFoundError < Error
+    def initialize(root: )
+      msg = "Could not resolve kerbifile in #{root}"
+      super(msg)
+    end
+  end
+
   class EntryValidationError < Error
     MSG = "Cannot write state because of validation errors: "
 

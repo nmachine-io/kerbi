@@ -2,6 +2,8 @@ module Kerbi
   module Consts
 
     module OptionKeys
+      PROJECT_ROOT = "project-root"
+
       OUTPUT_FMT = "output-format"
       INLINE_ASSIGNMENT = "inline-value"
       LOAD_DEFAULT_VALUES = "load-defaults"
@@ -51,6 +53,13 @@ module Kerbi
     end
 
     module OptionSchemas
+
+      PROJECT_ROOT = {
+        key: OptionKeys::PROJECT_ROOT,
+        desc: "Project root. An abs path, a rel path, or remote (/foo, foo, @foo/bar)",
+        aliases: "-p"
+      }
+
       K8S_AUTH_TYPE = {
         key: OptionKeys::K8S_AUTH_TYPE,
         desc: "Strategy for connecting to target cluster (defaults to kube-config)",
@@ -193,6 +202,7 @@ defaults to $(kubectl config current-context)"
         name: "template [KERBIFILE] [RELEASE_NAME]",
         desc: "Runs mixers for RELEASE_NAME",
         options: [
+          OptionSchemas::PROJECT_ROOT,
           OptionSchemas::OUTPUT_FMT,
           *OptionSchemas::VALUES_OPTIONS,
           *OptionSchemas::KUBERNETES_OPTIONS
@@ -203,6 +213,7 @@ defaults to $(kubectl config current-context)"
         name: "console",
         desc: "Opens an IRB console so you can play with your mixers",
         options: [
+          OptionSchemas::PROJECT_ROOT,
           OptionSchemas::VALUE_FNAMES,
           OptionSchemas::INLINE_ASSIGNMENT
         ]
@@ -325,6 +336,7 @@ defaults to $(kubectl config current-context)"
         name: "show",
         desc: "Print out loaded values as YAML",
         options: [
+          OptionSchemas::PROJECT_ROOT,
           OptionSchemas::OUTPUT_FMT,
           *OptionSchemas::VALUES_OPTIONS,
           *OptionSchemas::KUBERNETES_OPTIONS

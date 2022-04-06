@@ -202,15 +202,19 @@ module Kerbi
         subtree.freeze
       end
 
-      def resolve_file_name(fname)
+      ## Resolves a user-given short name for a file to interpolate,
+      # like 'pod', 'pod.yaml', into an absolute file path.
+      # @param [String] fname_expr e.g 'pod', 'pod.yaml'
+      # @return [?String]
+      def resolve_file_name(fname_expr)
         dir = self.pwd
         Kerbi::Utils::Misc.real_files_for(
-          fname,
-          "#{fname}.yaml",
-          "#{fname}.yaml.erb",
-          "#{dir}/#{fname}",
-          "#{dir}/#{fname}.yaml",
-          "#{dir}/#{fname}.yaml.erb"
+          fname_expr,
+          "#{fname_expr}.yaml",
+          "#{fname_expr}.yaml.erb",
+          "#{dir}/#{fname_expr}",
+          "#{dir}/#{fname_expr}.yaml",
+          "#{dir}/#{fname_expr}.yaml.erb"
         ).first
       end
 

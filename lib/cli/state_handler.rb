@@ -1,7 +1,7 @@
 module Kerbi
   module Cli
     class StateHandler < BaseHandler
-      thor_meta Kerbi::Consts::CommandSchemas::INIT_STATE
+      cmd_meta Kerbi::Consts::CommandSchemas::INIT_STATE
       # @param [String] namespace refers to a Kubernetes namespace
       def init(namespace)
         state_backend(namespace).provision_missing_resources(
@@ -11,12 +11,12 @@ module Kerbi
         Kerbi::ConfigFile.patch({ns_key => namespace})
       end
 
-      thor_meta Kerbi::Consts::CommandSchemas::STATE_STATUS
+      cmd_meta Kerbi::Consts::CommandSchemas::STATE_STATUS
       def status
         state_backend.test_connection(verbose: run_opts.verbose?)
       end
 
-      thor_meta Kerbi::Consts::CommandSchemas::LIST_STATE
+      cmd_meta Kerbi::Consts::CommandSchemas::LIST_STATE
       def list
         prep_opts(Kerbi::Consts::OptionDefaults::LIST_STATE)
         echo_data(
@@ -26,7 +26,7 @@ module Kerbi
         )
       end
 
-      thor_meta Kerbi::Consts::CommandSchemas::SHOW_STATE
+      cmd_meta Kerbi::Consts::CommandSchemas::SHOW_STATE
       # @param [String] tag_expr e.g 1.9.1, @latest
       def show(tag_expr)
         prep_opts(Kerbi::Consts::OptionDefaults::LIST_STATE)
@@ -38,7 +38,7 @@ module Kerbi
         )
       end
 
-      thor_meta Kerbi::Consts::CommandSchemas::RETAG_STATE
+      cmd_meta Kerbi::Consts::CommandSchemas::RETAG_STATE
       # @param [String] old_tag_expr e.g 1.9.1, @latest
       # @param [String] new_tag_expr e.g 1.9.1, @latest
       def retag(old_tag_expr, new_tag_expr)
@@ -47,7 +47,7 @@ module Kerbi
         touch_and_save_entry(entry, tag: old_tag)
       end
 
-      thor_meta Kerbi::Consts::CommandSchemas::PROMOTE_STATE
+      cmd_meta Kerbi::Consts::CommandSchemas::PROMOTE_STATE
       # @param [String] tag_expr e.g 1.9.1, @latest
       def promote(tag_expr)
         entry = find_readable_entry(tag_expr)
@@ -55,7 +55,7 @@ module Kerbi
         touch_and_save_entry(entry, tag: old_name)
       end
 
-      thor_meta Kerbi::Consts::CommandSchemas::DEMOTE_STATE
+      cmd_meta Kerbi::Consts::CommandSchemas::DEMOTE_STATE
       # @param [String] tag_expr e.g 1.9.1, @latest
       def demote(tag_expr)
         entry = find_readable_entry(tag_expr)
@@ -63,7 +63,7 @@ module Kerbi
         touch_and_save_entry(entry, tag: old_name)
       end
 
-      thor_meta Kerbi::Consts::CommandSchemas::SET_STATE_ATTR
+      cmd_meta Kerbi::Consts::CommandSchemas::SET_STATE_ATTR
       # @param [String] tag_expr e.g 1.9.1, @latest
       # @param [String] attr_name e.g message
       # @param [String] new_value e.g i am a new message
@@ -73,7 +73,7 @@ module Kerbi
         touch_and_save_entry(entry, attr_name => old_value)
       end
 
-      thor_meta Kerbi::Consts::CommandSchemas::DELETE_STATE
+      cmd_meta Kerbi::Consts::CommandSchemas::DELETE_STATE
       # @param [String] tag_expr e.g 1.9.1, @latest
       def delete(tag_expr)
         entry = find_readable_entry(tag_expr)
@@ -82,7 +82,7 @@ module Kerbi
         puts "Deleted state[#{entry.tag}]. Remaining entries: #{new_count}"
       end
 
-      thor_meta Kerbi::Consts::CommandSchemas::PRUNE_CANDIDATES_STATE
+      cmd_meta Kerbi::Consts::CommandSchemas::PRUNE_CANDIDATES_STATE
       def prune_candidates
         old_count = entry_set.entries.count
         entry_set.prune_candidates

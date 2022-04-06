@@ -41,7 +41,6 @@ require_relative './mixins/cli_state_helpers'
 
 require_relative './utils/mixing'
 require_relative './utils/helm'
-require_relative './utils/kubectl'
 require_relative './utils/cli'
 require_relative './utils/values'
 require_relative './main/code_gen'

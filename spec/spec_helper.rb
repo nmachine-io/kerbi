@@ -29,14 +29,17 @@ def new_state_set(bundles)
   Kerbi::State::EntrySet.new(dicts)
 end
 
-def cli(command, escaped=false)
-  original_stdout = $stdout
+def cli(command, escaped: false)
   $stdout = StringIO.new
-  command = command.split(" ") if command.is_a?(String)
-  Kerbi::Cli::RootHandler.start(command)
-  output = $stdout.string
-  $stdout = original_stdout
-  escaped ?  output.gsub("\e", "\\e") : output
+  begin
+    command = command.split(" ") if command.is_a?(String)
+    Kerbi::Cli::RootHandler.start(command)
+    output = $stdout.string
+    $stdout = STDOUT
+    escaped ? output.gsub("\e", "\\e") : output
+  ensure
+    $stdout = STDOUT
+  end
 end
 
 def load_expectation_file(dir, file, ext)
@@ -45,19 +48,23 @@ def load_expectation_file(dir, file, ext)
 end
 
 def expect_cli_eq_file(cmd, dir, file, ext='txt')
-  result = cli(cmd)
-  expected = load_expectation_file(dir, file, ext)
+  actual_str = cli(cmd)
+  expected_str = load_expectation_file(dir, file, ext)
 
   if ext == 'json'
-    expect(JSON.parse(result)).to eq(JSON.parse(expected))
+    expect(JSON.parse(actual_str)).to eq(JSON.parse(expected_str))
   elsif ext == 'yaml'
-    expect(YAML.load_stream(result)).to eq(YAML.load_stream(expected))
+    actual = YAML.load_stream(actual_str)
+    expected = YAML.load_stream(expected_str)
+    expect(actual).to eq(expected)
   else
-    neutered_result = result.gsub(/\s+/, "").gsub("\e", "\\e")
-    neutered_expected = expected.gsub(/\s+/, "")
-    expect(neutered_result).to eq(neutered_expected)
+    actual = actual_str.gsub(/\s+/, "").gsub("\e", "\\e")
+    expected = expected_str.gsub(/\s+/, "")
+    expect(actual).to eq(expected)
   end
 end
+
+
 
 def cmd_group_spec(cmd, dir, file, opts={})
   (opts[:formats] || %w[yaml json table]).each do |format|

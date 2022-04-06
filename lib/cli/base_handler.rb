@@ -62,7 +62,11 @@ module Kerbi
           raise "Unknown output format '#{run_opts.output_format}'"
         end
 
-        puts printable_str
+        echo(printable_str)
+      end
+
+      def echo(printable_str)
+        $stdout.puts printable_str
       end
 
       ##
@@ -79,7 +83,11 @@ module Kerbi
             fname_exprs = run_opts.fname_exprs
             fname_exprs = ["values", *fname_exprs] if run_opts.load_defaults?
 
-            file_values = utils.from_files(fname_exprs)
+            file_values = utils.from_files(
+              fname_exprs,
+              root: run_opts.project_root
+            )
+
             inline_values = utils.from_inlines(run_opts.inline_val_exprs)
             state_values = read_state_values
 
@@ -96,7 +104,7 @@ module Kerbi
       def compile_default_values
         utils = Kerbi::Utils::Values
         if run_opts.load_defaults?
-          utils.from_files(['values'])
+          utils.from_files(['values'], root: run_opts.project_root)
         else
           {}
         end
@@ -128,7 +136,7 @@ module Kerbi
       # Kerbi::Consts::OptionSchemas.
       # @param [Hash] _schema a dict from Kerbi::Consts::OptionSchemas
       # @param [Class<Thor>] handler_cls the handler
-      def self.thor_sub_meta(_schema, handler_cls)
+      def self.sub_cmd_meta(_schema, handler_cls)
         schema = _schema.deep_dup
         desc(schema[:name], schema[:desc])
         subcommand schema[:name], handler_cls
@@ -148,7 +156,7 @@ module Kerbi
       # metadata bundle, in accordance with the schema in
       # Kerbi::Consts::OptionSchemas.
       # @param [Hash] _schema a dict from Kerbi::Consts::OptionSchemas
-      def self.thor_meta(_schema)
+      def self.cmd_meta(_schema)
         schema = _schema.deep_dup
         desc(schema[:name], schema[:desc])
         # set_default_options_for_next(schema[:defaults])

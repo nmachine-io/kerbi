@@ -96,13 +96,13 @@ module Kerbi
       ##
       # Searches the expected paths for the kerbifile and ruby-loads it.
       # @param [String] root directory to search
-      def self.load_kerbifile(fname_expr)
-        fname_expr ||= Dir.pwd
-        abs_path = "#{fname_expr}/kerbifile.rb"
-        if File.exists?(abs_path)
-          #noinspection RubyResolve
-          load(abs_path)
-        end
+      def self.load_kerbifile(root_dir)
+        root_dir ||= Dir.pwd
+        abs_path = "#{root_dir}/kerbifile.rb"
+        exists = File.exists?(abs_path)
+        raise Kerbi::KerbifileNotFoundError.new(root: root_dir) unless exists
+        #noinspection RubyResolve
+        load(abs_path)
       end
 
       LIST_TABLE_STYLE = {

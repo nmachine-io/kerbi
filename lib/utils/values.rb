@@ -21,12 +21,20 @@ module Kerbi
       def self.resolve_fname_exprs(fname_exprs, **opts)
         final_exprs = fname_exprs.uniq
         final_exprs.map do |fname_expr|
-          path = resolve_fname_expr(fname_expr, **opts)
-          if fname_expr != 'values' && !path
-            raise "Could not resolve file '#{fname_expr}'"
-          end
+          candidate_paths = values_paths(fname_expr, **opts)
+          path = Kerbi::Utils::Misc.real_files_for(*candidate_paths)[0]
+          raise_if_file_not_found(fname_expr, path, **opts)
           path.presence
         end.compact.uniq
+      end
+
+      def self.raise_if_file_not_found(fname_expr, path, **opts)
+        if fname_expr != 'values' && !path
+          raise Kerbi::ValuesFileNotFoundError.new(
+            fname_expr: fname_expr,
+            root: opts[:root]
+          )
+        end
       end
 
       ##
@@ -49,21 +57,6 @@ module Kerbi
         inline_exprs.inject({}) do |whole, str_assignment|
           assignment = self.parse_inline_assignment(str_assignment)
           whole.deep_merge(assignment)
-        end
-      end
-
-      ##
-      # Turns a user supplied values filename into a final, usable
-      # absolute filesystem path. This method calls the values_paths method,
-      # which assumes a kerbi directory structure.
-      # @param [String] expr
-      # @param [Hash] opts
-      # @return [?String] the absolute filename or nil if it does not exist
-      def self.resolve_fname_expr(expr, **opts)
-        candidate_paths = self.values_paths(expr, **opts)
-        candidate_paths.find do |candidate_path|
-          File.exists?(candidate_path) && \
-          !File.directory?(candidate_path)
         end
       end
 

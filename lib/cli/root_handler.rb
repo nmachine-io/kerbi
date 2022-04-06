@@ -17,8 +17,13 @@ module Kerbi
     # Top level CLI command handler with Thor.
     class RootHandler < BaseHandler
 
+      ##
+      # Two things happen here:
+      # 1. Kerbi::Globals.reset is necessary for testing, because memory
+      # is not flushed.
       def self.start(*args, **kwargs)
         begin
+          Kerbi::Globals.reset
           super
         rescue Kerbi::Error => e
           #noinspection RubyResolve
@@ -26,13 +31,10 @@ module Kerbi
         end
       end
 
-      cmd_schemas = Kerbi::Consts::CommandSchemas
-
-      thor_meta cmd_schemas::TEMPLATE
+      cmd_meta Kerbi::Consts::CommandSchemas::TEMPLATE
       # @param [String] release_name helm-like Kubernetes release name
-      # @param [String] path root dir from which to search for kerbifile.rb
-      def template(release_name, path)
-        utils::Cli.load_kerbifile(path)
+      def template(release_name)
+        utils::Cli.load_kerbifile(run_opts.project_root)
         values = compile_values
         persist_compiled_values
         mixer_classes = Kerbi::Globals.mixers
@@ -40,25 +42,25 @@ module Kerbi
         echo_data(res_dicts, coerce_type: "Array")
       end
 
-      thor_meta cmd_schemas::CONSOLE
+      cmd_meta Kerbi::Consts::CommandSchemas::CONSOLE
       def console
-        utils::Cli.load_kerbifile(".")
-        values = self.compile_values
+        utils::Cli.load_kerbifile(run_opts.project_root)
+        values = compile_values
         ARGV.clear
         IRB.setup(eval("__FILE__"), argv: [])
         workspace = IRB::WorkSpace.new(Console.new(values))
         IRB::Irb.new(workspace).run(IRB.conf)
       end
 
-      thor_meta cmd_schemas::SHOW_VERSION
+      cmd_meta Kerbi::Consts::CommandSchemas::SHOW_VERSION
       def version
         puts "1"
       end
 
-      thor_sub_meta cmd_schemas::VALUES_SUPER, ValuesHandler
-      thor_sub_meta cmd_schemas::PROJECT_SUPER, ProjectHandler
-      thor_sub_meta cmd_schemas::STATE_SUPER, StateHandler
-      thor_sub_meta cmd_schemas::CONFIG_SUPER, ConfigHandler
+      sub_cmd_meta Kerbi::Consts::CommandSchemas::VALUES_SUPER, ValuesHandler
+      sub_cmd_meta Kerbi::Consts::CommandSchemas::PROJECT_SUPER, ProjectHandler
+      sub_cmd_meta Kerbi::Consts::CommandSchemas::STATE_SUPER, StateHandler
+      sub_cmd_meta Kerbi::Consts::CommandSchemas::CONFIG_SUPER, ConfigHandler
     end
   end
 end

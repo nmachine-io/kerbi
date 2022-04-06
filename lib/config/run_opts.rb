@@ -133,6 +133,11 @@ module Kerbi
       options[consts::WRITE_STATE_MESSAGE]
     end
 
+    # @return [String]
+    def project_root
+      options[consts::PROJECT_ROOT].presence
+    end
+
     private
 
     # @return [Module<Kerbi::Consts::OptionKeys>]

@@ -26,7 +26,6 @@ RSpec.describe Kerbi::Utils::Misc do
         {a: "a"},
         {a: "b"}
       )
-      puts result
     end
   end
 end

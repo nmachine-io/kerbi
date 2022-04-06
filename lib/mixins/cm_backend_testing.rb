@@ -20,8 +20,7 @@ module Kerbi
       end
 
       def read_write_ready?
-        namespace_exists?
-        resource_exists?
+        namespace_exists? && resource_exists?
       end
 
       def test_connection(options={})
@@ -83,11 +82,13 @@ module Kerbi
         puts "#{msg}: #{outcome_str}".bold
       end
 
-      def puts_init(msg, result, options={})
-        outcome_str = result.present? ? "Already existed" : "Created"
-        color = result.present? ? :green : :blue
-        outcome_str = outcome_str.colorize(color)
-        puts "#{msg}: #{outcome_str}".bold
+      def echo_init(msg, result, options={})
+        unless options[:quiet].present?
+          outcome_str = result.present? ? "Already existed" : "Created"
+          color = result.present? ? :green : :blue
+          outcome_str = outcome_str.colorize(color)
+          puts "#{msg}: #{outcome_str}".bold
+        end
       end
     end
   end

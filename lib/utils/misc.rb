@@ -16,7 +16,7 @@ module Kerbi
       # @return [Array] subset of candidate filenames that are real filenames
       def self.real_files_for(*candidates)
         candidates.select do |fname|
-          File.exists?(fname)
+          File.exists?(fname) && !Dir.exists?(fname)
         end
       end
 

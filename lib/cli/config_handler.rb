@@ -2,23 +2,23 @@ module Kerbi
   module Cli
     class ConfigHandler < BaseHandler
 
-      thor_meta Kerbi::Consts::CommandSchemas::CONFIG_LOCATION
+      cmd_meta Kerbi::Consts::CommandSchemas::CONFIG_LOCATION
       def location
-        puts Kerbi::ConfigFile.file_path
+        echo Kerbi::ConfigFile.file_path
       end
 
-      thor_meta Kerbi::Consts::CommandSchemas::CONFIG_SET
+      cmd_meta Kerbi::Consts::CommandSchemas::CONFIG_SET
       def set(key, value)
         raise_if_bad_write(key)
         Kerbi::ConfigFile.patch(key => value)
       end
 
-      thor_meta Kerbi::Consts::CommandSchemas::CONFIG_GET
+      cmd_meta Kerbi::Consts::CommandSchemas::CONFIG_GET
       def get(key)
-        puts run_opts.options[key]
+        echo run_opts.options[key]
       end
 
-      thor_meta Kerbi::Consts::CommandSchemas::CONFIG_SHOW
+      cmd_meta Kerbi::Consts::CommandSchemas::CONFIG_SHOW
       def show
         echo_data(run_opts.options)
       end

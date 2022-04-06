@@ -1,7 +1,7 @@
 module Kerbi
   module Cli
     class ValuesHandler < BaseHandler
-      thor_meta Kerbi::Consts::CommandSchemas::SHOW_VALUES
+      cmd_meta Kerbi::Consts::CommandSchemas::SHOW_VALUES
       def show
         values = self.compile_values
         persist_compiled_values
