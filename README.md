@@ -5,24 +5,27 @@
 [![Gem Version](https://badge.fury.io/rb/kerbi.svg)](https://badge.fury.io/rb/kerbi)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## What is Kerbi?
+# What is Kerbi?
 
 **Kerbi is a templating engine** for generating Kubernetes manifests. 
 On the outside, it operates very similarly to [Helm](https://helm.sh/), turning 
 variables + templates into Kubernetes-bound YAML, and even has similar command line API.
 
-**Versus Helm**, it is designed to have 1) a better developer experience, 2) more power, 3) more flexibility. 
-It is also a pure templating engine - it does not "package" things, or talk to Kubernetes for you, it just turns X into YAML.
+**Versus Helm**, on the templating front, it is designed to have 1) a better developer 
+experience, 2) more power, 3) more flexibility. On the Kubernetes front, it is far more
+decoupled.
 
 **The name Kerbi** is an acronym for Kubernetes [ERB](https://www.stuartellis.name/articles/erb/) Interpolator. 
 And just like the [pink Kirby](https://en.wikipedia.org/wiki/Kirby_(character)), 
 it sucks up just about anything, and spits out something useful.
 
+<!--
 ![](https://storage.googleapis.com/kerbi/images/kerbi-intro.png)
+-->
 
 **[Documentation Site.](https://xavier-9.gitbook.io/untitled/walkthroughs/getting-started)**
 
-## Getting Started
+# Getting Started
 
 Install the `kerbi` RubyGem globally: 
 
@@ -34,10 +37,6 @@ Now use the new `kerbi` executable to initialize a project and install the depen
 
 ```bash
 $ kerbi project new hello-kerbi
-Created project at /home/<my-workspace>/hello-kerbi
-Created file hello-kerbi/Gemfile
-#...
-
 $ cd hello-kerbi
 $ bundle install
 ```
@@ -51,9 +50,22 @@ message: default message
 
 **[See the complete walkthroughs and more.](https://xavier-9.gitbook.io/untitled/walkthroughs/getting-started)**
 
-## The Developer Experience
+# The Developer Experience
 
-Kerbi lets you write programmatic mixers in Ruby to orchestrate complex (or silly) templating logic:    
+As a user, the main difference between Helm and Kerbi projects is this:
+
+**🚦 Kerbi requires an Explicit Control Flow**. Where Helm uses a directory structure convention
+to figure out what to do with your files, Kerbi makes you write **Mixers** in plain Ruby, 
+where you explictly say "template this file here and that chart there".
+
+**📁 Kerbi accepts various types of files**. Because Kerbi has your write actual programs,
+you can easily use or build new **extractor methods** like `file()` to load, interpolate, and normailze
+anything into `dicts` (e.g `Array<Hash>`), which are Kerbi thinks in.
+
+## Mixers
+
+Mixers don't exist in Helm. They may seem like an extra step, but when your logic starts to grows,
+mixers are an excellent way to stay DRY, readable, and organized.
 
 **`backend/mixer.rb`**
 ```ruby
@@ -78,6 +90,8 @@ class Hooli::Backend::Mixer < Kerbi::Mixer
 end
 ```
 
+## Templating
+
 Most of the actual templating happens in `.yaml.erb` files, which the mixer above loads:
 
 **`deployment.yaml.erb`**
@@ -85,29 +99,95 @@ Most of the actual templating happens in `.yaml.erb` files, which the mixer abov
 apiVersion: appsV1
 kind: Deployment
 metadata:
-  name: backend
+  name: <% Hooli::Backend::Consts::NAME %>
   namespace: <%= release_name %>
-  labels: <%= embed(common_labels, indent: 3) %>
+  labels: <%= embed(common_labels) %>
 spec: 
   replicas: <%= values[:deployment][:replicas] %>
+  template:
+    spec:
+      containers: <%= embed_array(
+                        file('containers') + 
+                        mixer(Hooli::Traefik::ContainerMixer))
+                   ) %>
 ```
 
-And like with Helm, you pass values with a default `values.yaml` plus any custom files:
+## Values
+
+Like with Helm, values for your templating logic come from YAML files, namely your default
+`values.yaml`, inline assignments in the command like `--set backend.ingress.enabled=false`, 
+plus any custom files you load via CLI, e.g `-f production.yaml`:
 
 **`values/production.yaml`**
 ```yaml
-deployment:
-  replicas: 10
+backend:
+  deployment:
+    replicas: 10
 ```
 
-You then generate your final Kubernetes-bound YAML like this:
+## CLI
+
+Intuitive and familiar command structure:
 
 ```bash
-$ kerbi template my-namespace . -f production.yaml
+$ kerbi template my-namespace . -f production.yaml -o json
+$ kerbi values show
+$ kerbi state commit --namespace=default
+$ kerbi state show --storage=configmap
 ```
+
+## State Management
+
+Kerbi will never do "cluster stuff" as a side effect without your explict
+instruction to do so.
+
+### Setup Kerbi State Management
+```bash
+$ kerbi config use-namespace see-food
+$ kerbi state test-connection
+$ kerbi state init
+$ kerbi state test-connection
+```
+
+### Template and Save a Candidate State
+```bash
+$ kerbi template see-food . \
+        --set backend.image=our-image.1.0.1 \
+        --read-state @latest \
+        --write-state @candidate \       
+        >> manifest.yaml
+```
+
+### Inspect the State
+```
+$ kerbi state list
+
+$ kerbi values show --read-state @candidate
+
+$ kerbi values show --read-state @latest
+```
+
+### Kubectl Apply and Commit the State
+
+```
+$ kubectl apply -f manifest.yaml
+
+# Everything worked, so we can commit this state for real
+
+$ kerbi state retag @candidate @random --message "minor tweaks to backend"
+```
+
+
+```bash
+$ kerbi state list
+$ kerbi values show latest
+```
+
  
-Kerbi can also be run in interactive mode (via IRB), making it easy to play
-with your code:
+## Interactive Console
+ 
+Kerbi can also be run in interactive mode (via IRB), making it super easy to play
+with your code and debug things:
 
 ```ruby
 $ kerbi console --set backend.database.enabled=true
@@ -123,10 +203,10 @@ irb(kerbi):003:0> Hooli::Backend::Mixer.new(values).run
 ```
 
 
-## Why Kerbi over Helm?
+## Why use Kerbi over Helm?
 
-The thesis with Kerbi is this: reality is messy, and our templating needs often break structural 
-molds (like Helm's), so let's make an engine with less structure and more power, 
+The thesis with Kerbi is this: reality is messy, and our templating needs often break clean 
+structural molds like Helm's, so let's make an engine with less structure and more power, 
 so that you can model it to your needs.
 
 **🔀 More ways to template and manipulate data**. 
@@ -142,24 +222,38 @@ You can also add functionality in any way you want, being constrained only by Ru
 **💎 Ruby at its best**. 
 Ruby is not longer a top tier language for web apps 😞. 
 But when it comes to narrow programs that involve DSLs and config mgmt, Ruby remains second to none. 
-The developer experience in Ruby is way better to what you get for these kinds of programs with Go in Helm.
+While Helm can feel a bit mysterious, Kerbi feel familiar to anyone familiar with programming and libraries in general.
 
+## Why use Helm over Kerbi?
 
-## Running the Examples
+With great Turing-completeness comes the potential for great stupidity. If you love over-engineering, 
+re-inventing wheels, obsessing over DRYness, or library-creeping, then you are at risk of abusing
+Kerbi and plunging your team into tyranny. Kerbi responsibly.
+
+# State of the project
+
+## Maturity
+
+Kerbi is **not** mature. I use it for my personal Kubernetes projects, but it has not yet been
+disciplined by the community. At this point, the goal is to get eyes and hands on.
+
+## Getting Involved
+
+If you're interesting in getting involved, thank you ❤️. 
+
+[CONTRIBUTING.md](https://github.com/nmachine-io/kerbi/blob/master/CONTRIBUTING.md)
+
+Email: xavier@nmachine.io
+
+Discord: https://discord.gg/ntAs6TaD
+
+# Running the Examples
 
 Have a look at the [examples](https://github.com/nmachine-io/kerbi/tree/master/examples) directory. 
 If you want to go a step further and run them from source, clone the project, `cd` into the example you 
-want, and run 
-```bash
-$ ./run [CLI COMMAND AND OPTIONS] 
-```
-This will use the local code instead of your global `kerbi` executable. For example:
+want. For instance:
 
 ```bash
-$ cd examples/hello-yaml
-$ ./run template default .
+$ cd examples/hello-kerbi
+$ kerbi template default .
 ```
-
-## Contributing
-
-See [CONTRIBUTING.md](https://github.com/nmachine-io/kerbi/blob/master/CONTRIBUTING.md)
