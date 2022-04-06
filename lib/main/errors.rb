@@ -38,9 +38,8 @@ module Kerbi
   end
 
   class StateNotFoundError < Error
-    MSG = "State given by tag not found"
-    def initialize(msg = MSG)
-      super
+    def initialize(tag='')
+      super("State given by tag #{tag} not found")
     end
   end
 

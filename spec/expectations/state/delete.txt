@@ -1,0 +1,1 @@
+Deleted state[two]. Remaining entries: 3

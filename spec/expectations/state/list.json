@@ -1,6 +1,6 @@
 [
   {
-    "tag": "[cand]-two",
+    "tag": "[cand]-four",
     "message": null,
     "created_at": "2003-01-01 00:00:00 +0000",
     "values": {
@@ -12,7 +12,7 @@
     ]
   },
   {
-    "tag": "[cand]-one",
+    "tag": "[cand]-three",
     "message": null,
     "created_at": "2002-01-01 00:00:00 +0000",
     "values": {

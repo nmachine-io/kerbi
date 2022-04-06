@@ -13,15 +13,18 @@ module Kerbi
       CANDIDATE_WORD = "candidate"
       NEW_CANDIDATE_WORD = "new-candidate"
       LATEST_WORD = "latest"
+      OLDEST_WORD = "oldest"
       RANDOM_WORD = "random"
 
       SPECIAL_READ_WORDS = [
         CANDIDATE_WORD,
-        LATEST_WORD
+        LATEST_WORD,
+        OLDEST_WORD
       ]
 
       SPECIAL_WRITE_WORDS = [
         LATEST_WORD,
+        OLDEST_WORD,
         CANDIDATE_WORD,
         NEW_CANDIDATE_WORD,
         RANDOM_WORD
@@ -139,6 +142,15 @@ module Kerbi
       # @return [String]
       def resolve_latest_word
         latest&.tag || ""
+      end
+
+      ##
+      # Single word resolver. Looks for the latest committed state entry
+      # and returns its tag or an empty string if there is no
+      # latest committed state.
+      # @return [String]
+      def resolve_oldest_word
+        oldest&.tag || ""
       end
 
       ##

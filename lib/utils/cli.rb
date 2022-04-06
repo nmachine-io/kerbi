@@ -42,6 +42,7 @@ module Kerbi
             raw.gsub("---\n", i.zero? ? '' : "---\n\n")
           end.join("\n")
         else
+          return "{}" if dicts.empty?
           as_yaml = YAML.dump(dicts.deep_stringify_keys)
           as_yaml.gsub("---\n", "")
         end

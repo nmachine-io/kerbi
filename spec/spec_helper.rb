@@ -29,24 +29,24 @@ def new_state_set(bundles)
   Kerbi::State::EntrySet.new(dicts)
 end
 
-def cli(command)
+def cli(command, escaped=false)
   original_stdout = $stdout
   $stdout = StringIO.new
   command = command.split(" ") if command.is_a?(String)
   Kerbi::Cli::RootHandler.start(command)
   output = $stdout.string
   $stdout = original_stdout
-  output
+  escaped ?  output.gsub("\e", "\\e") : output
 end
 
-def file_exp(dir, file, ext)
+def load_expectation_file(dir, file, ext)
   path = "#{__dir__}/expectations/#{dir}/#{file}.#{ext}"
   File.read(path)
 end
 
-def expect_cli_eq_file(cmd, dir, file, ext)
+def expect_cli_eq_file(cmd, dir, file, ext='txt')
   result = cli(cmd)
-  expected = file_exp(dir, file, ext)
+  expected = load_expectation_file(dir, file, ext)
 
   if ext == 'json'
     expect(JSON.parse(result)).to eq(JSON.parse(expected))
@@ -56,6 +56,18 @@ def expect_cli_eq_file(cmd, dir, file, ext)
     neutered_result = result.gsub(/\s+/, "").gsub("\e", "\\e")
     neutered_expected = expected.gsub(/\s+/, "")
     expect(neutered_result).to eq(neutered_expected)
+  end
+end
+
+def cmd_group_spec(cmd, dir, file, opts={})
+  (opts[:formats] || %w[yaml json table]).each do |format|
+    context "with --output-format #{format} #{opts[:context_append]}" do
+      it "echos the expected text" do
+        extension = format == 'table' ? "txt" :  format
+        cmd_with_fmt = "#{cmd} -o #{format}"
+        expect_cli_eq_file(cmd_with_fmt, dir, file, extension)
+      end
+    end
   end
 end
 
@@ -87,7 +99,6 @@ module Kerbi
       system "rm -rf #{TEST_YAMLS_DIR}"
       system "mkdir #{TEST_YAMLS_DIR}"
     end
-
   end
 end
 

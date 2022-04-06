@@ -52,6 +52,14 @@ module Kerbi
       end
 
       ##
+      # Finds the least recently created/updated entry in the list
+      # that is not a candidate.
+      # @return [?Kerbi::State::Entry]
+      def oldest
+        committed.last
+      end
+
+      ##
       # Finds the most recently created/updated entry in the list
       # that is a candidate.
       # @return [?Kerbi::State::Entry]
@@ -73,7 +81,7 @@ module Kerbi
       def find_entry_for_read(tag_expr)
         resolved_tag = resolve_read_tag_expr(tag_expr)
         entry = find_by_literal_tag(resolved_tag)
-        raise Kerbi::StateNotFoundError unless entry
+        raise Kerbi::StateNotFoundError.new(tag_expr) unless entry
         entry
       end
 
