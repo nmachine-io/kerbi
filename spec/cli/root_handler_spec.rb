@@ -20,7 +20,7 @@ RSpec.describe "$ kerbi [COMMAND]" do
         context "with #{bundle[0].presence || "no args"}" do
           it "echos the expected text" do
             cmd = hello_kerbi("template foo #{bundle[0]}")
-            expect_cli_eq_file(cmd, "root", bundle[1], "yaml")
+            exp_cli_eq_file(cmd, "root", bundle[1], "yaml")
           end
         end
       end
@@ -50,7 +50,7 @@ RSpec.describe "$ kerbi [COMMAND]" do
       context "with writing" do
         before :each do
           cmd = template_write_cmd("centos")
-          expect_cli_eq_file(cmd, "root", "template-write", "yaml")
+          exp_cli_eq_file(cmd, "root", "template-write", "yaml")
         end
 
         context "--write-state when the entry does not yet exist" do
@@ -82,7 +82,7 @@ RSpec.describe "$ kerbi [COMMAND]" do
         context "without inline overrides" do
           it "echos the expected text" do
             cmd = hello_kerbi("template foo --read-state foo", namespace)
-            expect_cli_eq_file(cmd, "root", "template-read", "yaml")
+            exp_cli_eq_file(cmd, "root", "template-read", "yaml")
           end
         end
 
@@ -90,7 +90,7 @@ RSpec.describe "$ kerbi [COMMAND]" do
           it "echos the expected text, preferring the inline over the state" do
             base = "template foo --read-state foo --set pod.image=busybox"
             cmd = hello_kerbi(base, namespace)
-            expect_cli_eq_file(cmd, "root", "template-read-inlines", "yaml")
+            exp_cli_eq_file(cmd, "root", "template-read-inlines", "yaml")
           end
         end
       end

@@ -365,6 +365,12 @@ defaults to $(kubectl config current-context)"
           OptionSchemas::OUTPUT_FMT
         ]
       }.freeze
+
+      CONFIG_RESET = {
+        name: "reset",
+        desc: "Resets the config file to its default state",
+        options: []
+      }.freeze
     end
   end
 end

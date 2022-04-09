@@ -1,0 +1,1 @@
+\e[0;32;49mUpdated config[namespace] from  => kerbi-spec\e[0m

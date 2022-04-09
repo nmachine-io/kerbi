@@ -48,6 +48,11 @@ module Kerbi
       write(new_config)
     end
 
+    def self.reset
+      create_file_if_missing
+      write({})
+    end
+
     def self.legal_keys
       Kerbi::Consts::OptionKeys::LEGAL_CONFIG_FILE_KEYS
     end

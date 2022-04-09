@@ -27,14 +27,14 @@ RSpec.describe "$ kerbi state [COMMAND]" do
     let(:cmd) { "state init kerbi-spec" }
     context "when resources already existed" do
       it "echoes the correct text" do
-        expect_cli_eq_file(cmd, exps_dir, "init-already-existed")
+        exp_cli_eq_file(cmd, exps_dir, "init-already-existed")
       end
     end
 
     context "when the resources did not exist" do
       it "echoes the correct text" do
         kmd("delete ns #{namespace}")
-        expect_cli_eq_file(cmd, exps_dir, "init-both-created")
+        exp_cli_eq_file(cmd, exps_dir, "init-both-created")
       end
     end
   end
@@ -43,14 +43,14 @@ RSpec.describe "$ kerbi state [COMMAND]" do
     let(:cmd) { "state status -n #{namespace}" }
     context "when everything is ready" do
       it "echoes the correct text" do
-        expect_cli_eq_file(cmd, exps_dir, "status-all-working")
+        exp_cli_eq_file(cmd, exps_dir, "status-all-working")
       end
     end
 
     context "when connected but resources not provisioned" do
       it "echoes the correct text" do
         kmd("delete ns #{namespace}")
-        expect_cli_eq_file(cmd, exps_dir, "status-not-provisioned")
+        exp_cli_eq_file(cmd, exps_dir, "status-not-provisioned")
       end
     end
   end
@@ -82,20 +82,20 @@ RSpec.describe "$ kerbi state [COMMAND]" do
     context "when the old tag exists" do
       context "using a literal tag" do
         it "echos the expected text" do
-          expect_cli_eq_file(make_cmd("two"), exps_dir, "retag")
+          exp_cli_eq_file(make_cmd("two"), exps_dir, "retag")
         end
       end
 
       context "using @latest or @oldest" do
         it "echos the expected text" do
-          expect_cli_eq_file(make_cmd("@latest"), exps_dir, "retag")
+          exp_cli_eq_file(make_cmd("@latest"), exps_dir, "retag")
         end
       end
     end
 
     context "when the old tag does not exist" do
       it "echos the expected text" do
-        expect_cli_eq_file(make_cmd("bad-tag"), "common", "bad-tag")
+        exp_cli_eq_file(make_cmd("bad-tag"), "common", "bad-tag")
       end
     end
   end
@@ -103,14 +103,14 @@ RSpec.describe "$ kerbi state [COMMAND]" do
   describe "$ kerbi state promote" do
     let(:cmd) { "state promote @candidate -n #{namespace}" }
     it "echos the expected text" do
-      expect_cli_eq_file(cmd, exps_dir, "promote")
+      exp_cli_eq_file(cmd, exps_dir, "promote")
     end
   end
 
   describe "$ kerbi state demote" do
     let(:cmd) { "state demote @latest -n #{namespace}" }
     it "echos the expected text" do
-      expect_cli_eq_file(cmd, exps_dir, "demote")
+      exp_cli_eq_file(cmd, exps_dir, "demote")
     end
   end
 
@@ -118,21 +118,21 @@ RSpec.describe "$ kerbi state [COMMAND]" do
     let(:easy_part) { "state set @latest message" }
     let(:cmd) { easy_part.split(" ") + ["new message", "-n", namespace] }
     it "echos the expected text" do
-      expect_cli_eq_file(cmd, exps_dir, "set")
+      exp_cli_eq_file(cmd, exps_dir, "set")
     end
   end
 
   describe "$ kerbi state delete" do
     let(:cmd) { "state delete @latest -n #{namespace}" }
     it "echos the expected text" do
-      expect_cli_eq_file(cmd, exps_dir, "delete")
+      exp_cli_eq_file(cmd, exps_dir, "delete")
     end
   end
 
   describe "$ kerbi state prune-candidates" do
     let(:cmd) { "state prune-candidates -n #{namespace}" }
     it "echos the expected text" do
-      expect_cli_eq_file(cmd, exps_dir, "prune-candidates")
+      exp_cli_eq_file(cmd, exps_dir, "prune-candidates")
     end
   end
 

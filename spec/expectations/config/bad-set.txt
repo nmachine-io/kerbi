@@ -1,0 +1,1 @@
+\e[1;31;49mIllegal config assignment. 'bad-key' not in ["state-backend", "namespace", "auth-type", "kube-config-context", "username", "password", "token"]\e[0m

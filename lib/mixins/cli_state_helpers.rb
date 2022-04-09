@@ -41,7 +41,7 @@ module Kerbi
           new_value = entry.send(key) rescue "ERR"
           name = "state[#{entry.tag}].#{key}"
           change_str = "from #{old_value} => #{new_value}"
-          puts "Updated #{name} #{change_str}".colorize(:green)
+          echo "Updated #{name} #{change_str}".colorize(:green)
         end
       end
 

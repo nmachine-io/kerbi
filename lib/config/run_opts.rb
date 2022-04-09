@@ -3,6 +3,7 @@ module Kerbi
   ##
   # Convenience accessor struct for getting values from
   # the CLI args.
+  #noinspection RubyTooManyMethodsInspection
   class RunOpts
 
     attr_reader :options

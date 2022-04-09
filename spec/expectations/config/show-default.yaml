@@ -1,0 +1,6 @@
+load-defaults: true
+inline-value: []
+values-file: []
+output-format: yaml
+state-backend: configmap
+auth-type: kube-config

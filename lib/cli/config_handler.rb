@@ -8,9 +8,14 @@ module Kerbi
       end
 
       cmd_meta Kerbi::Consts::CommandSchemas::CONFIG_SET
-      def set(key, value)
+      def set(key, new_value)
         raise_if_bad_write(key)
-        Kerbi::ConfigFile.patch(key => value)
+        old_value = run_opts.options[key]
+        Kerbi::ConfigFile.patch(key => new_value)
+
+        name = "config[#{key}]"
+        change_str = "from #{old_value} => #{new_value}"
+        echo "Updated #{name} #{change_str}".colorize(:green)
       end
 
       cmd_meta Kerbi::Consts::CommandSchemas::CONFIG_GET
@@ -23,11 +28,18 @@ module Kerbi
         echo_data(run_opts.options)
       end
 
+      cmd_meta Kerbi::Consts::CommandSchemas::CONFIG_RESET
+      def reset
+        Kerbi::ConfigFile.reset
+        echo("Config reset".colorize(:green))
+        echo("See #{Kerbi::ConfigFile.file_path}")
+      end
+
       private
 
       def raise_if_bad_write(key)
         unless legal_keys.include?(key)
-          raise Kerbi::IllegalConfigWrite
+          raise Kerbi::IllegalConfigWrite.new(key)
         end
       end
 

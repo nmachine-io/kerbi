@@ -9,7 +9,7 @@ RSpec.describe "$ kerbi values [COMMAND]" do
       it "respects --set > -f > defaults" do
         base = "values show -f v2 -f production --set service.type=NodePort"
         cmd = hello_kerbi(base)
-        expect_cli_eq_file(cmd, "values", "order-of-precedence", "yaml")
+        exp_cli_eq_file(cmd, "values", "order-of-precedence", "yaml")
       end
     end
   end
