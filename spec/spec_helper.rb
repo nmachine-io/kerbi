@@ -42,29 +42,43 @@ def cli(command, escaped: false)
   end
 end
 
-def load_expectation_file(dir, file, ext)
+def load_exp_file(dir, file, ext)
   path = "#{__dir__}/expectations/#{dir}/#{file}.#{ext}"
   File.read(path)
 end
 
+def read_exp_file(dir, file, ext)
+  expected_str = load_exp_file(dir, file, ext)
+  if ext == 'json'
+    JSON.parse(expected_str)
+  elsif ext == 'yaml'
+    YAML.load_stream(expected_str)
+  else
+    expected_str.gsub(/\s+/, "")
+  end
+end
+
 def expect_cli_eq_file(cmd, dir, file, ext='txt')
   actual_str = cli(cmd)
-  expected_str = load_expectation_file(dir, file, ext)
+  expected = read_exp_file(dir, file, ext)
 
   if ext == 'json'
-    expect(JSON.parse(actual_str)).to eq(JSON.parse(expected_str))
+    expect(JSON.parse(actual_str)).to eq(expected)
   elsif ext == 'yaml'
     actual = YAML.load_stream(actual_str)
-    expected = YAML.load_stream(expected_str)
     expect(actual).to eq(expected)
   else
     actual = actual_str.gsub(/\s+/, "").gsub("\e", "\\e")
-    expected = expected_str.gsub(/\s+/, "")
     expect(actual).to eq(expected)
   end
 end
 
-
+def hello_kerbi(cmd, namespace=nil)
+  target = "#{__dir__}/../examples/hello-kerbi"
+  cmd = "#{cmd} --project-root #{target}"
+  cmd = "#{cmd} --namespace #{namespace}" if namespace
+  cmd
+end
 
 def cmd_group_spec(cmd, dir, file, opts={})
   (opts[:formats] || %w[yaml json table]).each do |format|

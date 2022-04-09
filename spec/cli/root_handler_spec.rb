@@ -7,13 +7,6 @@ RSpec.describe "$ kerbi [COMMAND]" do
   let(:exps_dir) { "root" }
   let(:root_dir) { "#{__dir__}/../../examples/hello-kerbi" }
 
-  def mk_cmd(cmd, namespace=nil)
-    target = "#{__dir__}/../../examples/hello-kerbi"
-    cmd = "#{cmd} --project-root #{target}"
-    cmd = "#{cmd} --namespace #{namespace}" if namespace
-    cmd
-  end
-
   spec_bundles = [
     ["", "template"],
     ["-f production", "template-production"],
@@ -21,89 +14,82 @@ RSpec.describe "$ kerbi [COMMAND]" do
   ].freeze
 
   describe "$ kerbi template" do
+
     context "without state" do
       spec_bundles.each do |bundle|
         context "with #{bundle[0].presence || "no args"}" do
           it "echos the expected text" do
-            cmd = mk_cmd("template foo #{bundle[0]}")
+            cmd = hello_kerbi("template foo #{bundle[0]}")
             expect_cli_eq_file(cmd, "root", bundle[1], "yaml")
           end
         end
       end
     end
 
-    context "with --write-state and --read-state" do
+    context "with with state" do
+
+      let(:backend){ make_backend(namespace) }
+
       before :each do
         kmd("create ns #{namespace}")
         kmd("delete cm #{cm_name} -n #{namespace}")
-      end
-
-      let(:expect_values) do
-        { pod: { image: "centos" }, service: { type: "ClusterIP"} }
-      end
-
-      let(:expect_default_values) do
-        { pod: { image: "nginx" }, service: { type: "ClusterIP"} }
-      end
-
-      before :each do
         backend = make_backend(namespace)
         backend.provision_missing_resources(quiet: true)
-        expect(backend.read_write_ready?).to eq(true)
       end
 
-      def backend
-        make_backend(namespace)
+      def exp_vals(which)
+        str_keyed_hash = read_exp_file("root", "values", "json")
+        str_keyed_hash.deep_symbolize_keys[which.to_sym]
       end
 
-      def mk_new_cmd(pod_image)
+      def template_write_cmd(pod_image)
         base_cmd = "template foo --set pod.image=#{pod_image} --write-state foo"
-        mk_cmd(base_cmd, namespace)
+        hello_kerbi(base_cmd, namespace)
       end
 
-      context "--write-state when the entry does not yet exist" do
-        it "creates a new entry with the expected values" do
-          expect(backend.entries.any?).to be_falsey
-          expect_cli_eq_file(mk_new_cmd("centos"), "root", "template-write", "yaml")
-          entry = backend.entries[0]
-          expect(backend.entries.count).to eq(1)
-          expect(entry.tag).to eq("foo")
-          expect(entry.values).to eq(expect_values)
-          expect(entry.default_values).to eq(expect_default_values)
+      context "with writing" do
+        before :each do
+          cmd = template_write_cmd("centos")
+          expect_cli_eq_file(cmd, "root", "template-write", "yaml")
         end
-      end
 
-      context "--write-state with an existing state entry" do
-        let(:expect_values) do
-          { pod: { image: "debian" }, service: { type: "ClusterIP"} }
+        context "--write-state when the entry does not yet exist" do
+          it "creates a new entry with the expected values" do
+            entry = backend.entries[0]
+            expect(backend.entries.count).to eq(1)
+            expect(entry.tag).to eq("foo")
+            expect(entry.values).to eq(exp_vals("centos"))
+            expect(entry.default_values).to eq(exp_vals("nginx"))
+          end
         end
-        it "updates the existing entry with the expected values" do
-          expect(backend.entries.any?).to be_falsey
-          expect_cli_eq_file(mk_new_cmd("centos"), "root", "template-write", "yaml")
-          cli(mk_new_cmd("debian"))
-          entry = backend.entries[0]
-          expect(backend.entries.count).to eq(1)
-          expect(entry.tag).to eq("foo")
-          expect(entry.values).to eq(expect_values)
-          expect(entry.default_values).to eq(expect_default_values)
+
+        context "--write-state with an existing state entry" do
+          it "updates the existing entry with the expected values" do
+            cli(template_write_cmd("centos"))
+            cli(template_write_cmd("debian"))
+            expect(backend.entries.count).to eq(1)
+            entry = backend.entries[0]
+            expect(entry.tag).to eq("foo")
+            expect(entry.values).to eq(exp_vals("debian"))
+            expect(entry.default_values).to eq(exp_vals("nginx"))
+          end
         end
       end
 
       context "--read-state with an existing state entry" do
+        before(:each) { cli(template_write_cmd("centos")) }
+
         context "without inline overrides" do
           it "echos the expected text" do
-            expect(backend.entries.any?).to be_falsey
-            expect_cli_eq_file(mk_new_cmd("centos"), "root", "template-write", "yaml")
-            cmd = mk_cmd("template foo --read-state foo", namespace)
+            cmd = hello_kerbi("template foo --read-state foo", namespace)
             expect_cli_eq_file(cmd, "root", "template-read", "yaml")
           end
         end
 
         context "with inline overrides" do
           it "echos the expected text, preferring the inline over the state" do
-            expect(backend.entries.any?).to be_falsey
-            expect_cli_eq_file(mk_new_cmd("centos"), "root", "template-write", "yaml")
-            cmd = mk_cmd("template foo --read-state foo --set pod.image=busybox", namespace)
+            base = "template foo --read-state foo --set pod.image=busybox"
+            cmd = hello_kerbi(base, namespace)
             expect_cli_eq_file(cmd, "root", "template-read-inlines", "yaml")
           end
         end

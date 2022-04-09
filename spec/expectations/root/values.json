@@ -1,0 +1,28 @@
+{
+  "centos": {
+    "pod": {
+      "image": "centos"
+    },
+    "service": {
+      "type": "ClusterIP"
+    }
+  },
+
+  "nginx": {
+    "pod": {
+      "image": "nginx"
+    },
+    "service": {
+      "type": "ClusterIP"
+    }
+  },
+
+  "debian": {
+    "pod": {
+      "image": "debian"
+    },
+    "service": {
+      "type": "ClusterIP"
+    }
+  }
+}
