@@ -54,7 +54,7 @@ backend:
 ```
 
 
-### 📜 Familiar Languages: YAML/JSON, Ruby, ERB
+### 📜 Familiar Languages: YAML Embedded with Ruby
 
 Helm gets it right by sticking to YAML, but 
 
