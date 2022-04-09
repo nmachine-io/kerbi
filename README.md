@@ -12,6 +12,8 @@ Kerbi is a Kubernetes tool most similar to [Helm](https://helm.sh/). It does two
 
 ## Getting Started
 
+**[Complete guide and more.](https://xavier-9.gitbook.io/untitled/walkthroughs/getting-started)**
+
 Install the `kerbi` RubyGem globally: 
 
 ```bash
@@ -23,40 +25,49 @@ Now use the new `kerbi` executable to initialize a project and install the depen
 ```bash
 $ kerbi project new hello-kerbi
 $ cd hello-kerbi
-$ bundle install
 ```
 
 Voila. Generate your first manifest with:
 
 ```yaml
-$ kerbi template default .
-message: default message
+$ kerbi template demo --set message=special
+text: special demo message
 ```
 
-**[See the complete walkthroughs and more.](https://xavier-9.gitbook.io/untitled/walkthroughs/getting-started)**
+And setup state managment in one line:
+
+```bash
+$ kerbi state init --namespace demo
+
+$ kerbi template demo --write-state @candidate
+
+$ kerbi state list
+```
 
 
 ## Drawing from Helm, Kaptain, and CDK8s
 
-### 💲 Fully Variables (aka Values) Based
+### 💲 Variable/Value Based like Helm
 
-Single source of truth
+Like with Helm, your control knobs are key-value pairs that get passed in at runtime,
+which your templating logic uses to interpolate the final manifest. Your have your 
+baseline `values.yaml` file, override files passed via CLI, e.g
+`-f production.yaml`, and inline assignments, e.g `--set backend.ingress.enabled=false`.
 
-Like with Helm, values for your templating logic come from YAML files, namely your default
-`values.yaml`, inline assignments in the command like `--set backend.ingress.enabled=false`, 
-plus any custom files you load via CLI, e.g `-f production.yaml`:
-
-**`values/production.yaml`**
+**`production.yaml`**
 ```yaml
 backend:
   deployment:
-    replicas: 10
+    replicas: 30
 ```
 
+Zero innovation here because Helm does it perfectly.
 
-### 📜 Familiar Languages: YAML Embedded with Ruby
+### 📜 Familiar Ruby in YAML Templating ~~New Dialects or Object Models~~
 
-Helm gets it right by sticking to YAML, but 
+Helm's Go-in-YAML might be awkward, but makes the right choice of sticking to Kubernetes' lingua franca - YAML.
+Kapitan and CDK8S offer a better DX, but only if you 1) know their DSL/libs well,
+and 2) actually need hardcore templating everywhere in your project.
 
 **`deployment.yaml.erb`**
 ```yaml
@@ -76,7 +87,6 @@ spec:
                    ) %>
 ```
 
-
 ### 📀 Explicit, Transparent, Robust State Management
 
 ```bash
@@ -91,7 +101,7 @@ $ kerbi template my-app \
 table
 ```
 
-### 🚦 Powerful Templating Orchestration
+### 🚦 Powerful Templating Orchestration Layer
 
 **`backend/mixer.rb`**
 ```ruby
