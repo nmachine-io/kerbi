@@ -1,31 +1,16 @@
 
-# The Kerbi Templating Engine for Kubernetes
+# Kerbi
 
 [![codecov](https://codecov.io/gh/nectar-cs/kerbi/branch/master/graph/badge.svg)](https://codecov.io/gh/nectar-cs/kerbi)
 [![Gem Version](https://badge.fury.io/rb/kerbi.svg)](https://badge.fury.io/rb/kerbi)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-# What is Kerbi?
+Kerbi is a Kubernetes tool most similar to [Helm](https://helm.sh/). It does two things:
+1. **Variable-based templating** based on ERB (YAML/JSON embedded Ruby)
+2. **State management** for the applied variables, reading/writing to a `ConfigMap`, `Secret`, or database
 
-**Kerbi is a templating engine** for generating Kubernetes manifests. 
-On the outside, it operates very similarly to [Helm](https://helm.sh/), turning 
-variables + templates into Kubernetes-bound YAML, and even has similar command line API.
 
-**Versus Helm**, on the templating front, it is designed to have 1) a better developer 
-experience, 2) more power, 3) more flexibility. On the Kubernetes front, it is far more
-decoupled.
-
-**The name Kerbi** is an acronym for Kubernetes [ERB](https://www.stuartellis.name/articles/erb/) Interpolator. 
-And just like the [pink Kirby](https://en.wikipedia.org/wiki/Kirby_(character)), 
-it sucks up just about anything, and spits out something useful.
-
-<!--
-![](https://storage.googleapis.com/kerbi/images/kerbi-intro.png)
--->
-
-**[Documentation Site.](https://xavier-9.gitbook.io/untitled/walkthroughs/getting-started)**
-
-# Getting Started
+## Getting Started
 
 Install the `kerbi` RubyGem globally: 
 
@@ -50,26 +35,67 @@ message: default message
 
 **[See the complete walkthroughs and more.](https://xavier-9.gitbook.io/untitled/walkthroughs/getting-started)**
 
-# The Developer Experience
 
-As a user, the main difference between Helm and Kerbi projects is this:
+## Drawing from Helm, Kaptain, and CDK8s
 
-**🚦 Kerbi requires an Explicit Control Flow**. Where Helm uses a directory structure convention
-to figure out what to do with your files, Kerbi makes you write **Mixers** in plain Ruby, 
-where you explictly say "template this file here and that chart there".
+### 💲 Fully Variables (aka Values) Based
 
-**📁 Kerbi accepts various types of files**. Because Kerbi has your write actual programs,
-you can easily use or build new **extractor methods** like `file()` to load, interpolate, and normailze
-anything into `dicts` (e.g `Array<Hash>`), which are Kerbi thinks in.
+Single source of truth
 
-## Mixers
+Like with Helm, values for your templating logic come from YAML files, namely your default
+`values.yaml`, inline assignments in the command like `--set backend.ingress.enabled=false`, 
+plus any custom files you load via CLI, e.g `-f production.yaml`:
 
-Mixers don't exist in Helm. They may seem like an extra step, but when your logic starts to grows,
-mixers are an excellent way to stay DRY, readable, and organized.
+**`values/production.yaml`**
+```yaml
+backend:
+  deployment:
+    replicas: 10
+```
+
+
+### 📜 Familiar Languages: YAML/JSON, Ruby, ERB
+
+Helm gets it right by sticking to YAML, but 
+
+**`deployment.yaml.erb`**
+```yaml
+apiVersion: appsV1
+kind: Deployment
+metadata:
+  name: <% Hooli::Backend::Consts::NAME %>
+  namespace: <%= release_name %>
+  labels: <%= embed(common_labels) %>
+spec: 
+  replicas: <%= values[:deployment][:replicas] %>
+  template:
+    spec:
+      containers: <%= embed_array(
+                        file('containers') + 
+                        mixer(Hooli::Traefik::ContainerMixer))
+                   ) %>
+```
+
+
+### 📀 Explicit, Transparent, Robust State Management
+
+```bash
+$ kerbi template my-app \
+        --set backend.image=thing:1.0.1 \
+        --read-state @latest \
+        --write-state @candidate \       
+        >> manifest.yaml
+```
+
+```
+table
+```
+
+### 🚦 Powerful Templating Orchestration
 
 **`backend/mixer.rb`**
 ```ruby
-class Hooli::Backend::Mixer < Kerbi::Mixer
+class MyApp::Backend::Mixer < Kerbi::Mixer
   include Hooli::Common::KubernetesLabels
   values_root "backend"
 
@@ -90,58 +116,8 @@ class Hooli::Backend::Mixer < Kerbi::Mixer
 end
 ```
 
-## Templating
+### 🗣️ No talking to Kubernetes behind your back
 
-Most of the actual templating happens in `.yaml.erb` files, which the mixer above loads:
-
-**`deployment.yaml.erb`**
-```yaml
-apiVersion: appsV1
-kind: Deployment
-metadata:
-  name: <% Hooli::Backend::Consts::NAME %>
-  namespace: <%= release_name %>
-  labels: <%= embed(common_labels) %>
-spec: 
-  replicas: <%= values[:deployment][:replicas] %>
-  template:
-    spec:
-      containers: <%= embed_array(
-                        file('containers') + 
-                        mixer(Hooli::Traefik::ContainerMixer))
-                   ) %>
-```
-
-## Values
-
-Like with Helm, values for your templating logic come from YAML files, namely your default
-`values.yaml`, inline assignments in the command like `--set backend.ingress.enabled=false`, 
-plus any custom files you load via CLI, e.g `-f production.yaml`:
-
-**`values/production.yaml`**
-```yaml
-backend:
-  deployment:
-    replicas: 10
-```
-
-## CLI
-
-Intuitive and familiar command structure:
-
-```bash
-$ kerbi template my-namespace . -f production.yaml -o json
-$ kerbi values show
-$ kerbi state commit --namespace=default
-$ kerbi state show --storage=configmap
-```
-
-## State Management
-
-Kerbi will never do "cluster stuff" as a side effect without your explict
-instruction to do so.
-
-### Setup Kerbi State Management
 ```bash
 $ kerbi config use-namespace see-food
 $ kerbi state test-connection
@@ -149,42 +125,7 @@ $ kerbi state init
 $ kerbi state test-connection
 ```
 
-### Template and Save a Candidate State
-```bash
-$ kerbi template see-food . \
-        --set backend.image=our-image.1.0.1 \
-        --read-state @latest \
-        --write-state @candidate \       
-        >> manifest.yaml
-```
-
-### Inspect the State
-```
-$ kerbi state list
-
-$ kerbi values show --read-state @candidate
-
-$ kerbi values show --read-state @latest
-```
-
-### Kubectl Apply and Commit the State
-
-```
-$ kubectl apply -f manifest.yaml
-
-# Everything worked, so we can commit this state for real
-
-$ kerbi state retag @candidate @random --message "minor tweaks to backend"
-```
-
-
-```bash
-$ kerbi state list
-$ kerbi values show latest
-```
-
- 
-## Interactive Console
+## ⌨️ Interactive Console
  
 Kerbi can also be run in interactive mode (via IRB), making it super easy to play
 with your code and debug things:
@@ -201,41 +142,6 @@ irb(kerbi):002:0> Hooli::Backend::Mixer.new(values).persistence_enabled?
 irb(kerbi):003:0> Hooli::Backend::Mixer.new(values).run
 => [{:apiVersion=>"appsV1", :kind=>"Deployment", :metadata=>{:name=>"backend", :namespace=>"default"}, :spec=>"foo"}]
 ```
-
-
-## Why use Kerbi over Helm?
-
-The thesis with Kerbi is this: reality is messy, and our templating needs often break clean 
-structural molds like Helm's, so let's make an engine with less structure and more power, 
-so that you can model it to your needs.
-
-**🔀 More ways to template and manipulate data**. 
-Kerbi lets you deal directly with dicts (or Hashes in Ruby speak), and makes it easy to extract 
-dicts from things like files, directories, static manifests, or even Helm charts, into dicts, 
-letting you implement complex multi-source templating strategies.
-
-**🏗 Freedom to organize and extend**. 
-With Kerbi, you're just writing a program. 
-You can require files how you see fit, meaning you can have any directory structure you want. 
-You can also add functionality in any way you want, being constrained only by Ruby and its packages.
-
-**💎 Ruby at its best**. 
-Ruby is not longer a top tier language for web apps 😞. 
-But when it comes to narrow programs that involve DSLs and config mgmt, Ruby remains second to none. 
-While Helm can feel a bit mysterious, Kerbi feel familiar to anyone familiar with programming and libraries in general.
-
-## Why use Helm over Kerbi?
-
-With great Turing-completeness comes the potential for great stupidity. If you love over-engineering, 
-re-inventing wheels, obsessing over DRYness, or library-creeping, then you are at risk of abusing
-Kerbi and plunging your team into tyranny. Kerbi responsibly.
-
-# State of the project
-
-## Maturity
-
-Kerbi is **not** mature. I use it for my personal Kubernetes projects, but it has not yet been
-disciplined by the community. At this point, the goal is to get eyes and hands on.
 
 ## Getting Involved
 
