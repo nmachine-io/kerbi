@@ -1,9 +1,11 @@
 #!/bin/bash
 
 if [[ "$1" == "test" ]]; then
+  mkdir "$HOME"/.kerbi
+  echo "auth-type: in-cluster" > "$HOME"/.kerbi/config.yaml
+  cat "$HOME"/.kerbi/config.yaml
+
   bundle exec rspec -fd
-#  ls coverage
-#  bash <(curl -s https://codecov.io/bash) -s /app/coverage
 elif [[ "$1" == "publish" ]]; then
   echo ":rubygems_api_key: $RUBYGEMS_API_KEY" > /root/.gem/credentials
   chmod 0600 /root/.gem/credentials

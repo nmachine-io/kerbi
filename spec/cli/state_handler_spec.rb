@@ -16,15 +16,15 @@ RSpec.describe "$ kerbi state [COMMAND]" do
   end
 
   before :each do
-    kmd("create ns #{namespace}")
-    kmd("delete cm #{cm_name} -n #{namespace}")
+    create_ns(namespace)
+    delete_cm(cm_name, namespace)
     backend = make_backend(namespace)
     configmap_dict = backend.template_resource(set.entries)
     backend.apply_resource(configmap_dict)
   end
 
   describe "$ kerbi state init" do
-    let(:cmd) { "state init kerbi-spec" }
+    let(:cmd) { "state init #{namespace}" }
     context "when resources already existed" do
       it "echoes the correct text" do
         exp_cli_eq_file(cmd, exps_dir, "init-already-existed")
@@ -33,7 +33,7 @@ RSpec.describe "$ kerbi state [COMMAND]" do
 
     context "when the resources did not exist" do
       it "echoes the correct text" do
-        kmd("delete ns #{namespace}")
+        delete_ns(namespace)
         exp_cli_eq_file(cmd, exps_dir, "init-both-created")
       end
     end
@@ -49,7 +49,7 @@ RSpec.describe "$ kerbi state [COMMAND]" do
 
     context "when connected but resources not provisioned" do
       it "echoes the correct text" do
-        kmd("delete ns #{namespace}")
+        delete_ns(namespace)
         exp_cli_eq_file(cmd, exps_dir, "status-not-provisioned")
       end
     end

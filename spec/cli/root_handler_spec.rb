@@ -31,8 +31,8 @@ RSpec.describe "$ kerbi [COMMAND]" do
       let(:backend){ make_backend(namespace) }
 
       before :each do
-        kmd("create ns #{namespace}")
-        kmd("delete cm #{cm_name} -n #{namespace}")
+        create_ns(namespace)
+        delete_cm(cm_name, namespace)
         backend = make_backend(namespace)
         backend.provision_missing_resources(quiet: true)
       end

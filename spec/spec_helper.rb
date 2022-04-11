@@ -5,17 +5,62 @@ SimpleCov.start
 
 require_relative './../lib/kerbi'
 
-def kmd(command)
-  opts = { err: File::NULL, out: File::NULL }
-  system("kubectl #{command} --context kind-kind", **opts)
+def run_opts
+  Kerbi::RunOpts.new({}, Kerbi::Consts::OptionDefaults::BASE)
 end
 
+# @param [String] namespace
 # @return [Kerbi::State::ConfigMapBackend]
 def make_backend(namespace)
-  Kerbi::State::ConfigMapBackend.new(
-    Kerbi::Utils::K8sAuth.kube_config_bundle,
-    namespace
+  auth_bundle = Kerbi::Utils::Cli.make_k8s_auth_bundle(run_opts)
+  Kerbi::State::ConfigMapBackend.new(auth_bundle, namespace)
+end
+
+# @return [Kubeclient::Client]
+def make_kube_client(api_name)
+  auth_bundle = Kerbi::Utils::Cli.make_k8s_auth_bundle(run_opts)
+  Kubeclient::Client.new(
+    auth_bundle[:endpoint],
+    api_name,
+    **auth_bundle[:options]
   )
+end
+
+def create_ns(name)
+  dict = { metadata: { name: name } }
+  begin
+    #noinspection RubyResolve
+    make_kube_client("v1").create_namespace(dict)
+  rescue Kubeclient::HttpError
+    true
+  end
+end
+
+def delete_cm(name, namespace)
+  begin
+    #noinspection RubyResolve
+    make_kube_client("v1").delete_config_map(name, namespace)
+    begin
+      sleep(1)
+      #noinspection RubyResolve
+      exists = client.get_config_map(name, namespace) rescue nil
+    end while exists
+  rescue Kubeclient::ResourceNotFoundError
+    true
+  end
+end
+
+def delete_ns(name)
+  begin
+    #noinspection RubyResolve
+    (client = make_kube_client("v1")).delete_namespace(name)
+    begin
+      sleep(1)
+      exists = client.get_namespace(name) rescue nil
+    end while exists
+  rescue Kubeclient::ResourceNotFoundError
+    true
+  end
 end
 
 def new_state(tag, dict={})

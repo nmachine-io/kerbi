@@ -6,8 +6,8 @@ RSpec.describe Kerbi::State::ConfigMapBackend do
   let(:cm_name) { Kerbi::State::Consts::RESOURCE_NAME }
 
   before :each do
-    kmd("create ns #{namespace}")
-    kmd("delete cm #{cm_name} -n #{namespace}")
+    create_ns(namespace)
+    delete_cm(cm_name, namespace)
     # sleep(2) #ADD ME BACK IF WEIRD ERRORS... :/
   end
 
@@ -16,7 +16,7 @@ RSpec.describe Kerbi::State::ConfigMapBackend do
 
     context "when the namespace does not exist" do
       it "provisions accordingly" do
-        kmd("delete ns #{namespace}")
+        delete_ns(namespace)
         expect(backend.read_write_ready?).to be_falsey
         backend.provision_missing_resources
       end
@@ -24,14 +24,14 @@ RSpec.describe Kerbi::State::ConfigMapBackend do
 
     context "when the namespace does exist" do
       before :each do
-        kmd("create ns #{namespace}")
+        create_ns(namespace)
         expect(backend.read_write_ready?).to be_falsey
       end
 
       context "when the configmap does not exist" do
         it "provisions accordingly" do
           backend.provision_missing_resources
-          kmd("delete cm #{cm_name} -n #{namespace}")
+          delete_cm(cm_name, namespace)
           backend.provision_missing_resources
         end
       end

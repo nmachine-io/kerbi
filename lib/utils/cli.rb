@@ -105,6 +105,38 @@ module Kerbi
         load(abs_path)
       end
 
+      ##
+      # Given the various Kubernetes authentication options and
+      # configs, generates a Hash with the necessary data/schema
+      # to pass onto the internal k8s authentication logic.
+      #
+      # This method only delegates. Actual work done is done here at:
+      # Kerbi::Utils::K8sAuth.
+      # @return [Hash] auth bundle for the k8s authentication logic.
+      # @param [Kerbi::RunOpts] run_opts
+      def self.make_k8s_auth_bundle(run_opts)
+        case run_opts.k8s_auth_type
+        when "kube-config"
+          Kerbi::Utils::K8sAuth.kube_config_bundle(
+            path: run_opts.kube_config_path,
+            name: run_opts.kube_context_name
+          )
+        when "basic"
+          Kerbi::Utils::K8sAuth.basic_auth_bundle(
+            username: run_opts.k8s_auth_username,
+            password: run_opts.k8s_auth_password
+          )
+        when "token"
+          Kerbi::Utils::K8sAuth.token_auth_bundle(
+            bearer_token: run_opts.k8s_auth_token,
+            )
+        when "in-cluster"
+          Kerbi::Utils::K8sAuth.in_cluster_auth_bundle
+        else
+          raise "Bad k8s connect type '#{run_opts.k8s_auth_type}'"
+        end
+      end
+
       LIST_TABLE_STYLE = {
         border_left: false,
         border_right: false,

@@ -139,6 +139,11 @@ module Kerbi
       options[consts::PROJECT_ROOT].presence
     end
 
+    # @return [TrueClass, FalseClass]
+    def in_cluster?
+      options[consts::K8S_AUTH_TYPE] == 'in-cluster'
+    end
+
     private
 
     # @return [Module<Kerbi::Consts::OptionKeys>]
