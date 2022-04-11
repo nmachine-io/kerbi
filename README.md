@@ -6,9 +6,10 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Kerbi is a Kubernetes tool most similar to [Helm](https://helm.sh/). It does two things:
-1. **Variable-based templating** based on ERB (YAML/JSON embedded Ruby)
-2. **State management** for the applied variables, reading/writing to a `ConfigMap`, `Secret`, or database
 
+**1. Variable-based manifest templating** based on ERB (YAML/JSON embedded Ruby)
+
+**2. State management** for the applied variables, reading/writing to a `ConfigMap`, `Secret`, or database
 
 ## Getting Started
 
@@ -27,32 +28,22 @@ $ kerbi project new hello-kerbi
 $ cd hello-kerbi
 ```
 
-Voila. Generate your first manifest with:
+Voila. You can now generate templates and manage state:
 
-```yaml
+```
 $ kerbi template demo --set message=special
 text: special demo message
 ```
 
-And setup state managment in one line:
+## Drawing from Helm, Kapitan, and CDK8s
 
-```bash
-$ kerbi state init --namespace demo
+### 💲 Kerbi is Variable (aka Value) Based like Helm
 
-$ kerbi template demo --write-state @candidate
-
-$ kerbi state list
-```
-
-
-## Drawing from Helm, Kaptain, and CDK8s
-
-### 💲 Variable/Value Based like Helm
-
-Like with Helm, your control knobs are key-value pairs that get passed in at runtime,
+Like with Helm, your control knobs are key-value pairs that you pass in at runtime,
 which your templating logic uses to interpolate the final manifest. Your have your 
 baseline `values.yaml` file, override files passed via CLI, e.g
-`-f production.yaml`, and inline assignments, e.g `--set backend.ingress.enabled=false`.
+`-f production.yaml`, inline assignments, e.g `--set backend.ingress.enabled=false`,
+and previously committed values, e.g `--read-state @latest`
 
 **`production.yaml`**
 ```yaml
@@ -61,12 +52,54 @@ backend:
     replicas: 30
 ```
 
+You can also easily inspect fully merged values before templating:
+
+```yaml
+$ kerbi values show -f production --set backend.image=centos --read-state tango
+backend:
+  deployment:
+    replicas: 30
+```
+
 Zero innovation here because Helm does it perfectly.
 
-### 📜 Familiar Ruby in YAML Templating ~~New Dialects or Object Models~~
+### 📀 State Management is Explicit and Non-Invasive
+
+Variable based templating is only feasible IRL if you have a way to store and retreive 
+the sets of variables you generate your manifests with. If you template and apply 
+with `--set backend.image=2` and later want to `--set frontend.image=2`, you'll need to have a way 
+keep `backend.image` equal to `2`, otherwise it will get reverted to its old value. You _could_ use git, 
+but that's not ideal.
+
+Thus, Helm and Kerbi have a notion of "state", where information about template-generating
+operations can be persisted to a `ConfigMap`. Unlike Helm, which couples state with a heavy 
+handed concept of "releases" (modifies your resources, kubectl's for you, etc...), Kerbi opts 
+for an explicit, non-invasive API: `--read-state` and `--write-state`, that only records 
+computed values.
+
+Start by explicitly setting up state tracking:
+```
+kerbi 
+```
+
+1) Kerbi's CLI much more explicit controls,nforcing the user to be deliberate. Additionally, 
+
+```bash
+$ kerbi template my-app \
+        --set backend.image=thing:1.0.1 \
+        --read-state @latest \
+        --write-state @candidate \       
+        >> manifest.yaml
+```
+
+```
+table
+```
+
+### 📜 The Templating Languages are Familiar to Most
 
 Helm's Go-in-YAML might be awkward, but makes the right choice of sticking to Kubernetes' lingua franca - YAML.
-Kapitan and CDK8S offer a better DX, but only if you 1) know their DSL/libs well,
+Kapitan and CDK8S offer a better DX, but only if you 1) know their dialects or object models well,
 and 2) actually need hardcore templating everywhere in your project.
 
 **`deployment.yaml.erb`**
@@ -86,20 +119,8 @@ spec:
                         mixer(Hooli::Traefik::ContainerMixer))
                    ) %>
 ```
-
-### 📀 Explicit, Transparent, Robust State Management
-
-```bash
-$ kerbi template my-app \
-        --set backend.image=thing:1.0.1 \
-        --read-state @latest \
-        --write-state @candidate \       
-        >> manifest.yaml
-```
-
-```
-table
-```
+In Kerbi, you do most of your templating in YAML embedded with Ruby (`ERB`). As shown two sections
+beneath, you can seamlessly mix between two extremes: fully programmatic and fully YAML.
 
 ### 🚦 Powerful Templating Orchestration Layer
 
@@ -126,7 +147,24 @@ class MyApp::Backend::Mixer < Kerbi::Mixer
 end
 ```
 
-### 🗣️ No talking to Kubernetes behind your back
+### 🗣️ No Workflow Highjacking, No talking to K8s "for you"
+
+A big design objective with state management was to avoid doing mission critical,
+stressful operations like `kubectl apply` on your behalf. 
+
+```bash
+$ kerbi 
+$ kerbi template my-app \
+        --set backend.image=thing:1.0.1 \
+        --read-state @latest \
+        --write-state @candidate \       
+        >> manifest.yaml
+
+$ kubectl apply --dry-run -f manifest.yaml 
+
+$ 
+
+```
 
 ```bash
 $ kerbi config use-namespace see-food
@@ -136,9 +174,11 @@ $ kerbi state test-connection
 ```
 
 ## ⌨️ Interactive Console
- 
-Kerbi can also be run in interactive mode (via IRB), making it super easy to play
-with your code and debug things:
+
+My favorite thing about CDK8s is that it feels like a normal computer program. 
+
+Kerbi takes that one step further by letting you run your code in interactive mode (via IRB), 
+making it super easy to play with and debug your code:
 
 ```ruby
 $ kerbi console --set backend.database.enabled=true
