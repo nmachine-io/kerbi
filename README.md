@@ -82,7 +82,7 @@ In Kerbi, you do most of your templating in YAML embedded with Ruby (`ERB`). As 
 beneath, you can seamlessly mix between two extremes: fully programmatic and fully YAML.
 
 
-Zero innovation here because Helm does it perfectly.
+
 
 ### 📀 Explicit & Non-Invasive State Management
 
@@ -157,6 +157,8 @@ $ kerbi state list
  1.0.0                       2            0          2 minutes ago
 ```
 
+
+
 ### 🚦 Powerful Templating Orchestration Layer
 
 You define `Mixer` classes from where you explicitly load up your 
@@ -188,6 +190,8 @@ end
 You can opt for trivial or complicated mixers, depending on your needs and taste. They
 primarily exist to 1) help you keep real logic out of your template files, and 2) let 
 you organize your project as you see fit.
+
+
 
 ## ⌨️ Interactive Console
 
