@@ -56,7 +56,7 @@ service:
   type: NodePort
 ```
 
-### 📜 Basic Templating in YAML embedded with Ruby
+### 📜 Basic Templating with YAML embedded with Ruby
 
 Kerbi lets you do your basic templating in YAML embedded with Ruby (`ERB`), 
 keeping your template files readable and singular focused, while moving any
@@ -86,7 +86,7 @@ DX, but only if you 1) know their dialects or object models well,
 and 2) actually need hardcore templating everywhere in your project.
 
 
-### 🚦 Powerful Templating Orchestration Layer
+### 🚦 Powerful Higher Order Templating Model
 
 You define `Mixer` classes from where you explicitly load up your 
 lower level template files (say `deployment.yaml.erb`), other mixers,
