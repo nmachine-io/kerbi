@@ -4,11 +4,10 @@
 [![Gem Version](https://badge.fury.io/rb/kerbi.svg)](https://badge.fury.io/rb/kerbi)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Kerbi is a Kubernetes tool most similar to [Helm](https://helm.sh/). It does two things:
-
-**1. Variable-based manifest templating** based on ERB (YAML/JSON embedded Ruby)
-
-**2. State management** for the applied variables, reading/writing to a `ConfigMap`, `Secret`, or database
+Kerbi is a Kubernetes tool most similar to [Helm](https://helm.sh/), with the following key differences:
+- Templating: also based on variables, but (aspires to be) more powerful, flexible, and delightful
+- State management: (aspires to be) less opinionated, less invasive, more deliberate/explict
+- Packaging: nada - Kerbi does not have an "artifact hub" or central registry
 
 ## Getting Started
 
