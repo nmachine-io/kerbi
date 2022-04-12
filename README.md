@@ -56,17 +56,11 @@ service:
   type: NodePort
 ```
 
-### 📜 Popular Templating Language: Ruby in YAML
+### 📜 Basic Templating in YAML embedded with Ruby
 
-Helm's Go-in-YAML is awkward to some, but sticking to Kubernetes' lingua 
-franca - YAML - is the right choice. Kapitan and CDK8S offer a better
-DX, but only if you 1) know their dialects or object models well,
-and 2) actually need hardcore templating everywhere in your project.
-
-In Kerbi, you do most of your basic templating in YAML embedded with Ruby (`ERB`). 
-Because Kerbi also has Mixers (see 2 sections down), you can keep your ERBs simple
-and singularly focused.
-
+Kerbi lets you do your basic templating in YAML embedded with Ruby (`ERB`), 
+keeping your template files readable and singular focused, while moving any
+real logic to mixers, shown in the following section.
 
 **`deployment.yaml.erb`**
 ```yaml
@@ -85,6 +79,49 @@ spec:
                         mixer(Hooli::Traefik::ContainerMixer))
                    ) %>
 ```
+
+Helm's Go-in-YAML is awkward to some, but sticking to Kubernetes' lingua 
+franca - YAML - is the right choice. Kapitan and CDK8S offer a better
+DX, but only if you 1) know their dialects or object models well,
+and 2) actually need hardcore templating everywhere in your project.
+
+
+### 🚦 Powerful Templating Orchestration Layer
+
+You define `Mixer` classes from where you explicitly load up your 
+lower level template files (say `deployment.yaml.erb`), other mixers,
+entire directories, or even raw Helm charts. Loader functions like `file()`
+and `dir()` return a sanitized `Array<Hash>`, making it easy to filter, patch, or modify 
+output.
+
+**`backend/mixer.rb`**
+```ruby
+class MyApp::Backend::Mixer < Kerbi::Mixer
+  include MyApp::Common::KubernetesLabels
+
+  def mix
+    push file("deployment")
+    push file("pvc") if persistence_enabled?
+    push(mixer(ServiceMixer) + file("ingress"))
+    
+    patched_with file("annotations") do
+      push chart("my-legacy/helm-chart")
+      push dir("./../rbac", only: [{kind: 'ClusterRole.*'}])
+    end
+  end 
+  
+  def persistence_enabled?
+    values.dig(:database, :enabled).present?
+  end
+end
+```
+
+You can opt for trivial or complicated mixers, depending on your needs and taste. They
+primarily exist to 1) help you keep real logic out of your template files, and 2) let 
+you organize and DRY up as you see fit.
+
+
+
 
 ### 📀 Explicit & Non-Invasive State Management
 
@@ -160,38 +197,6 @@ $ kerbi state list
 ```
 
 
-
-### 🚦 Powerful Templating Orchestration Layer
-
-You define `Mixer` classes from where you explicitly load up your 
-lower level template files (say `deployment.yaml.erb`), other mixers,
-entire directories, or even raw Helm charts. 
-
-**`backend/mixer.rb`**
-```ruby
-class MyApp::Backend::Mixer < Kerbi::Mixer
-  include MyApp::Common::KubernetesLabels
-
-  def mix
-    push file("deployment")
-    push file("pvc") if persistence_enabled?
-    push(mixer(ServiceMixer) + file("ingress"))
-    
-    patched_with file("annotations") do
-      push chart("my-legacy/helm-chart")
-      push dir("./../rbac", only: [{kind: 'ClusterRole.*'}])
-    end
-  end 
-  
-  def persistence_enabled?
-    values.dig(:database, :enabled).present?
-  end
-end
-```
-
-You can opt for trivial or complicated mixers, depending on your needs and taste. They
-primarily exist to 1) help you keep real logic out of your template files, and 2) let 
-you organize your project as you see fit.
 
 
 
