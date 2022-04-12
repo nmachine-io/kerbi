@@ -37,7 +37,7 @@ text: special demo message
 
 ## Drawing from Helm, Kapitan, and CDK8s
 
-### 💲 Variable Based like Helm
+### 💲 Variable based like Helm
 
 Like with Helm, your control knobs are key-value pairs that you pass in at runtime,
 which your templating logic uses to interpolate the final manifest. Your have your 
@@ -58,16 +58,22 @@ service:
 
 ### 📜 Popular Templating Language: Ruby in YAML
 
-Helm's Go-in-YAML might be awkward, but makes the right choice of sticking to Kubernetes' lingua franca - YAML.
-Kapitan and CDK8S offer a better DX, but only if you 1) know their dialects or object models well,
+Helm's Go-in-YAML is awkward to some, but sticking to Kubernetes' lingua 
+franca - YAML - is the right choice. Kapitan and CDK8S offer a better
+DX, but only if you 1) know their dialects or object models well,
 and 2) actually need hardcore templating everywhere in your project.
+
+In Kerbi, you do most of your basic templating in YAML embedded with Ruby (`ERB`). 
+Because Kerbi also has Mixers (see 2 sections down), you can keep your ERBs simple
+and singularly focused.
+
 
 **`deployment.yaml.erb`**
 ```yaml
 apiVersion: appsV1
 kind: Deployment
 metadata:
-  name: <% MyApp::Backend::Consts::NAME %>
+  name: <%= MyApp::Backend::Consts::NAME %>
   namespace: <%= release_name %>
   labels: <%= embed(common_labels) %>
 spec: 
@@ -79,11 +85,6 @@ spec:
                         mixer(Hooli::Traefik::ContainerMixer))
                    ) %>
 ```
-In Kerbi, you do most of your templating in YAML embedded with Ruby (`ERB`). As shown two sections
-beneath, you can seamlessly mix between two extremes: fully programmatic and fully YAML.
-
-
-
 
 ### 📀 Explicit & Non-Invasive State Management
 
