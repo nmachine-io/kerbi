@@ -1,7 +1,7 @@
 module <%= (module_name = data[:user_module_name]) %>
   class RootMixer < Kerbi::Mixer
     def mix
-      push dict(hello: values[:message])
+      push dict(text: "#{values[:message]} #{release_name} message")
     end
   end
 end

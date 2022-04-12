@@ -119,7 +119,7 @@ def exp_cli_eq_file(cmd, dir, file, ext='txt')
 end
 
 def hello_kerbi(cmd, namespace=nil)
-  target = "#{__dir__}/../examples/hello-kerbi"
+  target = "#{__dir__}/mini-projects/hello-kerbi"
   cmd = "#{cmd} --project-root #{target}"
   cmd = "#{cmd} --namespace #{namespace}" if namespace
   cmd

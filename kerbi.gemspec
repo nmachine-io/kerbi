@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
   s.homepage      = 'https://nmachine-io.github.io/kerbi'
   s.license       = 'MIT'
 
-  s.files         = Dir["{bin,lib,boilerplate}/**/*"]
+  s.files         = Dir["{bin,lib}/**/*"]
   s.test_files    = Dir["spec/**/*"]
   s.bindir        = 'bin'
   s.executables   = ['kerbi']

@@ -4,7 +4,7 @@ metadata:
   name: hello-kerbi
   namespace: foo
   annotations:
-    author: xavier
+    author: person
   labels:
     app: hello-kerbi
 spec:
@@ -20,7 +20,7 @@ metadata:
   name: hello-kerbi
   namespace: foo
   annotations:
-    author: xavier
+    author: person
   labels:
     app: hello-kerbi
 spec:

@@ -36,6 +36,7 @@ If you're using [Rubymine](https://www.jetbrains.com/ruby/)
 (which I wholeheartedly recommend), you should be able to run any test or
 group of tests from inside the editor.
 
+
 ### Method 2: Using a play directory
 
 Have a look at the directories inside `examples`. These work thanks to 
@@ -53,25 +54,32 @@ It will behave exactly like calling `kerbi` except it will use the local code.
 
 ### Using Docker
 
-There isn't much of a reason to use docker, other than to preview 
-what happens in the CI/CD pipeline.
 
 You'll notice the `Dockerfile` in the project root. Create an image by running
 ```bash
-$ docker build . -t kerbi
+$ docker build . -t <IMG>
+$ docker push <IMG>
 ```
 
 Start by running `test` on your docker image:
 
 ```bash
-$ docker run kerbi test
-Kerbi::Mixer
-  #patched_with
-    correctly patches output in the yielded block
-    does not patch out-of-block dicts
-#...
+kubectl run kerbi-pod --context <CONTEXT> --image <IMG> -- test
 ```
+
 Check out `docker-entry.sh` to find out what else you can do.
+
+**Authenticating**. If you're running `rspec` in docker, the odds are you're
+running the image as a pod in a Kubernetes cluster.
+
+```bash
+kubectl create clusterrolebinding kerbi-cluster-admin \
+        --clusterrole=cluster-admin \
+        --serviceaccount=default:default 
+        --context <CONTEXT>
+```
+
+ 
 
 ## Code of Conduct
 

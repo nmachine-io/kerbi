@@ -3,7 +3,7 @@ module Kerbi
     class ProjectGenerator
 
       ERB_EXT = ".erb"
-      BOILER_REL_PATH = "/../../boilerplate"
+      BOILER_REL_PATH = "/../code-gen/new-project"
 
       ##
       # Serves as both the new project's dir name and the mixer's _module name

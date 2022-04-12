@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: <%= HelloKerbi::Consts::APP_NAME %>
+  namespace: <%= release_name %>
+spec:
+  containers:
+    - name: main
+      image: <%= img2alpine(values[:pod][:image]) %>
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: <%= HelloKerbi::Consts::APP_NAME %>
+  namespace: <%= release_name %>
+spec:
+  type: <%= values[:service][:type] %>
+  selector:
+    app: <%= HelloKerbi::Consts::APP_NAME %>
+  ports:
+    - port: 80

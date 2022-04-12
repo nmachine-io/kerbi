@@ -1,0 +1,4 @@
+pod:
+  image: nginx
+service:
+  type: ClusterIP

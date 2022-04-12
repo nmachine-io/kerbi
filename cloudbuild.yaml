@@ -1,43 +1,32 @@
 steps:
 
-  - id: "Fetch Secrets"
-    name: gcr.io/cloud-builders/gcloud
-    waitFor: []
-    entrypoint: 'bash'
-    args:
-      - '-c'
-      - 'echo $(gcloud secrets versions access latest --secret=rubygems-api-key) > rubygems-api-key.txt;
-         echo $(gcloud secrets versions access latest --secret=kerbi-codecov-token) > kerbi-codecov-token.txt;
-        '
-
-#  - id: "Get google-cloud-cli"
-#    name: gcr.io/google.com/cloudsdktool/google-cloud-cli
-#    waitFor: []
-#    entrypoint: 'bash'
-#    args:
-#      - '-c'
-#      - 'gcloud auth login; kubectl config view'
-#    env:
-#      - 'CLOUDSDK_COMPUTE_ZONE=us-central1'
-#      - 'CLOUDSDK_CONTAINER_CLUSTER=ci-autopilot-cluster'
-
   - id: "Build base image"
     name: 'gcr.io/cloud-builders/docker'
     waitFor: []
-    args: ["build", ".", "-t", "kerbi"]
+    args:
+      - "build"
+      - "."
+      - "-t"
+      - "test-image:latest"
 
-  - id: "Run rspec"
-    name: gcr.io/google.com/cloudsdktool/google-cloud-cli
+  - id: "Pull Kind Test Runner Image"
+    name: 'gcr.io/cloud-builders/docker'
+    waitFor: []
+    args:
+      - "pull"
+      - "us-central1-docker.pkg.dev/nectar-bazaar/public/kind-test-runner:latest"
+
+  - id: "Run Tests in kind cluster"
+    name: 'gcr.io/cloud-builders/docker'
     waitFor:
       - "Build base image"
-      - "Get google-cloud-cli"
-    entrypoint: 'bash'
+      - "Pull Kind Test Runner Image"
     args:
-      - '-c'
-      - 'docker run kerbi test'
-    env:
-      - 'CLOUDSDK_COMPUTE_ZONE=us-central1'
-      - 'CLOUDSDK_CONTAINER_CLUSTER=ci-autopilot-cluster'
+      - "run"
+      - "-v"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "--net=host"
+      - "us-central1-docker.pkg.dev/nectar-bazaar/public/kind-test-runner:latest"
 
 #  - id: 'Run tests and push coverage'
 #    name: 'gcr.io/cloud-builders/docker'
