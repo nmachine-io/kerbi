@@ -63,37 +63,71 @@ backend:
 
 Zero innovation here because Helm does it perfectly.
 
-### 📀 State Management is Explicit and Non-Invasive
+### 📀 Explicit & Non-Invasive State Management
 
-Variable based templating is only feasible IRL if you have a way to store and retreive 
-the sets of variables you generate your manifests with. If you template and apply 
-with `--set backend.image=2` and later want to `--set frontend.image=2`, you'll need to have a way 
-keep `backend.image` equal to `2`, otherwise it will get reverted to its old value. You _could_ use git, 
-but that's not ideal.
-
-Thus, Helm and Kerbi have a notion of "state", where information about template-generating
-operations can be persisted to a `ConfigMap`. Unlike Helm, which couples state with a heavy 
+Kerbi lets you persist and retreive the bundles of the variables you generate your manifests 
+with to a `ConfigMap` or `Secret`. Unlike Helm, which couples state with a heavy 
 handed concept of "releases" (modifies your resources, kubectl's for you, etc...), Kerbi opts 
-for an explicit, non-invasive API: `--read-state` and `--write-state`, that only records 
-computed values.
+for a simple, deliberate, and non-invasive API: `--read-state` and `--write-state`.
 
-Start by explicitly setting up state tracking:
+1. Setup with `init [NAMESPACE]` 
 ```
-kerbi 
+$ kerbi state init demo
+namespaces/demo: Created
+demo/configmaps/kerbi-state-tracker: Created
 ```
 
-1) Kerbi's CLI much more explicit controls,nforcing the user to be deliberate. Additionally, 
+2. Persist a candidate state with `--write @new-candidate`
+```bash
+$ kerbi template demo \
+        --write-state @new-candidate \
+        > manifest.yaml
+```
+
+We have a notion of candidates, because in real life, you will want to 
+apply the resources to your cluster (i.e `kubectl apply -f manifest.yaml`)
+and only really commit this bundle of values if all goes well.
+
+3. List states and promote the candidate with `list` and `promote`
+```bash
+$ kerbi state list
+ TAG                 MESSAGE  ASSIGNMENTS  OVERRIDES  CREATED_AT
+ [cand]-angry-syrup           2            0          4 seconds ago
+
+$ kerbi state promote @candidate
+Updated state[angry-syrup].tag from [cand]-angry-syrup => angry-syrup
+
+$ kerbi state show @latest
+ --------------------------------------------
+ TAG              angry-syrup
+--------------------------------------------
+ MESSAGE
+--------------------------------------------
+ CREATED_AT       2022-04-12 14:43:24 +0100
+--------------------------------------------
+ VALUES           pod.image: nginx          
+                  service.type: ClusterIP
+--------------------------------------------
+ DEFAULT_VALUES   pod.image: nginx          
+                  service.type: ClusterIP
+--------------------------------------------
+ OVERRIDDEN_KEYS
+--------------------------------------------
+```
+
+4. Use the values from `@latest` in our next templating operation, ad infinitum:
 
 ```bash
-$ kerbi template my-app \
-        --set backend.image=thing:1.0.1 \
+$ kerbi template demo \
+        --set pod.image=centos \
         --read-state @latest \
-        --write-state @candidate \       
-        >> manifest.yaml
-```
+        --write-state @new-candidate \
+        > manifest.yaml
 
-```
-table
+$ kerbi state list
+ TAG                MESSAGE  ASSIGNMENTS  OVERRIDES  CREATED_AT
+ [cand]-tame-basin           2            1          5 seconds ago
+ angry-syrup                 2            0          2 minutes ago
 ```
 
 ### 📜 The Templating Languages are Familiar to Most
