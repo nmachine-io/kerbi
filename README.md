@@ -1,4 +1,4 @@
-# Kerbi: K8s State & Templating Engine
+# Kerbi: a Kubernetes State & Templating Engine
 
 [![codecov](https://codecov.io/gh/nectar-cs/kerbi/branch/master/graph/badge.svg)](https://codecov.io/gh/nectar-cs/kerbi)
 [![Gem Version](https://badge.fury.io/rb/kerbi.svg)](https://badge.fury.io/rb/kerbi)
@@ -7,7 +7,9 @@
 Kerbi is a Kubernetes tool most similar to [Helm](https://helm.sh/), with the following key differences:
 - Templating: also based on variables, but (aspires to be) more powerful, flexible, and delightful
 - State management: (aspires to be) less opinionated, less invasive, more deliberate/explict
-- Packaging: nada - Kerbi does not have an "artifact hub" or central registry
+- Packaging: Kerbi does not have an "artifact hub" or central registry
+
+![kerbi](https://user-images.githubusercontent.com/1733617/163004208-7ae6295a-ca47-47a2-8dba-ab013eda9be2.gif)
 
 ## Getting Started
 
