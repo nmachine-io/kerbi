@@ -11,10 +11,6 @@ Kerbi is a Kubernetes tool most similar to [Helm](https://helm.sh/), with the fo
 
 [Documentation.](https://xavier-9.gitbook.io/untitled/walkthroughs/getting-started)
 
-<!---
-![kerbi](https://user-images.githubusercontent.com/1733617/163004208-7ae6295a-ca47-47a2-8dba-ab013eda9be2.gif)
---->
-
 ## Getting Started
 
 Install the `kerbi` RubyGem globally: 
