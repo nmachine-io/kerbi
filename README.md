@@ -144,26 +144,19 @@ $ kerbi template demo \
         > manifest.yaml
 
 ```
-States created with `@new-candidate` have "candidate" status until you promote them, usually after
-applying the new manifest to your cluster (i.e `kubectl apply -f manifest.yaml`).
-
-
-3. Use `list`, `promote`, and `retag`
-```bash
-$ kerbi state list
- TAG                 MESSAGE  ASSIGNMENTS  OVERRIDES  CREATED_AT
- [cand]-angry-syrup           2            0          4 seconds ago
-```
+3. Dry run, promote, apply for real
 
 ```
-$ kerbi state promote @candidate
-Updated state[angry-syrup].tag from [cand]-angry-syrup => angry-syrup
+$ kubectl apply --dry-run=server -f manifest.yaml \
+  && kerbi state retag @candidate 1.0.0 \
+  && kubectl apply -f manifest.yaml  
 ```
 
+4. Inspect
 ```
 $ kerbi state show @latest
  --------------------------------------------
- TAG              angry-syrup
+ TAG              1.0.0
 --------------------------------------------
  MESSAGE
 --------------------------------------------
@@ -179,12 +172,8 @@ $ kerbi state show @latest
 --------------------------------------------
 ```
 
-```
-$ kerbi state retag @latest 1.0.0
-Updated state[1.0.0].tag from angry-syrup => 1.0.0
-```
 
-4. Use the values from `@latest` in our next templating operation, ad infinitum:
+5. Use the values from `@latest` in our next templating operation, ad infinitum:
 
 ```javascript
 $ kerbi template demo \
@@ -193,6 +182,8 @@ $ kerbi template demo \
         --write-state @new-candidate \
         > manifest.yaml
 ```
+
+And inspect:
 ```
 $ kerbi state list
  TAG                MESSAGE  ASSIGNMENTS  OVERRIDES  CREATED_AT
