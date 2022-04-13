@@ -5,15 +5,17 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Kerbi is a Kubernetes tool most similar to [Helm](https://helm.sh/), with the following key differences:
-- Templating: also based on variables, but (aspires to be) more powerful, flexible, and delightful
-- State management: (aspires to be) less opinionated, less invasive, more deliberate/explict
+- Templating: also variable-based, but aspires to be more powerful, flexible, and delightful
+- State management: aspires to be less opinionated, less invasive, more deliberate/explict
 - Packaging: Kerbi does not have an "artifact hub" or central registry
 
+[Complete guide and more.](https://xavier-9.gitbook.io/untitled/walkthroughs/getting-started)
+
+<!---
 ![kerbi](https://user-images.githubusercontent.com/1733617/163004208-7ae6295a-ca47-47a2-8dba-ab013eda9be2.gif)
+--->
 
 ## Getting Started
-
-**[Complete guide and more.](https://xavier-9.gitbook.io/untitled/walkthroughs/getting-started)**
 
 Install the `kerbi` RubyGem globally: 
 
@@ -35,7 +37,9 @@ $ kerbi template demo --set message=special
 text: special demo message
 ```
 
-## Drawing from Helm, Kapitan, and CDK8s
+**[Complete guide and more.](https://xavier-9.gitbook.io/untitled/walkthroughs/getting-started)**
+
+## Features
 
 ### 💲 Variable based like Helm
 
@@ -131,7 +135,7 @@ handed concept of "releases" (that annotates your resources, kubectl's for you, 
 for a simple, deliberate, and non-invasive API: `--read-state` and `--write-state`.
 
 1. Setup with `init [NAMESPACE]` 
-```javascript
+```bash
 $ kerbi state init demo
 namespaces/demo: Created
 demo/configmaps/kerbi-state-tracker: Created
@@ -141,18 +145,18 @@ $ kerbi state list
 ```
 
 2. Persist a candidate state with `--write @new-candidate`
-```javascript
+```bash
 $ kerbi template demo \
         --write-state @new-candidate \
         > manifest.yaml
 
-# States are in "candidate" status until you promote them, usually after
-# applying the new manifest to your cluster (i.e `kubectl apply -f manifest.yaml`).
 ```
+States created with `@new-candidate` have "candidate" status until you promote them, usually after
+applying the new manifest to your cluster (i.e `kubectl apply -f manifest.yaml`).
 
 
 3. Use `list`, `promote`, and `retag`
-```javascript
+```bash
 $ kerbi state list
  TAG                 MESSAGE  ASSIGNMENTS  OVERRIDES  CREATED_AT
  [cand]-angry-syrup           2            0          4 seconds ago
