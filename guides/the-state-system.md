@@ -68,15 +68,13 @@ $ kubectl apply --dry-run=server -f manifest.yaml \
 
 Running `kubectl apply` with `--dry=run-server` will yield a status code of `"0"` if all resources were accepted, and `"1"` otherwise.  Therefore, the statement that comes after the `&&` only gets evaluated if Kubernetes accepted all our resources -  what we wanted.
 
-## Namespace and Release Name
-
-Read the full guide on [Releases and Namespaces](release-and-namespace.md). As a recap
-
 ## Configuration
 
-### State Management Backends
+### &#x20;**State management backends.**
 
-You&#x20;
+Kerbi can store the compiled values data in a `ConfigMap`, a `Secret`, or an arbitrary database. **** You can set this behavior either with a flag e.g `--backend ConfigMap` or in the global Kerbi config e.g `$ kerbi config set state-backend: Secret`.
+
+If you use a `ConfigMap` or `Secret`, you'll need to give Kerbi access your cluster. There
 
 ## Candidate Status
 
