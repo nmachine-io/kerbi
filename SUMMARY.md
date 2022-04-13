@@ -10,4 +10,4 @@
 * [The Templating API](guides/the-templating-api.md)
 * [State Management](guides/the-state-system.md)
 * [Release & Namespace](guides/release-and-namespace.md)
-* [CLI Commands](guides/cli-commands.md)
+* [CLI Reference](guides/cli-commands.md)

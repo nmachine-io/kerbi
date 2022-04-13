@@ -2,7 +2,7 @@
 
 Kerbi's state system lets you store the values it computes as part of certain commands (`template` and `values)`, and then retrieve those values again. Kerbi uses a `ConfigMap`, `Secret`, or database in your cluster to store the data.
 
-For a practical example state management, see the [Walkthrough](simple-kubernetes-example.md#6.-writing-state).&#x20;
+To build an intuitive understanding of state management, see the [Walkthrough](simple-kubernetes-example.md#6.-writing-state).&#x20;
 
 ## Kubernetes Workflow
 
@@ -74,6 +74,12 @@ Running `kubectl apply` with `--dry=run-server` will yield a status code of `"0"
 
 Kerbi can store the compiled values data in a `ConfigMap`, a `Secret`, or an arbitrary database. **** You can set this behavior either with a flag e.g `--backend ConfigMap` or in the global Kerbi config e.g `$ kerbi config set state-backend: Secret`.
 
+{% hint style="warning" %}
+**Only `ConfigMap` currently works**
+
+Secret and database are not yet finished.
+{% endhint %}
+
 If you use a `ConfigMap` or `Secret`, you'll need to give Kerbi **access your cluster**. The examples below show the three different ways to do that.&#x20;
 
 {% tabs %}
@@ -130,6 +136,34 @@ ca_crt_path = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
 {% endtabs %}
 
 Note that each configuration above can also be passed as a flag in any state touching operation, e.g `$ kerbi template --k8s-auth-type in-cluster`.
+
+## Tag Substitutions
+
+We can feed the CLI special expressions instead of literals tag. When Kerbi encounters a special keyword, formatted as `@<keyword>`, it will attempt to resolve it to a literal tag name. Depending on the keyword, the resolved tag may or may not refer to an existing state tag.&#x20;
+
+### The `@latest` keyword
+
+Resolves to the tag of the **newest **_**non**_**-candidate** state (as given by `created_at`). Behavior is the same during read and write operations.&#x20;
+
+Example: `$ kerbi state show @latest`
+
+### The `@candidate` keyword
+
+Resolves to the tag of the **newest candidate** state (as given by `created_at`). Behavior is the same during read and write operations.&#x20;
+
+Example: `$ kerbi state retag @candidate 1.2.3`
+
+### The `@new-candidate` keyword
+
+Resolves to a random, free (not yet taken by existing states) tag **with a candidate status prefix**. Only works for write operations.&#x20;
+
+Example: `$ kerbi values show -f v2.yaml --write-state @new-candidate`. The name of the new state in this case resolved to `"[cand]-purple-purse"`
+
+### The `@random` keyword
+
+Resolves to a random, free (not yet taken by existing states) tag **without a candidate status prefix**. Only works for write operations.&#x20;
+
+Example: `$ kerbi values show -f v2.yaml --write-state @random`. The name of the new state in this case resolved to `"spiky-goose"`
 
 ## State Attributes
 
@@ -221,38 +255,6 @@ $ kerbi state promote @candidate
 You can also delete all candidate states with one command:
 
 ```
-$ kerbi state prune-candidates
+$ kerbi state prune-candidates 
 ```
-
-## Edge Case Behavior
-
-&#x20;
-
-## Tag Substitutions
-
-We can feed the CLI special expression instead of literals tag. When Kerbi encounters a special keyword, formatted as `@<keyword>`, it will attempt to resolve it to a literal tag name. Depending on the keyword, the resolved tag may or may not refer to an existing state tag.&#x20;
-
-### The `@latest` keyword
-
-Resolves to the tag of the **newest **_**non**_**-candidate** state (as given by `created_at`). Behavior is the same during read and write operations.&#x20;
-
-Example: `$ kerbi state show @latest`
-
-### The `@candidate` keyword
-
-Resolves to the tag of the **newest candidate** state (as given by `created_at`). Behavior is the same during read and write operations.&#x20;
-
-Example: `$ kerbi state retag @candidate 1.2.3`
-
-### The `@new-candidate` keyword
-
-Resolves to a random, free (not yet taken by existing states) tag **with a candidate status prefix**. Only works for write operations.&#x20;
-
-Example: `$ kerbi values show -f v2.yaml --write-state @new-candidate`. The name of the new state in this case resolved to `"[cand]-purple-purse"`
-
-### The `@random` keyword
-
-Resolves to a random, free (not yet taken by existing states) tag **without a candidate status prefix**. Only works for write operations.&#x20;
-
-Example: `$ kerbi values show -f v2.yaml --write-state @random`. The name of the new state in this case resolved to `"spiky-goose"`
 
