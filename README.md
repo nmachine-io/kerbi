@@ -9,7 +9,7 @@ Kerbi is a Kubernetes tool most similar to [Helm](https://helm.sh/), with the fo
 - State management: aspires to be less opinionated, less invasive, more deliberate/explict
 - Packaging: Kerbi does not have an "artifact hub" or central registry
 
-[Complete guide and more.](https://xavier-9.gitbook.io/untitled/walkthroughs/getting-started)
+[Documentation.](https://xavier-9.gitbook.io/untitled/walkthroughs/getting-started)
 
 <!---
 ![kerbi](https://user-images.githubusercontent.com/1733617/163004208-7ae6295a-ca47-47a2-8dba-ab013eda9be2.gif)
@@ -37,7 +37,7 @@ $ kerbi template demo --set message=special
 text: special demo message
 ```
 
-**[Complete guide and more.](https://xavier-9.gitbook.io/untitled/walkthroughs/getting-started)**
+**[Documentation.](https://xavier-9.gitbook.io/untitled/walkthroughs/getting-started)**
 
 ## Features
 
