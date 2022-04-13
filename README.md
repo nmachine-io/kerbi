@@ -153,10 +153,14 @@ applying the new manifest to your cluster (i.e `kubectl apply -f manifest.yaml`)
 $ kerbi state list
  TAG                 MESSAGE  ASSIGNMENTS  OVERRIDES  CREATED_AT
  [cand]-angry-syrup           2            0          4 seconds ago
+```
 
+```
 $ kerbi state promote @candidate
 Updated state[angry-syrup].tag from [cand]-angry-syrup => angry-syrup
+```
 
+```
 $ kerbi state show @latest
  --------------------------------------------
  TAG              angry-syrup
@@ -173,7 +177,9 @@ $ kerbi state show @latest
 --------------------------------------------
  OVERRIDDEN_KEYS
 --------------------------------------------
+```
 
+```
 $ kerbi state retag @latest 1.0.0
 Updated state[1.0.0].tag from angry-syrup => 1.0.0
 ```
@@ -186,7 +192,8 @@ $ kerbi template demo \
         --read-state @latest \
         --write-state @new-candidate \
         > manifest.yaml
-
+```
+```
 $ kerbi state list
  TAG                MESSAGE  ASSIGNMENTS  OVERRIDES  CREATED_AT
  [cand]-tame-basin           2            1          5 seconds ago
