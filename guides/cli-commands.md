@@ -1,4 +1,6 @@
-# CLI Commands
+# CLI Reference
+
+## Root Commands
 
 ### $ `kerbi template [RELEASE] [options]`
 
@@ -38,7 +40,7 @@ defaults to $(kubectl config current-context)
 
 </details>
 
-``
+## Values Commands
 
 ### `$ kerbi values show [options]`
 
@@ -49,12 +51,26 @@ Prints out all values compiled by Kerbi for the project in the current directory
 <summary>Options</summary>
 
 ```
--o, --output-format [FORMAT] output format type, "yaml" or "json", defaults to "yaml", e.g -o json
--f, --value-file [FILE]      extra values file to be loaded (repeatable) e.g -f dev.yaml -f aws.yaml
-    --read-state [ID/TYPE]   merge values from given state record into final values          
-    --write-state [ID/TYPE]  write compiled values into given state record
-    --namespace [NAME]       use this namespace in state operations 
-    --set [ASSIGNMENT]       inline value assignment to be loaded (repeatable) e.g  --set x.y=z
+
+  -p, [--project-root=PROJECT-ROOT]                # Project root. An abs path, a rel path, or remote (/foo, foo, @foo/bar)
+  -o, [--output-format=OUTPUT-FORMAT]              # Specify YAML, JSON, or table
+                                                   # Possible values: yaml, json, table
+  -f, [--values-file=VALUES-FILE]                  # Name of a values file to be loaded.
+  --set, [--inline-value=INLINE-VALUE]             # An inline variable assignment, e.g --set x.y=foo --set x.z=bar
+      [--load-defaults], [--no-load-defaults]      # Automatically load values.yaml. Defaults to true.
+                                                   # Default: true
+  -n, [--namespace=NAMESPACE]                      # for state operations, tell kerbi that the state
+               configmap/secret is in this namespace
+      [--state-backend=STATE-BACKEND]              # Persistent store to keep track of applied values (configmap, secret)
+                                                   # Possible values: configmap, secret
+      [--read-state=READ-STATE]                    # Merge values from given state record into final values.
+      [--write-state=WRITE-STATE]                  # write compiled values into given state record
+      [--auth-type=AUTH-TYPE]                      # Strategy for connecting to target cluster (defaults to kube-config)
+                                                   # Possible values: kube-config, in-cluster, basic, token
+      [--kube-config-path=KUBE-CONFIG-PATH]        # path to your kube-config file, defaults to ~/.kube/config
+      [--kube-config-context=KUBE-CONFIG-CONTEXT]  # context to use in your kube config,
+defaults to $(kubectl config current-context)
+
 ```
 
 </details>
