@@ -70,13 +70,159 @@ Running `kubectl apply` with `--dry=run-server` will yield a status code of `"0"
 
 ## Configuration
 
-### &#x20;**State management backends.**
+### **State management backends**
 
 Kerbi can store the compiled values data in a `ConfigMap`, a `Secret`, or an arbitrary database. **** You can set this behavior either with a flag e.g `--backend ConfigMap` or in the global Kerbi config e.g `$ kerbi config set state-backend: Secret`.
 
-If you use a `ConfigMap` or `Secret`, you'll need to give Kerbi access your cluster. There
+If you use a `ConfigMap` or `Secret`, you'll need to give Kerbi **access your cluster**. The examples below show the three different ways to do that.&#x20;
+
+{% tabs %}
+{% tab title="KubeConfig (default)" %}
+```
+$ kerbi config set auth-type kube-config
+```
+
+
+
+What you probably want for human operation. If you have a `~/.kube/config.yaml` on your machine, then this should work without any further configuration. The following settings are available:
+
+
+
+```
+$ kerbi config set kube-config-path /path/to/your/kube/config
+$ kerbi config set kube-config-context <e.g gke-stagging-cluster>
+```
+{% endtab %}
+
+{% tab title="Access Token" %}
+```
+$ kerbi config set auth-type access-token
+```
+
+\
+Probably what you want in CI/CD if you have a [ServiceAccount](the-state-system.md#kubernetes-workflow) and a remote cluster. You need to supply an access token, a.k.a bearer token:
+
+
+
+```
+$ kerbi config set auth-type k8s-access-token <token>
+```
+{% endtab %}
+
+{% tab title="In-Cluster" %}
+```
+$ kerbi config set auth-type in-cluster
+```
+
+
+
+Probably what you want if running Kerbi inside a pod. You don't need to supply any additional auth credentials; Kerbi will authenticate using the following values:
+
+
+
+{% code title="pseudocode" %}
+```
+token_path = '/var/run/secrets/kubernetes.io/serviceaccount/token'
+ca_crt_path = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+```
+{% endcode %}
+{% endtab %}
+{% endtabs %}
+
+Note that each configuration above can also be passed as a flag in any state touching operation, e.g `$ kerbi template --k8s-auth-type in-cluster`.
+
+## State Attributes
+
+What makes up a state record? Kerbi strives to be lightweight, and thus only stores a small amount of data for each state record, namely:
+
+* `tag` - its unique name, which can be anything
+* `message` any human readable note, or perhaps a git commit id
+* `values` the final values computed by `template` or `values show`
+* `default_values` the final **default** values computed by `template` or `values show`
+* `created_at` an ISO8601 timestamp
+
+You can easily inspect any state with the CLI:
+
+{% tabs %}
+{% tab title="Table output" %}
+```
+$ kerbi state show @latest
+
+ --------------------------------------------
+ TAG              1.0.0
+--------------------------------------------
+ MESSAGE
+--------------------------------------------
+ CREATED_AT       2022-04-12 14:43:24 +0100
+--------------------------------------------
+ VALUES           pod.image: centos          
+                  service.type: ClusterIP
+--------------------------------------------
+ DEFAULT_VALUES   pod.image: nginx          
+                  service.type: ClusterIP
+--------------------------------------------
+ OVERRIDDEN_KEYS  pod.image
+--------------------------------------------
+```
+{% endtab %}
+
+{% tab title="JSON output" %}
+```json
+$ kerbi state show @latest -o json
+
+{
+  "tag": "0.0.1",
+  "message": null,
+  "created_at": "2022-04-13 10:32:55 +0100",
+  "values": {
+    "pod": {
+      "image": "centos"
+    },
+    "service": {
+      "type": "ClusterIP"
+    }
+  },
+  "default_values": {
+    "pod": {
+      "image": "nginx"
+    },
+    "service": {
+      "type": "ClusterIP"
+    }
+  },
+  "overridden_keys": [
+    "pod.image"
+  ]
+}
+```
+{% endtab %}
+{% endtabs %}
 
 ## Candidate Status
+
+States have a "candidate" flag to make it possible to implement the conceptual workflow described in the first section. In short, you want a state to be in candidate mode until you know it has been successfully applied to the cluster.&#x20;
+
+### Designation
+
+To make Kerbi as simple as possible, there is no special attribute to designate candidacy, only a special prefix `[cand]-`. So any state that begins with `[cand]-` is treated as a candidate. Conversely, if you want to promote a state to non-candidate _and_ rename it in one go, just:
+
+```
+$ kerbi state retag @candidate <a-new-name>
+```
+
+### Promoting and Pruning
+
+To promote a state and keep its name, run:
+
+```
+$ kerbi state promote @candidate
+```
+
+You can also delete all candidate states with one command:
+
+```
+$ kerbi state prune-candidates
+```
 
 ## Edge Case Behavior
 
@@ -96,7 +242,7 @@ Example: `$ kerbi state show @latest`
 
 Resolves to the tag of the **newest candidate** state (as given by `created_at`). Behavior is the same during read and write operations.&#x20;
 
-Example: `$ kerbi state retag @candidate @candidate-two`
+Example: `$ kerbi state retag @candidate 1.2.3`
 
 ### The `@new-candidate` keyword
 
