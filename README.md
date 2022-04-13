@@ -139,9 +139,6 @@ for a simple, deliberate, and non-invasive API: `--read-state` and `--write-stat
 $ kerbi state init demo
 namespaces/demo: Created
 demo/configmaps/kerbi-state-tracker: Created
-
-$ kerbi state list
- TAG                 MESSAGE  ASSIGNMENTS  OVERRIDES  CREATED_AT
 ```
 
 2. Persist a candidate state with `--write @new-candidate`
