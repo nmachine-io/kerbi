@@ -2,10 +2,11 @@
 
 * [Welcome](README.md)
 
-## Walkthroughs
+## Guides
 
-* [Getting Started](walkthroughs/getting-started.md)
-* [Simple Kubernetes Example](walkthroughs/simple-kubernetes-example.md)
-* [The Mixer API](walkthroughs/the-mixer-api.md)
-* [The Templating API](walkthroughs/the-templating-api.md)
-* [CLI Commands](walkthroughs/cli-commands.md)
+* [Getting Started](guides/getting-started.md)
+* [Walkthrough](guides/simple-kubernetes-example.md)
+* [The Mixer API](guides/the-mixer-api.md)
+* [The Templating API](guides/the-templating-api.md)
+* [The State System](guides/the-state-system.md)
+* [CLI Commands](guides/cli-commands.md)

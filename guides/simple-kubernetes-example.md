@@ -1,4 +1,4 @@
-# Simple Kubernetes Example
+# Walkthrough
 
 Let's do something useful: generate some Kubernetes-bound YAML. We'll create the resource descriptors for a tiny [Pod](https://kubernetes.io/docs/concepts/workloads/pods/) running `nginx` along with a [Service](https://kubernetes.io/docs/concepts/services-networking/service/).
 
@@ -66,7 +66,7 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: hello-kerbi
-  namespace: default
+  namespace: demo
 spec:
   containers:
   - name: main
@@ -78,7 +78,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: hello-kerbi
-  namespace: default
+  namespace: demo
 spec:
   selector:
     app: hello-kerbi
@@ -90,7 +90,7 @@ spec:
 
 {% tab title="Kubernetes" %}
 ```bash
-$ kerbi template default . > manifest.yaml
+$ kerbi template demo > manifest.yaml
 $ kubectl apply -f manifest.yaml
 ```
 {% endtab %}
@@ -159,7 +159,7 @@ service:
 Running `kerbi template default .` yields the output you would expect. We can also choose to also apply our `production.yaml` by using `-f` flag in the command:
 
 ```
-$ kerbi template default . -f production.yaml
+$ kerbi template demo -f production.yaml
 ```
 
 This makes our Service become a LoadBalancer:
@@ -175,7 +175,7 @@ spec:
 Finally, we can use `--set` to achieve the same effect, but without creating a new values file:
 
 ```
-$ kerbi template default . --set service.type=LoadBalancer
+$ kerbi template demo --set service.type=LoadBalancer
 ```
 
 ## 3. Patching After Loading
@@ -201,7 +201,7 @@ Kerbi::Globals.mixers << HelloWorld
 ```yaml
 metadata:
   annotations:
-    author: <%= ENV['USER'] %>
+    author: person
   labels:
     app: hello-kerbi
 ```
@@ -213,9 +213,9 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: hello-kerbi
-  namespace: default
+  namespace: demo
   annotations:
-    author: xavier
+    author: person
   labels:
     app: hello-kerbi
 spec:
@@ -229,9 +229,9 @@ apiVersion: v1
 kind: Service
 metadata:
   name: hello-kerbi
-  namespace: default
+  namespace: demo
   annotations:
-    author: xavier
+    author: person
   labels:
     app: hello-kerbi
 spec:
@@ -240,6 +240,7 @@ spec:
     app: hello-kerbi
   ports:
   - port: 80
+
 ```
 {% endtab %}
 {% endtabs %}
@@ -332,7 +333,7 @@ spec:
 {% endtab %}
 {% endtabs %}
 
-## 5. Playing in the Interactive Console
+## 5. Interactive Console
 
 Another thing that sets Kerbi apart is the ability to touch your code. Using the **`kerbi console`** command, we'll open up an [**IRB session**](https://www.digitalocean.com/community/tutorials/how-to-use-irb-to-explore-ruby) do what we please with our code:
 
@@ -353,10 +354,221 @@ irb(kerbi):005:0> mixer.run
 {:apiVersion=>"v1", :kind=>"Service", :metadata=>{:name=>"hello-kerbi", :namespace=>"default", :annotations=>{:author=>"xavier"}, :labels=>{:app=>"hello-kerbi"}}, :spec=>{:type=>"ClusterIP", :selector=>{:app=>"hello-kerbi"}, :ports=>[{:port=>80}]}}
 ```
 
-## 6. Managing State
+## 6. Writing State
 
-You need a way to keep track of the values you use to generate your latest manifest. If you pushed using `--set backend.image=2` and then later `--set frontend.image=2`, the second invokation would revert `backend.image` to its default from `values.yaml`. Big problem.
+You need a way to keep track of the values you use to generate your latest manifest. If you applied a templated manifest that used `--set backend.image=2` and then later `--set frontend.image=2`, then the second invokation would revert `backend.image` to its default from `values.yaml`. Big problem.
+
+Kerbi has an [**inbuilt state mechanism**](the-state-system.md) that lets you store the values it computes as part of certain commands (`template` and `values)`, and then retrieve those values again. Kerbi uses a `ConfigMap` in your cluster to store the data. Tell Kerbi to create that `ConfigMap`:
+
+```
+$ kerbi state init demo
+
+namespaces/demo: Created
+demo/configmaps/kerbi-state-tracker: Created
+```
+
+Now let's template again, but with a new option `--write-state`: &#x20;
+
+{% tabs %}
+{% tab title="Template Command" %}
+```
+$ kerbi template demo \
+        --set pod.image=ruby \
+        --write-state @new-candidate \
+        > manifest.yaml
+```
+{% endtab %}
+
+{% tab title="manifest.yaml" %}
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hello-kerbi
+  namespace: demo
+  annotations:
+    author: person
+  labels:
+    app: hello-kerbi
+spec:
+  containers:
+  - name: main
+    image: nginx:alpine
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-kerbi
+  namespace: demo
+  annotations:
+    author: person
+  labels:
+    app: hello-kerbi
+spec:
+  type: ClusterIP
+  selector:
+    app: hello-kerbi
+  ports:
+  - port
+```
+{% endtab %}
+{% endtabs %}
+
+Let's use Kerbi's state inspection commands: `list` and `show`:
+
+{% tabs %}
+{% tab title="$ kerbi state list" %}
+```
+$ kerbi state list
+
+  TAG                 MESSAGE  ASSIGNMENTS  OVERRIDES  CREATED_AT
+ [cand]-brave-toner           2            1          4 seconds ago
+```
+{% endtab %}
+
+{% tab title="$ kerbi state show" %}
+```
+$ kerbi state show @candidate
+
+--------------------------------------------
+ TAG              [cand]-brave-toner
+--------------------------------------------
+ MESSAGE
+--------------------------------------------
+ CREATED_AT       2022-04-13 10:21:50 +0100
+--------------------------------------------
+ VALUES           pod.image: ruby           
+                  service.type: ClusterIP
+--------------------------------------------
+ DEFAULT_VALUES   pod.image: nginx          
+                  service.type: ClusterIP
+--------------------------------------------
+ OVERRIDDEN_KEYS  pod
+--------------------------------------------
+```
+{% endtab %}
+{% endtabs %}
+
+The meanings of special words like `@candidate`, `@new-candidate`, and `@latest` are covered in the [State System guide](the-state-system.md).&#x20;
+
+## 7. Promoting and Retagging States
+
+Now for the sake of realism, let's run `kubectl apply -f manifest`. That worked, so we feel good about these values. Let's promote our latest state:
+
+{% tabs %}
+{% tab title="$ kerbi state promote" %}
+```
+$ kerbi state promote @candidate
+
+Updated state[brave-toner].tag from [cand]-brave-toner => brave-toner
+```
+{% endtab %}
+
+{% tab title="$ kerbi state retag  (optional)" %}
+```
+$ kerbi state retag @latest 0.0.1
+
+Updated state[0.0.1].tag from brave-toner => 0.0.1
+```
+{% endtab %}
+{% endtabs %}
+
+The name of our state has changed:
+
+{% tabs %}
+{% tab title="$ kerbi state list" %}
+```
+$ kerbi state list
+
+ TAG    MESSAGE  ASSIGNMENTS  OVERRIDES  CREATED_AT
+ 0.0.1           2            1          a minute ago
+```
+{% endtab %}
+
+{% tab title="$ kerbi state show" %}
+```
+$ kerbi state show @latest
+
+--------------------------------------------
+ TAG              0.0.1
+--------------------------------------------
+ MESSAGE
+--------------------------------------------
+ CREATED_AT       2022-04-13 10:32:55 +0100
+--------------------------------------------
+ VALUES           pod.image: ruby           
+                  service.type: ClusterIP
+--------------------------------------------
+ DEFAULT_VALUES   pod.image: nginx          
+                  service.type: ClusterIP
+--------------------------------------------
+ OVERRIDDEN_KEYS  pod
+--------------------------------------------
+
+```
+{% endtab %}
+{% endtabs %}
+
+## 8. Retrieving State
+
+It's finally time to make use of the state we saved. Let's template the manifest again, with a new value assignment, but also with the old `pod.image=ruby` assignment:
+
+{% tabs %}
+{% tab title="$ kerbi template" %}
+```
+$ kerbi template demo \
+        --read-state @latest \
+        --write-state @new-candidate \
+        > manifest.yaml
+```
+{% endtab %}
+
+{% tab title="manifest.yaml" %}
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hello-kerbi
+  namespace: demo
+  annotations:
+    author: person
+  labels:
+    app: hello-kerbi
+spec:
+  containers:
+  - name: main
+    image: ruby:alpine
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-kerbi
+  namespace: demo
+  annotations:
+    author: person
+  labels:
+    app: hello-kerbi
+spec:
+  type: LoadBalancer
+  selector:
+    app: hello-kerbi
+  ports:
+  - port: 80
+```
+{% endtab %}
+{% endtabs %}
+
+We see in the manifest that the values from the old state (`pod.image=ruby`) were successfully applied which is what we wanted to do. Inspecting the state shows we have a new entry, as expected:&#x20;
 
 ```
 $ kerbi state list
+
+  TAG              MESSAGE  ASSIGNMENTS  OVERRIDES  CREATED_AT
+ [cand]-warm-tap           2            2          11 seconds ago
+ 0.0.1                     2            1          10 minutes ago
 ```
+
