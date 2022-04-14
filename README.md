@@ -130,31 +130,29 @@ with to a `ConfigMap` or `Secret`. Unlike Helm, which couples state with a heavy
 handed concept of "releases" (that annotates your resources, kubectl's for you, etc...), Kerbi opts 
 for a simple, deliberate, and non-invasive API: `--read-state` and `--write-state`.
 
-1. Setup with `init [NAMESPACE]` 
-```bash
-$ kerbi state init demo
-namespaces/demo: Created
-demo/configmaps/kerbi-state-tracker: Created
+`our-cd-pipeline.sh`
 ```
+$ kerbi state init <release_name / namespace> \
+        --backend=ConfigMap 
+        --allow-existing
 
-2. Persist a candidate state with `--write @new-candidate`
-```bash
-$ kerbi template demo \
+$ kerbi config set k8s-auth-type <your-strategy>
+
+$ kerbi template <release_name / namespace> \
+        --set some.deployment.image=v2 \
+        --read-state @latest \
         --write-state @new-candidate \
         > manifest.yaml
 
-```
-3. Dry run, promote, apply for real
-
-```
 $ kubectl apply --dry-run=server -f manifest.yaml \
   && kerbi state retag @candidate 1.0.0 \
   && kubectl apply -f manifest.yaml  
 ```
 
-4. Inspect
+
+For human operators: `#show`
 ```
-$ kerbi state show @latest
+$ kerbi state show 
  --------------------------------------------
  TAG              1.0.0
 --------------------------------------------
@@ -172,27 +170,13 @@ $ kerbi state show @latest
 --------------------------------------------
 ```
 
-
-5. Use the values from `@latest` in our next templating operation, ad infinitum:
-
-```javascript
-$ kerbi template demo \
-        --set pod.image=centos \
-        --read-state @latest \
-        --write-state @new-candidate \
-        > manifest.yaml
-```
-
-And inspect:
+For human operators: `#list`
 ```
 $ kerbi state list
  TAG                MESSAGE  ASSIGNMENTS  OVERRIDES  CREATED_AT
  [cand]-tame-basin           2            1          5 seconds ago
  1.0.0                       2            0          2 minutes ago
 ```
-
-
-
 
 
 ## ⌨️ Interactive Console
