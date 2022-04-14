@@ -5,8 +5,8 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: <%= consts::RESOURCE_NAME %>
-  namespace: <%= release_name %>
+  name: <%= values[:cm_name] %>
+  namespace: <%= values[:namespace] %>
 data: <%= embed({consts::ENTRIES_ATTR => entries_json}) %>
 
 ---
@@ -14,4 +14,4 @@ data: <%= embed({consts::ENTRIES_ATTR => entries_json}) %>
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: <%= release_name %>
+  name: <%= values[:namespace] %>

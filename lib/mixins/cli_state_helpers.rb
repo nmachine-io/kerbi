@@ -91,13 +91,16 @@ module Kerbi
       # generate an instance of the corresponding backend
       # class.
       # @return [Kerbi::State::Backend]
-      def generate_state_backend(namespace=nil)
-        if run_opts.state_backend_type == 'configmap'
+      def generate_state_backend(release_name: nil, namespace: nil)
+        if run_opts.state_backend_type.downcase.strip == 'configmap'
           auth_bundle = Kerbi::Utils::Cli.make_k8s_auth_bundle(run_opts)
           Kerbi::State::ConfigMapBackend.new(
             auth_bundle,
+            release_name || run_opts.release_name,
             namespace || run_opts.cluster_namespace
           )
+        else
+          raise Kerbi::UnsupportedBackendError
         end
       end
     end

@@ -1,24 +1,10 @@
 module Kerbi
   module Cli
     class StateHandler < BaseHandler
-      cmd_meta Kerbi::Consts::CommandSchemas::INIT_STATE
-      # @param [String] namespace refers to a Kubernetes namespace
-      def init(namespace)
-        state_backend(namespace).provision_missing_resources(
-          verbose: run_opts.verbose?
-        )
-        ns_key = Kerbi::Consts::OptionSchemas::NAMESPACE
-        Kerbi::ConfigFile.patch({ns_key => namespace})
-      end
-
-      cmd_meta Kerbi::Consts::CommandSchemas::STATE_STATUS
-      def status
-        state_backend.test_connection(verbose: run_opts.verbose?)
-      end
-
       cmd_meta Kerbi::Consts::CommandSchemas::LIST_STATE
-      def list
+      def list(release_name)
         prep_opts(Kerbi::Consts::OptionDefaults::LIST_STATE)
+        mem_release_name(release_name)
         echo_data(
           state_backend.entries,
           table_serializer: Kerbi::Cli::EntryRowSerializer,
@@ -28,8 +14,9 @@ module Kerbi
 
       cmd_meta Kerbi::Consts::CommandSchemas::SHOW_STATE
       # @param [String] tag_expr e.g 1.9.1, @latest
-      def show(tag_expr)
+      def show(release_name, tag_expr)
         prep_opts(Kerbi::Consts::OptionDefaults::LIST_STATE)
+        mem_release_name(release_name)
         entry = find_readable_entry(tag_expr)
         echo_data(
           entry,
@@ -41,7 +28,8 @@ module Kerbi
       cmd_meta Kerbi::Consts::CommandSchemas::RETAG_STATE
       # @param [String] old_tag_expr e.g 1.9.1, @latest
       # @param [String] new_tag_expr e.g 1.9.1, @latest
-      def retag(old_tag_expr, new_tag_expr)
+      def retag(release_name, old_tag_expr, new_tag_expr)
+        mem_release_name(release_name)
         entry = find_readable_entry(old_tag_expr)
         old_tag = entry.retag(new_tag_expr)
         touch_and_save_entry(entry, tag: old_tag)
@@ -49,7 +37,8 @@ module Kerbi
 
       cmd_meta Kerbi::Consts::CommandSchemas::PROMOTE_STATE
       # @param [String] tag_expr e.g 1.9.1, @latest
-      def promote(tag_expr)
+      def promote(release_name, tag_expr)
+        mem_release_name(release_name)
         entry = find_readable_entry(tag_expr)
         old_name = entry.promote
         touch_and_save_entry(entry, tag: old_name)
@@ -57,7 +46,8 @@ module Kerbi
 
       cmd_meta Kerbi::Consts::CommandSchemas::DEMOTE_STATE
       # @param [String] tag_expr e.g 1.9.1, @latest
-      def demote(tag_expr)
+      def demote(release_name, tag_expr)
+        mem_release_name(release_name)
         entry = find_readable_entry(tag_expr)
         old_name = entry.demote
         touch_and_save_entry(entry, tag: old_name)
@@ -67,7 +57,8 @@ module Kerbi
       # @param [String] tag_expr e.g 1.9.1, @latest
       # @param [String] attr_name e.g message
       # @param [String] new_value e.g i am a new message
-      def set(tag_expr, attr_name, new_value)
+      def set(release_name, tag_expr, attr_name, new_value)
+        mem_release_name(release_name)
         entry = find_readable_entry(tag_expr)
         old_value = entry.assign_attr(attr_name, new_value)
         touch_and_save_entry(entry, attr_name => old_value)
@@ -75,7 +66,8 @@ module Kerbi
 
       cmd_meta Kerbi::Consts::CommandSchemas::DELETE_STATE
       # @param [String] tag_expr e.g 1.9.1, @latest
-      def delete(tag_expr)
+      def delete(release_name, tag_expr)
+        mem_release_name(release_name)
         entry = find_readable_entry(tag_expr)
         state_backend.delete_entry(entry)
         new_count = state_backend.entries.count
@@ -83,7 +75,8 @@ module Kerbi
       end
 
       cmd_meta Kerbi::Consts::CommandSchemas::PRUNE_CANDIDATES_STATE
-      def prune_candidates
+      def prune_candidates(release_name)
+        mem_release_name(release_name)
         old_count = entry_set.entries.count
         entry_set.prune_candidates
         state_backend.save

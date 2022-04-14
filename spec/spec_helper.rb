@@ -11,9 +11,9 @@ end
 
 # @param [String] namespace
 # @return [Kerbi::State::ConfigMapBackend]
-def make_backend(namespace)
+def make_backend(release_name, namespace=nil)
   auth_bundle = Kerbi::Utils::Cli.make_k8s_auth_bundle(run_opts)
-  Kerbi::State::ConfigMapBackend.new(auth_bundle, namespace)
+  Kerbi::State::ConfigMapBackend.new(auth_bundle, release_name, namespace)
 end
 
 # @return [Kubeclient::Client]

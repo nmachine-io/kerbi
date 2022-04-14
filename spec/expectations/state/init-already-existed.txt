@@ -1,2 +1,0 @@
-\e[1;39;49mnamespaces/kerbi-spec: \e[0m\e[1;32;49mAlready existed\e[0m
-\e[1;39;49mkerbi-spec/configmaps/kerbi-state-tracker: \e[0m\e[1;32;49mAlready existed\e[0m

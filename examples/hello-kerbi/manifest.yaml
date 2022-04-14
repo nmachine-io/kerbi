@@ -2,11 +2,15 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: hello-kerbi
-  namespace: default
+  namespace: demo
+  annotations:
+    author: person
+  labels:
+    app: hello-kerbi
 spec:
   containers:
   - name: main
-    image: nginx
+    image: ruby:alpine
 
 ---
 
@@ -14,9 +18,13 @@ apiVersion: v1
 kind: Service
 metadata:
   name: hello-kerbi
-  namespace: default
+  namespace: demo
+  annotations:
+    author: person
+  labels:
+    app: hello-kerbi
 spec:
-  type: ClusterIP
+  type: LoadBalancer
   selector:
     app: hello-kerbi
   ports:

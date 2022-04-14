@@ -1,4 +1,4 @@
 \e[1;39;49m1. Create Kubernetes client: \e[0m\e[1;32;49mSuccess\e[0m
 \e[1;39;49m2. List cluster namespaces: \e[0m\e[1;32;49mSuccess\e[0m
 \e[1;39;49m3. Target namespace kerbi-spec exists: \e[0m\e[1;32;49mSuccess\e[0m
-\e[1;39;49m4. Resource kerbi-spec/cm/kerbi-state-tracker exists: \e[0m\e[1;32;49mSuccess\e[0m
+\e[1;39;49m4. Resource kerbi-spec/cm/kerbi-kerbi-spec-state-tracker exists: \e[0m\e[1;32;49mSuccess\e[0m

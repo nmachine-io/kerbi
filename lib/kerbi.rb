@@ -49,6 +49,7 @@ require_relative './main/code_gen'
 require_relative './main/mixer'
 
 require_relative './cli/entry_serializers'
+require_relative './cli/release_serializer'
 
 require_relative './mixins/entry_tag_logic'
 require_relative './state/entry_set'
@@ -63,4 +64,5 @@ require_relative './cli/config_handler'
 require_relative './cli/values_handler'
 require_relative './cli/project_handler'
 require_relative './cli/state_handler'
+require_relative './cli/release_handler'
 require_relative './cli/root_handler'

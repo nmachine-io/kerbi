@@ -11,10 +11,12 @@ module Kerbi
       ##
       # Convenience method for instantiating (and memoizating) a state
       # management backend.
-      # @param [String] namespace force a k8s ns, otherwise uses run option's
-      # @return [Kerbi::State::Backend]
-      def state_backend(namespace=nil)
-        @_state_backend ||= generate_state_backend(namespace)
+      def state_backend(**opts)
+        @_state_backend ||= generate_state_backend(**opts)
+      end
+
+      def mem_release_name(release_name)
+        self.run_opts.release_name = release_name
       end
 
       ##

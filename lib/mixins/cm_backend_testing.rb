@@ -24,7 +24,6 @@ module Kerbi
       end
 
       def test_connection(options={})
-        res_name = Kerbi::State::Consts::RESOURCE_NAME
         exceptions = []
 
         schema = [
@@ -42,7 +41,7 @@ module Kerbi
           },
           {
             method: :load_resource,
-            message: "4. Resource #{namespace}/cm/#{res_name} exists"
+            message: "4. Resource #{namespace}/cm/#{cm_name} exists"
           }
         ]
 

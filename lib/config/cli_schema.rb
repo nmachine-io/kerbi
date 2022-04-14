@@ -19,21 +19,21 @@ module Kerbi
       NAMESPACE = "namespace"
       WRITE_STATE_MESSAGE = "message"
 
-      K8S_AUTH_TYPE = "auth-type"
+      K8S_AUTH_TYPE = "k8s-auth-type"
       KUBE_CONFIG_PATH = "kube-config-path"
       KUBE_CONFIG_CONTEXT = "kube-config-context"
-      K8S_USERNAME = "username"
-      K8S_PASSWORD = "password"
-      K8S_TOKEN = "token"
+      KUBE_ACCESS_TOKEN = "k8s-access-token"
+      K8S_USERNAME = "k8s-username"
+      K8S_PASSWORD = "k8s-password"
+      K8S_TOKEN = "k8s-access-token"
 
       LEGAL_CONFIG_FILE_KEYS = [
         STATE_BACKEND_TYPE,
-        NAMESPACE,
         K8S_AUTH_TYPE,
         KUBE_CONFIG_CONTEXT,
         K8S_USERNAME,
         K8S_PASSWORD,
-        K8S_TOKEN
+        KUBE_ACCESS_TOKEN
       ]
     end
 
@@ -48,6 +48,10 @@ module Kerbi
       }.freeze
 
       LIST_STATE = BASE.merge(
+        OptionKeys::OUTPUT_FMT => "table"
+      ).freeze
+
+      LIST_RELEASE = BASE.merge(
         OptionKeys::OUTPUT_FMT => "table"
       ).freeze
     end
@@ -190,7 +194,12 @@ defaults to $(kubectl config current-context)"
 
       STATE_SUPER = {
         name: "state",
-        desc: "Command group for state actions: test, list, show"
+        desc: "Command group for state actions"
+      }.freeze
+
+      RELEASE_SUPER = {
+        name: "release",
+        desc: "Command group for release actions"
       }.freeze
 
       CONFIG_SUPER = {
@@ -234,8 +243,8 @@ defaults to $(kubectl config current-context)"
         ]
       }.freeze
 
-      STATE_STATUS = {
-        name: "status",
+      RELEASE_STATUS = {
+        name: "status [RELEASE_NAME]",
         desc: "Verbosely assesses the readiness of your state-tracking backend.",
         options: [
           *OptionSchemas::KUBERNETES_OPTIONS,
@@ -243,9 +252,18 @@ defaults to $(kubectl config current-context)"
         ]
       }.freeze
 
-      LIST_STATE = {
+      RELEASE_LIST = {
         name: "list",
-        desc: "Print all recorded states for this namespace",
+        desc: "Lists all known Kerbi releases by scanning cluster ConfigMaps/Secrets",
+        options: [
+          *OptionSchemas::KUBERNETES_OPTIONS,
+          OptionSchemas::VERBOSE
+        ]
+      }.freeze
+
+      LIST_STATE = {
+        name: "list [RELEASE_NAME]",
+        desc: "Print all recorded states for [RELEASE_NAME]",
         options: [
           *OptionSchemas::KUBERNETES_OPTIONS,
           OptionSchemas::OUTPUT_FMT
@@ -253,8 +271,8 @@ defaults to $(kubectl config current-context)"
         defaults: OptionDefaults::LIST_STATE
       }.freeze
 
-      INIT_STATE = {
-        name: "init [NAMESPACE]",
+      INIT_RELEASE = {
+        name: "init [RELEASE_NAME]",
         desc: "Provision the resources for persisting the state",
         options: [
           *OptionSchemas::KUBERNETES_OPTIONS,
@@ -263,7 +281,7 @@ defaults to $(kubectl config current-context)"
       }.freeze
 
       SHOW_STATE = {
-        name: "show [TAG]",
+        name: "show [RELEASE_NAME] [TAG]",
         desc: "Print summary of state identified by [TAG]",
         options: [
           *OptionSchemas::KUBERNETES_OPTIONS,
@@ -273,7 +291,7 @@ defaults to $(kubectl config current-context)"
       }.freeze
 
       RETAG_STATE = {
-        name: "retag [OLD_TAG] [NEW_TAG]",
+        name: "retag [RELEASE_NAME] [OLD_TAG] [NEW_TAG]",
         desc: "Updates entry's tag given by [OLD_TAG] to [NEW_TAG]",
         options: [
           *OptionSchemas::KUBERNETES_OPTIONS,
@@ -283,7 +301,7 @@ defaults to $(kubectl config current-context)"
       }.freeze
 
       PROMOTE_STATE = {
-        name: "promote [TAG]",
+        name: "promote [RELEASE_NAME] [TAG]",
         desc: "Removes the [cand]- prefix from the given entry,
                removing its candidate status.",
         options: [
@@ -293,7 +311,7 @@ defaults to $(kubectl config current-context)"
       }.freeze
 
       DEMOTE_STATE = {
-        name: "promote [TAG]",
+        name: "promote [RELEASE_NAME] [TAG]",
         desc: "Adds the [cand]- prefix from the given entry,
                giving it candidate status.",
         options: [
@@ -303,7 +321,7 @@ defaults to $(kubectl config current-context)"
       }.freeze
 
       DELETE_STATE = {
-        name: "delete [TAG]",
+        name: "delete [RELEASE_NAME] [TAG]",
         desc: "Deletes the state entry given by [TAG]",
         options: [
           *OptionSchemas::KUBERNETES_OPTIONS,
@@ -311,7 +329,7 @@ defaults to $(kubectl config current-context)"
       }.freeze
 
       SET_STATE_ATTR = {
-        name: "set [TAG] [ATTR_NAME] [NEW_VALUE]",
+        name: "set [RELEASE_NAME] [TAG] [ATTR_NAME] [NEW_VALUE]",
         desc: "Updates state entry [TAG], attribute [ATTR_NAME] to value [NEW_VALUE]",
         options: [
           *OptionSchemas::KUBERNETES_OPTIONS,
@@ -319,7 +337,7 @@ defaults to $(kubectl config current-context)"
       }.freeze
 
       PRUNE_CANDIDATES_STATE = {
-        name: "prune-candidates",
+        name: "prune-candidates [RELEASE_NAME]",
         desc: "Deletes all state entries flagged as candidates",
         options: [
           *OptionSchemas::KUBERNETES_OPTIONS,

@@ -7,6 +7,7 @@ module Kerbi
   class RunOpts
 
     attr_reader :options
+    attr_accessor :release_name
 
     # @param [Hash{Symbol, Object}] cli_opts CLI args as a hash via Thor
     # @param [Hash{Symbol, Object}] defaults contextual defaults (per cmd)
@@ -111,7 +112,8 @@ module Kerbi
 
     # @return [String]
     def state_backend_type
-      options[consts::STATE_BACKEND_TYPE]
+      value = options[consts::STATE_BACKEND_TYPE]
+      value.is_a?(String) ? value : ''
     end
 
     # @return [String]

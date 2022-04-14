@@ -3,7 +3,7 @@ require_relative './../spec_helper'
 RSpec.describe Kerbi::State::ConfigMapBackend do
 
   let(:namespace) { "kerbi-spec" }
-  let(:cm_name) { Kerbi::State::Consts::RESOURCE_NAME }
+  let(:cm_name) { Kerbi::State::ConfigMapBackend.mk_cm_name(namespace) }
 
   before :each do
     create_ns(namespace)
@@ -12,7 +12,7 @@ RSpec.describe Kerbi::State::ConfigMapBackend do
   end
 
   describe "#provision_missing_resources" do
-    let(:backend) { make_backend(namespace) }
+    let(:backend) { make_backend(namespace, namespace) }
 
     context "when the namespace does not exist" do
       it "provisions accordingly" do
@@ -45,8 +45,8 @@ RSpec.describe Kerbi::State::ConfigMapBackend do
     end
 
     after :each do
-      expect(backend.read_write_ready?).to eq(true)
       expect(backend.namespace_exists?).to eq(true)
+      expect(backend.read_write_ready?).to eq(true)
       expect(backend.resource_exists?).to eq(true)
     end
   end
@@ -55,9 +55,10 @@ RSpec.describe Kerbi::State::ConfigMapBackend do
     context "with 0 entries" do
       it "outputs a descriptor with the right basic properties" do
         result = make_backend("xyz").template_resource([])
+        metadata = (result || {})[:metadata] || {}
         expect(result[:kind]).to eq('ConfigMap')
-        expect(result[:metadata][:name]).to eq('kerbi-state-tracker')
-        expect(result[:metadata][:namespace]).to eq('xyz')
+        expect(metadata[:name]).to eq('kerbi-xyz-state-tracker')
+        expect(metadata[:namespace]).to eq('xyz')
         expect(result[:data][:entries]).to eq("[]")
       end
     end
@@ -75,12 +76,12 @@ RSpec.describe Kerbi::State::ConfigMapBackend do
   describe "#namespace_exists?" do
     context "when the namespace exists" do
       it "returns true" do
-        expect(make_backend("default").namespace_exists?).to be_truthy
+        expect(make_backend('', "default").namespace_exists?).to be_truthy
       end
     end
     context "when the namespace does not exist" do
       it "returns false" do
-        expect(make_backend("nope").namespace_exists?).to be_falsey
+        expect(make_backend('', "nope").namespace_exists?).to be_falsey
       end
     end
   end
@@ -94,7 +95,7 @@ RSpec.describe Kerbi::State::ConfigMapBackend do
     end
 
     it "creates a configmap with the right contents" do
-      subject = make_backend(namespace)
+      subject = make_backend(namespace, namespace)
       descriptor = subject.template_resource(entries)
       subject.apply_resource(descriptor)
       sleep(1)

@@ -3,7 +3,6 @@ require 'io/console'
 
 RSpec.describe "$ kerbi [COMMAND]" do
   let(:namespace) { "kerbi-spec" }
-  let(:cm_name) { Kerbi::State::Consts::RESOURCE_NAME }
   let(:exps_dir) { "root" }
   let(:root_dir) { "#{__dir__}/../../examples/hello-kerbi" }
 
@@ -32,7 +31,7 @@ RSpec.describe "$ kerbi [COMMAND]" do
 
       before :each do
         create_ns(namespace)
-        delete_cm(cm_name, namespace)
+        delete_cm(backend.cm_name, namespace)
         backend = make_backend(namespace)
         backend.provision_missing_resources(quiet: true)
       end

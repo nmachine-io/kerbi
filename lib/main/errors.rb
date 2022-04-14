@@ -78,6 +78,12 @@ module Kerbi
     end
   end
 
+  class UnsupportedBackendError < Error
+    def initialize(name)
+      super("Unsupported state backend type")
+    end
+  end
+
   class EntryValidationError < Error
     MSG = "Cannot write state because of validation errors: "
 

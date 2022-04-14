@@ -5,6 +5,7 @@ module Kerbi
       CREATOR_VAL = "kerbi"
       ENTRIES_ATTR = :entries
       RESOURCE_NAME = "kerbi-state-tracker"
+      CM_REGEX = /kerbi-(.*)-state-tracker/
     end
   end
 end

@@ -59,6 +59,7 @@ module Kerbi
 
       sub_cmd_meta Kerbi::Consts::CommandSchemas::VALUES_SUPER, ValuesHandler
       sub_cmd_meta Kerbi::Consts::CommandSchemas::PROJECT_SUPER, ProjectHandler
+      sub_cmd_meta Kerbi::Consts::CommandSchemas::RELEASE_SUPER, ReleaseHandler
       sub_cmd_meta Kerbi::Consts::CommandSchemas::STATE_SUPER, StateHandler
       sub_cmd_meta Kerbi::Consts::CommandSchemas::CONFIG_SUPER, ConfigHandler
     end
