@@ -593,3 +593,15 @@ $ kubectl apply --dry-run=server -f manifest.yaml \
   && kubectl apply -f manifest.yaml  
 ```
 {% endcode %}
+
+## 10. Managing Releases
+
+If you start tracking more states for more apps, you'll need to start thinking about releases.
+
+```
+$ kerbi release list
+NAME    BACKEND    NAMESPACE   RESOURCE
+demo    ConfigMap  demo        kerbi-demo-state-tracker
+demo    ConfigMap  default     kerbi-demo-state-tracker
+omed    ConfigMap  demo        kerbi-omed-state-tracker
+```

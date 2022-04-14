@@ -72,7 +72,7 @@ Running `kubectl apply` with `--dry=run-server` will yield a status code of `"0"
 
 ### **State management backends**
 
-Kerbi can store the compiled values data in a `ConfigMap`, a `Secret`, or an arbitrary database. **** You can set this behavior either with a flag e.g `--backend ConfigMap` or in the global Kerbi config e.g `$ kerbi config set state-backend: Secret`.
+Kerbi can store the compiled values data in a `ConfigMap`, a `Secret`, or an arbitrary database. **** You can set this behavior either with a flag e.g `--backend ConfigMap` or in the global Kerbi config e.g `$ kerbi config set state-backend: Secret`.&#x20;
 
 {% hint style="warning" %}
 **Only `ConfigMap` currently works**
@@ -142,6 +142,38 @@ ca_crt_path = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
 {% endtabs %}
 
 Note that each configuration above can also be passed as a flag in any state touching operation, e.g `$ kerbi template --k8s-auth-type in-cluster`.
+
+### Release Name versus Namespace
+
+It makes sense for most Kubernetes apps to define their logical perimeters using a Kubernetes namespace, e.g "all of app 'X''s resources live in namespace 'X',  and all resources in namespace 'X' belong to app 'X'".
+
+For others apps though, this doesn't make sense, either because their resources span multiple namespaces, or because the app is fundamentally cluster-scoped, i.e non-namespaced.&#x20;
+
+When Kerbi or Helm do state operations, they need to to unambiguously reference _exactly one_ app. We use a `release_name`, because as we have just seem, namespace is not powerful enough.&#x20;
+
+But at the same time, **we need to know what namespace** we should read/write the state tracker. This is where our convention differs from Helm's. We say "we'll assume your app fundamentally lives in the namespace `release_name` unless you explicitly give us a `namespace`.
+
+Illustrative <mark style="color:yellow;">**pseudocode**</mark>:
+
+```bash
+# HOW KERBI DOES IT
+release_name = read('release_name')
+namespace = release_name || read('namespace')
+
+# HOW HELM DOES IT
+release_name = read('release_name')
+namespace = read(namespace) || 'default'
+```
+
+This is the actual source code for Kerbi's state `ConfigMap`:
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kerbi-<%= release_name %>-state-tracker
+  namespace: <%= values[:namespace] || release_name %>
+```
 
 ## Tag Substitutions
 
