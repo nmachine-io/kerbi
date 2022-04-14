@@ -150,7 +150,7 @@ $ kubectl apply --dry-run=server -f manifest.yaml \
 ```
 
 
-For human operators: `#show`
+For human operators: `state show`
 ```
 $ kerbi state show 
  --------------------------------------------
@@ -170,12 +170,23 @@ $ kerbi state show
 --------------------------------------------
 ```
 
-For human operators: `#list`
+For human operators: `state list`
 ```
 $ kerbi state list
- TAG                MESSAGE  ASSIGNMENTS  OVERRIDES  CREATED_AT
+
+TAG                MESSAGE  ASSIGNMENTS  OVERRIDES  CREATED_AT
  [cand]-tame-basin           2            1          5 seconds ago
  1.0.0                       2            0          2 minutes ago
+```
+
+For human operators: `release list`
+```
+$ kerbi release list
+
+NAME   STATES LATEST    BACKEND    NAMESPACE   RESOURCE
+demo   0                ConfigMap  demo        kerbi-demo-state-tracker
+demo   3      hot-tuna  ConfigMap  default     kerbi-demo-state-tracker
+omed   5      0.4.2     ConfigMap  demo        kerbi-omed-state-tracker
 ```
 
 
