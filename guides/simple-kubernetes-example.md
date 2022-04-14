@@ -572,3 +572,24 @@ $ kerbi state list
  0.0.1                     2            1          10 minutes ago
 ```
 
+## 9. In Your CD Pipeline
+
+Putting it all together, the following shows what a simple Kubernetes deployment script using Kerbi could look like.
+
+{% code title="my-cd-pipeline.sh" %}
+```
+$ kerbi state init demo --backend=ConfigMap
+
+$ kerbi config set k8s-auth-type <your-strategy>
+
+$ kerbi template <release_name> \
+        --set <however you get your vars in> \
+        --read-state @latest \
+        --write-state @new-candidate \
+        > manifest.yaml
+
+$ kubectl apply --dry-run=server -f manifest.yaml \
+  && kerbi state promote @candidate \
+  && kubectl apply -f manifest.yaml  
+```
+{% endcode %}

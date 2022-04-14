@@ -83,14 +83,16 @@ Secret and database are not yet finished.
 If you use a `ConfigMap` or `Secret`, you'll need to give Kerbi **access your cluster**. The examples below show the three different ways to do that.&#x20;
 
 {% tabs %}
-{% tab title="KubeConfig (default)" %}
+{% tab title="KubeConfig Auth" %}
+To use this auth mode:
+
 ```
-$ kerbi config set auth-type kube-config
+$ kerbi config set k8s-auth-type kube-config
 ```
 
 
 
-What you probably want for human operation. If you have a `~/.kube/config.yaml` on your machine, then this should work without any further configuration. The following settings are available:
+If you have a `~/.kube/config.yaml` on your machine, then this should work without any further configuration. The following settings are available:
 
 
 
@@ -100,9 +102,11 @@ $ kerbi config set kube-config-context <e.g gke-stagging-cluster>
 ```
 {% endtab %}
 
-{% tab title="Access Token" %}
+{% tab title="Access Token Auth" %}
+To use this auth mode:
+
 ```
-$ kerbi config set auth-type access-token
+$ kerbi config set k8s-auth-type access-token
 ```
 
 \
@@ -111,18 +115,20 @@ Probably what you want in CI/CD if you have a [ServiceAccount](the-state-system.
 
 
 ```
-$ kerbi config set auth-type k8s-access-token <token>
+$ kerbi config set k8s-access-token <token>
 ```
 {% endtab %}
 
-{% tab title="In-Cluster" %}
+{% tab title="In-Cluster Auth" %}
+To use this auth mode:
+
 ```
-$ kerbi config set auth-type in-cluster
+$ kerbi config set k8s-auth-type in-cluster
 ```
 
 
 
-Probably what you want if running Kerbi inside a pod. You don't need to supply any additional auth credentials; Kerbi will authenticate using the following values:
+For running Kerbi inside a pod. You don't need to supply any additional auth credentials; Kerbi will authenticate using the following values:
 
 
 
@@ -167,7 +173,7 @@ Example: `$ kerbi values show -f v2.yaml --write-state @random`. The name of the
 
 ## State Attributes
 
-What makes up a state record? Kerbi strives to be lightweight, and thus only stores a small amount of data for each state record, namely:
+What attributes make up a state record? Kerbi strives to be lightweight, and thus only stores a small amount of data for each state record, namely:
 
 * `tag` - its unique name, which can be anything
 * `message` any human readable note, or perhaps a git commit id
@@ -243,6 +249,10 @@ To make Kerbi as simple as possible, there is no special attribute to designate 
 ```
 $ kerbi state retag @candidate <a-new-name>
 ```
+
+### Creation
+
+Because the
 
 ### Promoting and Pruning
 
