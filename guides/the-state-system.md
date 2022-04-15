@@ -1,6 +1,6 @@
-# State Management
+# Releases & States
 
-Kerbi's state system lets you store the values it computes as part of certain commands (`template` and `values)`, and then retrieve those values again. Kerbi uses a `ConfigMap`, `Secret`, or database in your cluster to store the data.
+Kerbi's state management system lets you store the values it computes as part of certain commands (`template` and `values)`, and then retrieve those values again. Kerbi uses a `ConfigMap`, `Secret`, or database in your cluster to store the data.
 
 To build an intuitive understanding of state management, see the [Walkthrough](simple-kubernetes-example.md#6.-writing-state).&#x20;
 

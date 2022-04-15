@@ -1,4 +1,4 @@
-# Kerbi: a Kubernetes State & Templating Engine
+# Kerbi: Kubernetes Templating and Release Management
 
 [![codecov](https://codecov.io/gh/nectar-cs/kerbi/branch/master/graph/badge.svg)](https://codecov.io/gh/nectar-cs/kerbi)
 [![Gem Version](https://badge.fury.io/rb/kerbi.svg)](https://badge.fury.io/rb/kerbi)
@@ -132,13 +132,9 @@ for a simple, deliberate, and non-invasive API: `--read-state` and `--write-stat
 
 `our-cd-pipeline.sh`
 ```
-$ kerbi state init <release_name / namespace> \
-        --backend=ConfigMap 
-        --allow-existing
+$ kerbi release init hello-state
 
-$ kerbi config set k8s-auth-type <your-strategy>
-
-$ kerbi template <release_name / namespace> \
+$ kerbi template hello-state \
         --set some.deployment.image=v2 \
         --read-state @latest \
         --write-state @new-candidate \
@@ -150,9 +146,9 @@ $ kubectl apply --dry-run=server -f manifest.yaml \
 ```
 
 
-For human operators: `state show`
+For human operators:
 ```
-$ kerbi state show 
+$ kerbi state show demo @latest
  --------------------------------------------
  TAG              1.0.0
 --------------------------------------------
@@ -160,26 +156,17 @@ $ kerbi state show
 --------------------------------------------
  CREATED_AT       2022-04-12 14:43:24 +0100
 --------------------------------------------
- VALUES           pod.image: nginx          
+ VALUES           pod.image: centos          
                   service.type: ClusterIP
 --------------------------------------------
  DEFAULT_VALUES   pod.image: nginx          
                   service.type: ClusterIP
 --------------------------------------------
- OVERRIDDEN_KEYS
+ OVERRIDDEN_KEYS  pod.image
 --------------------------------------------
 ```
 
-For human operators: `state list`
-```
-$ kerbi state list
-
-TAG                MESSAGE  ASSIGNMENTS  OVERRIDES  CREATED_AT
- [cand]-tame-basin           2            1          5 seconds ago
- 1.0.0                       2            0          2 minutes ago
-```
-
-For human operators: `release list`
+For human operators:
 ```
 $ kerbi release list
 
