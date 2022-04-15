@@ -132,13 +132,9 @@ for a simple, deliberate, and non-invasive API: `--read-state` and `--write-stat
 
 `our-cd-pipeline.sh`
 ```
-$ kerbi state init <release_name / namespace> \
-        --backend=ConfigMap 
-        --allow-existing
+$ kerbi release init hello-state
 
-$ kerbi config set k8s-auth-type <your-strategy>
-
-$ kerbi template <release_name / namespace> \
+$ kerbi template hello-state \
         --set some.deployment.image=v2 \
         --read-state @latest \
         --write-state @new-candidate \
@@ -150,7 +146,7 @@ $ kubectl apply --dry-run=server -f manifest.yaml \
 ```
 
 
-For human operators: `state show`
+For human operators:
 ```
 $ kerbi state show demo @latest
  --------------------------------------------
@@ -170,7 +166,7 @@ $ kerbi state show demo @latest
 --------------------------------------------
 ```
 
-For human operators: `release list`
+For human operators:
 ```
 $ kerbi release list
 
