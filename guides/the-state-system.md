@@ -171,7 +171,7 @@ This is the actual source code for Kerbi's state `ConfigMap`:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: kerbi-<%= release_name %>-state-tracker
+  name: kerbi-<%= release_name %>-db
   namespace: <%= values[:namespace] || release_name %>
 ```
 

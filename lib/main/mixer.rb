@@ -13,6 +13,11 @@ module Kerbi
     attr_reader :release_name
 
     ##
+    # Namespace (defaults to release_name) from CLI options
+    # @return [String] symbol-keyed hash
+    attr_reader :namespace
+
+    ##
     # Array of res-hashes being aggregated
     # @return [Array<Hash>] list of hashes
     attr_reader :output
@@ -27,12 +32,13 @@ module Kerbi
     # @param [Hash] values the values tree that will be accessible to the subclass
     def initialize(values, opts={})
       @output = []
-      @release_name = opts[:release_name] || "default"
+      @release_name = opts[:release_name]
+      @namespace = opts[:namespace] || @release_name
       @patch_stack = []
       @values = self.class.compute_own_values_subtree(
         values,
         opts[:overwrite_values_root]
-      )
+      ).freeze
     end
 
     ##

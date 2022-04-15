@@ -29,7 +29,7 @@ module Kerbi
         echo_init("namespaces/#{namespace}", ns_existed, opts)
 
         create_resource unless (cm_existed = resource_exists?)
-        echo_init("#{namespace}/configmaps/#{cm_name}", cm_existed, opts)
+        echo_init("configmaps/#{namespace}/#{cm_name}", cm_existed, opts)
       end
 
       ##
@@ -153,7 +153,7 @@ module Kerbi
       end
 
       def self.mk_cm_name(release_name)
-        "kerbi-#{release_name}-state-tracker"
+        "kerbi-#{release_name}-db"
       end
 
       def self.make_client(auth_bundle, api_name)

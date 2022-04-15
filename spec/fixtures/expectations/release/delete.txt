@@ -1,1 +1,1 @@
-Deleted configmaps/kerbi-spec/kerbi-kerbi-spec-state-tracker
+Deleted configmaps/kerbi-spec/kerbi-kerbi-spec-db

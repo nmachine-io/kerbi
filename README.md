@@ -171,9 +171,9 @@ For human operators:
 $ kerbi release list
 
 NAME   STATES LATEST    BACKEND    NAMESPACE   RESOURCE
-demo   0                ConfigMap  demo        kerbi-demo-state-tracker
-demo   3      hot-tuna  ConfigMap  default     kerbi-demo-state-tracker
-omed   5      0.4.2     ConfigMap  demo        kerbi-omed-state-tracker
+demo   0                ConfigMap  demo        kerbi-demo-db
+demo   3      hot-tuna  ConfigMap  default     kerbi-demo-db
+omed   5      0.4.2     ConfigMap  demo        kerbi-omed-db
 ```
 
 

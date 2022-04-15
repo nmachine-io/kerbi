@@ -57,7 +57,7 @@ RSpec.describe Kerbi::State::ConfigMapBackend do
         result = make_backend("xyz").template_resource([])
         metadata = (result || {})[:metadata] || {}
         expect(result[:kind]).to eq('ConfigMap')
-        expect(metadata[:name]).to eq('kerbi-xyz-state-tracker')
+        expect(metadata[:name]).to eq('kerbi-xyz-db')
         expect(metadata[:namespace]).to eq('xyz')
         expect(result[:data][:entries]).to eq("[]")
       end

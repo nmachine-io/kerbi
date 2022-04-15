@@ -121,6 +121,7 @@ RSpec.describe "$ kerbi release [COMMAND]" do
     end
 
     it "works" do
+      puts cli("release list")
       exp_cli_eq_file("release list", exps_dir, "list")
     end
   end

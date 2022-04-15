@@ -364,7 +364,7 @@ Kerbi has an [**inbuilt state mechanism**](the-state-system.md) that lets you st
 $ kerbi state init demo
 
 namespaces/demo: Created
-demo/configmaps/kerbi-state-tracker: Created
+demo/configmaps/kerbi-db: Created
 ```
 
 Now let's template again, but with a new option `--write-state`: &#x20;
@@ -601,7 +601,7 @@ If you start tracking more states for more apps, you'll need to start thinking a
 ```
 $ kerbi release list
 NAME    BACKEND    NAMESPACE   RESOURCE
-demo    ConfigMap  demo        kerbi-demo-state-tracker
-demo    ConfigMap  default     kerbi-demo-state-tracker
-omed    ConfigMap  demo        kerbi-omed-state-tracker
+demo    ConfigMap  demo        kerbi-demo-db
+demo    ConfigMap  default     kerbi-demo-db
+omed    ConfigMap  demo        kerbi-omed-db
 ```
