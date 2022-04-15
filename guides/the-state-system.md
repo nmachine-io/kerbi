@@ -1,6 +1,6 @@
 # Releases & States
 
-Kerbi's state management system lets you store the values it computes as part of certain commands (`template` and `values)`, and then retrieve those values again. Kerbi uses a `ConfigMap`, `Secret`, or database in your cluster to store the data.
+Kerbi's state management system lets you store the values it computes during `$ kerbi template` or `$ kerbi values`, and then retrieve those values again. Kerbi uses a `ConfigMap`, `Secret`, or database in your cluster to store the data.
 
 To build an intuitive understanding of state management, see the [Walkthrough](simple-kubernetes-example.md#6.-writing-state).&#x20;
 
@@ -12,7 +12,7 @@ Your goal as a developer using variable-based templating in a modern CD pipeline
 
 {% tabs %}
 {% tab title="In English" %}
-1. **Template** a new manifest using new values (e.g a new image name) plus the old values
+1. **Template** a new manifest using new values merged onto the last set of values you used
 2. **Try applying** that new manifest to the Kubernetes cluster
 3. **If the apply worked**:
    1. **Store the values** you just used to generate this manifest for next time
@@ -49,11 +49,11 @@ $ helm install foo . \
     --set pod.image=v2
 ```
 
-This is great, but there are some downsides, namely that you are delegating arguably the most critical command Kubernetes in all of Kubernetes - `kubectl apply` - to another tool.
+This is great, but there are some downsides, namely that you are delegating the most critical command in Kubernetes - `kubectl apply` - to another tool.
 
 ### Kerbi Workflow
 
-Kerbi, on the other hand, is designed to never run critical operations like `kubectl apply` on your behalf. So with Kerbi, you can implement this workflow as follows:
+Kerbi, on the other hand, is designed to never run critical operations like `kubectl apply` on your behalf. So with Kerbi, you can implement conceptual workflow as follows:
 
 ```
 $ kerbi template foo \
@@ -89,7 +89,7 @@ You can easily inspect any state with the CLI:
 $ kerbi state show antelope @latest
 
 --------------------------------------------
- RELEASE          zebra
+ RELEASE          antelope
 --------------------------------------------
  TAG              1.0.0
 --------------------------------------------
@@ -142,7 +142,7 @@ $ kerbi state show demo @latest -o json
 
 ## What is a Release?
 
-A release is a collection of states. A release also means "one instance of the app".&#x20;
+A release is a collection of states. Conceptually, a release also means "one instance of the app".&#x20;
 
 ### Name, Namespace, and Resource Name
 
@@ -182,7 +182,7 @@ default              kerbi-antelope-db                    1      3m3s
 
 When you run a command like `$ kerbi template [RELEASE_NAME]`, Kerbi will look for a `ConfigMap` called `kerbi-[RELEASE_NAME]-db` in the namespace `[RELEASE_NAME]`.&#x20;
 
-If instead you run it with `--namespace` e.g `$ kerbi template [RELEASE_NAME] --namespace [NAMESPACE]` then it will look for the `ConfigMap` in the namespace `[NAMESPACE]`.
+If you pass an explicit namespace, e.g `$ kerbi template [RELEASE_NAME] --namespace [NAMESPACE]` then it will look for the `ConfigMap` in the namespace `[NAMESPACE]`.
 
 Remember you can easily figure out what's where with:
 
@@ -310,8 +310,6 @@ Example: `$ kerbi values show -f v2.yaml --write-state @new-candidate`. The name
 Resolves to a random, free (not yet taken by existing states) tag **without a candidate status prefix**. Only works for write operations.&#x20;
 
 Example: `$ kerbi values show -f v2.yaml --write-state @random`. The name of the new state in this case resolved to `"spiky-goose"`
-
-## State Attributes
 
 ## Candidate Status
 
