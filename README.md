@@ -1,4 +1,4 @@
-# Kerbi: Templating & State Management for Kubernetes
+# Kerbi: Templating & State Management for K8s Apps
 
 [![codecov](https://codecov.io/gh/nectar-cs/kerbi/branch/master/graph/badge.svg)](https://codecov.io/gh/nectar-cs/kerbi)
 [![Gem Version](https://badge.fury.io/rb/kerbi.svg)](https://badge.fury.io/rb/kerbi)
@@ -152,7 +152,7 @@ $ kubectl apply --dry-run=server -f manifest.yaml \
 
 For human operators: `state show`
 ```
-$ kerbi state show 
+$ kerbi state show demo @latest
  --------------------------------------------
  TAG              1.0.0
 --------------------------------------------
@@ -160,23 +160,14 @@ $ kerbi state show
 --------------------------------------------
  CREATED_AT       2022-04-12 14:43:24 +0100
 --------------------------------------------
- VALUES           pod.image: nginx          
+ VALUES           pod.image: centos          
                   service.type: ClusterIP
 --------------------------------------------
  DEFAULT_VALUES   pod.image: nginx          
                   service.type: ClusterIP
 --------------------------------------------
- OVERRIDDEN_KEYS
+ OVERRIDDEN_KEYS  pod.image
 --------------------------------------------
-```
-
-For human operators: `state list`
-```
-$ kerbi state list
-
-TAG                MESSAGE  ASSIGNMENTS  OVERRIDES  CREATED_AT
- [cand]-tame-basin           2            1          5 seconds ago
- 1.0.0                       2            0          2 minutes ago
 ```
 
 For human operators: `release list`
