@@ -580,16 +580,16 @@ Putting it all together, the following shows what a simple Kubernetes deployment
 ```
 $ kerbi state init demo --backend=ConfigMap
 
-$ kerbi config set k8s-auth-type <your-strategy>
+$ kerbi config set k8s-auth-type in-cluster
 
-$ kerbi template <release_name> \
+$ kerbi template demo \
         --set <however you get your vars in> \
         --read-state @latest \
         --write-state @new-candidate \
         > manifest.yaml
 
 $ kubectl apply --dry-run=server -f manifest.yaml \
-  && kerbi state promote @candidate \
+  && kerbi state promote demo @candidate \
   && kubectl apply -f manifest.yaml  
 ```
 {% endcode %}
@@ -600,8 +600,9 @@ If you start tracking more states for more apps, you'll need to start thinking a
 
 ```
 $ kerbi release list
-NAME    BACKEND    NAMESPACE   RESOURCE
-demo    ConfigMap  demo        kerbi-demo-state-tracker
-demo    ConfigMap  default     kerbi-demo-state-tracker
-omed    ConfigMap  demo        kerbi-omed-state-tracker
+ NAME  BACKEND    NAMESPACE  RESOURCE       STATES  LATEST
+
+ bass  ConfigMap  bass       kerbi-bass-db  5       real-palsy
+ tuna  ConfigMap  default    kerbi-tuna-db  2       baser-mitre
+ tuna  ConfigMap  tuna       kerbi-tuna-db  1       0.0.1
 ```
