@@ -39,14 +39,14 @@ text: special demo message
 
 ### 💲 Variable based like Helm
 
-Like with Helm, your control knobs are key-value pairs that you pass in at runtime,
-which your templating logic uses to interpolate the final manifest. Your have your 
-baseline `values.yaml` file, override files passed via CLI, e.g
-`-f production.yaml`, inline assignments, e.g `--set backend.ingress.enabled=false`,
-and previously committed values, e.g `--read-state @latest`:
+Like Helm, your templating logic depends on key-value pairs (aka variables) you pass in at runtime. 
+Your have a baseline `values.yaml` file and then three possible sources of extra variables:
+- override files, e.g`-f production.yaml`, 
+- inline assignments, e.g `--set backend.ingress.enabled=false`,
+- previously committed values, e.g `--read-state @latest` via state management (covered later)
 
 ```yaml
-$ kerbi values show \
+$ kerbi values show demo \
         -f production.yaml \
         --set backend.image=centos \
         --read-state 1.2.3
@@ -56,11 +56,14 @@ service:
   type: NodePort
 ```
 
+
+
+
 ### 📜 Basic Templating with YAML embedded with Ruby
 
-Kerbi lets you do your basic templating in YAML embedded with Ruby (`ERB`), 
-keeping your template files readable and singular focused, while moving any
-real logic to mixers, shown in the following section.
+Kerbi lets you do your basic templating with Ruby embedded YAML (`ERB`), 
+keeping your template files readable to all and singularly focused, 
+while your more complex logic goes in Mixers shown in the following section.
 
 **`deployment.yaml.erb`**
 ```yaml
@@ -80,19 +83,15 @@ spec:
                    ) %>
 ```
 
-Helm's Go-in-YAML is awkward to some, but sticking to Kubernetes' lingua 
-franca - YAML - is the right choice. Kapitan and CDK8S offer a better
-DX, but only if you 1) know their dialects or object models well,
-and 2) actually need hardcore templating everywhere in your project.
+
 
 
 ### 🚦 Powerful Higher Order Templating Model
 
-You define `Mixer` classes from where you explicitly load up your 
-lower level template files (say `deployment.yaml.erb`), other mixers,
-entire directories, or even raw Helm charts. Loader functions like `file()`
-and `dir()` return a sanitized `Array<Hash>`, making it easy to filter, patch, or modify 
-output.
+Mixers give you control and organization. Inside your `Mixer` subclasses, 
+you can explicitly load up your lower level template files (like `deployment.yaml.erb` above), other mixers,
+entire directories, or even raw Helm charts. Loader functions like `file()` and `dir()` return a 
+sanitized `Array<Hash>`, making it easy to filter, patch, or modify output.
 
 **`backend/mixer.rb`**
 ```ruby
@@ -115,11 +114,6 @@ class MyApp::Backend::Mixer < Kerbi::Mixer
   end
 end
 ```
-
-You can opt for trivial or complicated mixers, depending on your needs and taste. They
-primarily exist to 1) help you keep real logic out of your template files, and 2) let 
-you organize and DRY up as you see fit.
-
 
 
 
@@ -149,22 +143,20 @@ $ kubectl apply --dry-run=server -f manifest.yaml \
 For human operators:
 ```
 $ kerbi release list
- NAME  BACKEND    NAMESPACE  RESOURCE       STATES  LATEST
-
- bass  ConfigMap  bass       kerbi-bass-db  5       real-palsy
- tuna  ConfigMap  default    kerbi-tuna-db  2       baser-mitre
- tuna  ConfigMap  tuna       kerbi-tuna-db  1       0.0.1
+NAME  BACKEND    NAMESPACE  RESOURCE       STATES  LATEST
+bass  ConfigMap  bass       kerbi-bass-db  4       3.43.3
+tuna  ConfigMap  default    kerbi-tuna-db  2       baser-mitre
+tuna  ConfigMap  tuna       kerbi-tuna-db  1       0.0.1
 ```
 
 For human operators:
 ```
 $ kerbi state list bass
- TAG               MESSAGE  ASSIGNMENTS  OVERRIDES  CREATED_AT
- 3.43.3                     2            1          3 seconds ago
- 3.43.2                     2            1          5 seconds ago
- keen-ethyl                 2            0          8 seconds ago
- [cand]-key-satin           2            0          16 seconds ago
- 3.43.1                     2            1          2 minutes ago
+TAG               MESSAGE  ASSIGNMENTS  OVERRIDES  CREATED_AT
+3.43.3                     2            1          3 seconds ago
+3.43.2                     2            1          5 seconds ago
+keen-ethyl                 2            0          8 seconds ago
+3.43.1                     2            1          2 minutes ago
 ```
 
 
@@ -172,7 +164,7 @@ $ kerbi state list bass
 
 My favorite thing about CDK8s is that it feels like a normal computer program. 
 Kerbi takes that one step further by letting you run your code in interactive mode (via IRB), 
-making it super easy to play with and debug your code:
+making it easy to play with your code or the Kerbi lib.
 
 ```ruby
 $ kerbi console --set backend.database.enabled=true
@@ -180,11 +172,13 @@ $ kerbi console --set backend.database.enabled=true
 irb(kerbi):001:0> values
 => {:backend=>{:database=>{:enabled=>"true"}}}
 
-irb(kerbi):002:0> MyApp::Backend::Mixer.new(values).persistence_enabled?
-=> true
-
 irb(kerbi):003:0> MyApp::Backend::Mixer.new(values).run
 => [{:apiVersion=>"appsV1", :kind=>"Deployment", :metadata=>{:name=>"backend", :namespace=>"default"}, :spec=>"foo"}]
+
+irb(kerbi):003:0> Kerbi::ConfigFile.read
+=> {'k8es-auth-type': 'kube-config'}
+
+
 ```
 
 ## Getting Involved
