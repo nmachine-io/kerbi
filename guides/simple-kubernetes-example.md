@@ -60,7 +60,7 @@ spec:
 {% endtab %}
 
 {% tab title="Output" %}
-{% code title="$ kerbi template default" %}
+{% code title="$ kerbi template demo" %}
 ```yaml
 apiVersion: v1
 kind: Pod
@@ -601,7 +601,6 @@ If you start tracking more states for more apps, you'll need to start thinking a
 ```
 $ kerbi release list
  NAME  BACKEND    NAMESPACE  RESOURCE       STATES  LATEST
-
  bass  ConfigMap  bass       kerbi-bass-db  5       real-palsy
  tuna  ConfigMap  default    kerbi-tuna-db  2       baser-mitre
  tuna  ConfigMap  tuna       kerbi-tuna-db  1       0.0.1

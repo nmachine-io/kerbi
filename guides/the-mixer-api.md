@@ -30,13 +30,13 @@ Kerbi::Globals.mixers << TrivialMixer
 
 {% tab title="Output" %}
 ```yaml
-$ kerbi template default .
+$ kerbi template default
 
 hello: Mister Kerbi
 ---
 hola: Señor Kerbi
 ---
-bonjour: Monsieur Ke
+bonjour: Monsieur Kerbi
 ```
 {% endtab %}
 {% endtabs %}
@@ -49,11 +49,15 @@ bonjour: Monsieur Ke
 
 ## Attributes: [`values`](https://www.rubydoc.info/gems/kerbi/1.1.47/Kerbi/Mixer#values-instance\_method) and [`release_name`](https://www.rubydoc.info/gems/kerbi/1.1.47/Kerbi/Mixer#release\_name-instance\_method)``
 
-Mixers are instantiated with two important attributes: `values` and `release_name`.&#x20;
+Mixers are instantiated with three important attributes:
 
 **`values: Hash`** is an immutable dict containing the values compiled by Kerbi at start time (gathered from `values.yaml`, extra values files, and inline `--set x=y` assignments).
 
-**`release_name: String`** holds the `release_name` value, which is the second argument you pass in the CLI in the `template` command.&#x20;
+**`release_name: String`** the value of `template [RELEASE_NAME]`.
+
+**`namespace: String`** the value of `--namespace [NAMESPACE]` from the CLI, if you pass it.
+
+
 
 Accessing `values` and `release_name` is straightforward:
 
@@ -75,7 +79,7 @@ Kerbi::Globals.mixers << AttributesDemoMixer
 
 {% tab title="Output" %}
 ```yaml
-$ kerbi template my-kubernetes-namespace --set x=y
+$ kerbi template default --set x=y
 
 x_equals: y
 ---
