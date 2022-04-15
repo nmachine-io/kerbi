@@ -21,7 +21,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: minimal-ingress
-  annotations: <%= embed(file("ingress-annotations"), indent: 3) %>
+  annotations: <%= embed(file("ingress-annotations")) %>
 spec:
   #...
 <% end %>

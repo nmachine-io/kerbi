@@ -132,9 +132,9 @@ for a simple, deliberate, and non-invasive API: `--read-state` and `--write-stat
 
 `our-cd-pipeline.sh`
 ```
-$ kerbi release init hello-state
+$ kerbi release init tuna
 
-$ kerbi template hello-state \
+$ kerbi template tuna \
         --set some.deployment.image=v2 \
         --read-state @latest \
         --write-state @new-candidate \
@@ -148,32 +148,23 @@ $ kubectl apply --dry-run=server -f manifest.yaml \
 
 For human operators:
 ```
-$ kerbi state show demo @latest
- --------------------------------------------
- TAG              1.0.0
---------------------------------------------
- MESSAGE
---------------------------------------------
- CREATED_AT       2022-04-12 14:43:24 +0100
---------------------------------------------
- VALUES           pod.image: centos          
-                  service.type: ClusterIP
---------------------------------------------
- DEFAULT_VALUES   pod.image: nginx          
-                  service.type: ClusterIP
---------------------------------------------
- OVERRIDDEN_KEYS  pod.image
---------------------------------------------
+$ kerbi release list
+ NAME  BACKEND    NAMESPACE  RESOURCE       STATES  LATEST
+
+ bass  ConfigMap  bass       kerbi-bass-db  5       real-palsy
+ tuna  ConfigMap  default    kerbi-tuna-db  2       baser-mitre
+ tuna  ConfigMap  tuna       kerbi-tuna-db  1       0.0.1
 ```
 
 For human operators:
 ```
-$ kerbi release list
-
-NAME   STATES LATEST    BACKEND    NAMESPACE   RESOURCE
-demo   0                ConfigMap  demo        kerbi-demo-db
-demo   3      hot-tuna  ConfigMap  default     kerbi-demo-db
-omed   5      0.4.2     ConfigMap  demo        kerbi-omed-db
+$ kerbi state list bass
+ TAG               MESSAGE  ASSIGNMENTS  OVERRIDES  CREATED_AT
+ 3.43.3                     2            1          3 seconds ago
+ 3.43.2                     2            1          5 seconds ago
+ keen-ethyl                 2            0          8 seconds ago
+ [cand]-key-satin           2            0          16 seconds ago
+ 3.43.1                     2            1          2 minutes ago
 ```
 
 
