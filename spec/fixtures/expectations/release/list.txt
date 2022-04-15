@@ -1,0 +1,5 @@
+ NAME  BACKEND    NAMESPACE  RESOURCE                  STATES  LATEST
+
+ tuna  ConfigMap  macron     kerbi-tuna-state-tracker  0
+ dirt  ConfigMap  tuna       kerbi-dirt-state-tracker  ERR     ERR
+ tuna  ConfigMap  tuna       kerbi-tuna-state-tracker  2       1.0.0

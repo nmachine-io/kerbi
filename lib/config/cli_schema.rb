@@ -11,6 +11,7 @@ module Kerbi
 
       RUBY_VER = "ruby-version"
       VERBOSE = "verbose"
+      PRE_CONFIRM = "confirm"
 
       STATE_BACKEND_TYPE = "state-backend"
       READ_STATE = "read-state"
@@ -60,13 +61,15 @@ module Kerbi
 
       PROJECT_ROOT = {
         key: OptionKeys::PROJECT_ROOT,
-        desc: "Project root. An abs path, a rel path, or remote (/foo, foo, @foo/bar)",
+        desc: "Project root. An abs path, a rel path, "\
+              "or remote (/foo, foo, @foo/bar)",
         aliases: "-p"
       }
 
       K8S_AUTH_TYPE = {
         key: OptionKeys::K8S_AUTH_TYPE,
-        desc: "Strategy for connecting to target cluster (defaults to kube-config)",
+        desc: "Strategy for connecting to target cluster "\
+              "(defaults to kube-config)",
         enum: %w[kube-config in-cluster basic token]
       }.freeze
 
@@ -105,7 +108,8 @@ defaults to $(kubectl config current-context)"
 
       STATE_BACKEND_TYPE = {
         key: OptionKeys::STATE_BACKEND_TYPE,
-        desc: "Persistent store to keep track of applied values (configmap, secret)",
+        desc: "Persistent store to keep track of applied "\
+              "values (configmap, secret)",
         enum: %w[configmap secret]
       }.freeze
 
@@ -119,7 +123,8 @@ defaults to $(kubectl config current-context)"
       INLINE_ASSIGNMENT = {
         key: OptionKeys::INLINE_ASSIGNMENT,
         aliases: "--set",
-        desc: "An inline variable assignment, e.g --set x.y=foo --set x.z=bar",
+        desc: "An inline variable assignment, e.g --set x.y=foo "\
+              "--set x.z=bar",
         repeatable: true
       }.freeze
 
@@ -130,7 +135,8 @@ defaults to $(kubectl config current-context)"
 
       STRICT_READ_STATE = {
         key: OptionKeys::STRICT_READ_STATE,
-        desc: "Makes read-state operations fail if the state does not exist for the given tag",
+        desc: "Makes read-state operations fail if the " \
+                "state does not exist for the given tag",
       }.freeze
 
       WRITE_STATE = {
@@ -160,6 +166,12 @@ defaults to $(kubectl config current-context)"
       VERBOSE = {
         key: OptionKeys::VERBOSE,
         desc: "Run in verbose mode",
+        enum: %w[true false]
+      }.freeze
+
+      PRE_CONFIRM = {
+        key: OptionKeys::PRE_CONFIRM,
+        desc: "Skip CLI confirmation",
         enum: %w[true false]
       }.freeze
 
@@ -245,7 +257,8 @@ defaults to $(kubectl config current-context)"
 
       RELEASE_STATUS = {
         name: "status [RELEASE_NAME]",
-        desc: "Verbosely assesses the readiness of your state-tracking backend.",
+        desc: "Verbosely assesses the readiness of your "\
+              "state-tracking backend.",
         options: [
           *OptionSchemas::KUBERNETES_OPTIONS,
           OptionSchemas::VERBOSE
@@ -254,10 +267,21 @@ defaults to $(kubectl config current-context)"
 
       RELEASE_LIST = {
         name: "list",
-        desc: "Lists all known Kerbi releases by scanning cluster ConfigMaps/Secrets",
+        desc: "Lists all known Kerbi releases by scanning cluster" \
+              " ConfigMaps/Secrets",
         options: [
           *OptionSchemas::KUBERNETES_OPTIONS,
           OptionSchemas::VERBOSE
+        ]
+      }.freeze
+
+      RELEASE_DELETE = {
+        name: "delete [RELEASE_NAME]",
+        desc: "Delete the ConfigMap/Secret storing states for"\
+              " this release",
+        options: [
+          *OptionSchemas::KUBERNETES_OPTIONS,
+          OptionSchemas::PRE_CONFIRM
         ]
       }.freeze
 
@@ -330,7 +354,8 @@ defaults to $(kubectl config current-context)"
 
       SET_STATE_ATTR = {
         name: "set [RELEASE_NAME] [TAG] [ATTR_NAME] [NEW_VALUE]",
-        desc: "Updates state entry [TAG], attribute [ATTR_NAME] to value [NEW_VALUE]",
+        desc: "Updates state entry [TAG], attribute "\
+              "[ATTR_NAME] to value [NEW_VALUE]",
         options: [
           *OptionSchemas::KUBERNETES_OPTIONS,
         ]

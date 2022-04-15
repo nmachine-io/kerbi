@@ -38,28 +38,21 @@ module Kerbi
         apply_resource(template_resource([]))
       end
 
-      def self.releases(auth_bundle)
-        client = make_client(auth_bundle, "v1")
-        res_dicts = client.get_config_maps.map(&:to_h).select do |res_dict|
-          name = res_dict.dig(:metadata, :name)
-          name =~ Kerbi::State::Consts::CM_REGEX
-        end
-
-        res_dicts.map do |res_dict|
-          name, namespace = res_dict[:metadata].values_at(:name, :namespace)
-          release = name.match(Kerbi::State::Consts::CM_REGEX)[1]
-          self.new(auth_bundle, release, namespace)
-        end
-      end
-
       ##
       # Creates the configmap given an exact dict representation
       # of its contents. This method doesn't actually get used outside
       # of rspec, but it's super useful there so keeping for time being.
       # @param [Hash] resource_desc
-      def apply_resource(resource_desc)
-        #noinspection RubyResolve
-        client("v1").create_config_map(resource_desc)
+      def apply_resource(resource_desc, mode: 'create')
+        if mode == 'create'
+          #noinspection RubyResolve
+          client("v1").create_config_map(resource_desc)
+        elsif mode == 'update'
+          #noinspection RubyResolve
+          client("v1").update_config_map(resource_desc)
+        else
+          raise "What kind of sick mode is #{mode}?"
+        end
       end
 
       ##
@@ -90,6 +83,10 @@ module Kerbi
         cm_name
       end
 
+      def resource_signature
+        "configmaps/#{namespace}/#{resource_name}"
+      end
+
       protected
 
       ##
@@ -97,6 +94,13 @@ module Kerbi
       def load_resource
         #noinspection RubyResolve
         client("v1").get_config_map(cm_name, namespace).to_h
+      end
+
+      ##
+      # Reads the configmap from Kubernetes, returns its dict representation.
+      def delete_resource
+        #noinspection RubyResolve
+        client("v1").delete_config_map(cm_name, namespace)
       end
 
       ##
@@ -114,7 +118,7 @@ module Kerbi
       # #resources, which is memoized, so may trigger a cluster read.
       # @return [Array<Hash>] entries
       def read_entries
-        str_entries = resource[:data][:entries]
+        str_entries = resource[:data][consts::ENTRIES_ATTR]
         JSON.parse(str_entries)
       end
 
@@ -134,6 +138,20 @@ module Kerbi
         self.class.mk_cm_name(release_name)
       end
 
+      def self.releases(auth_bundle)
+        client = make_client(auth_bundle, "v1")
+        res_dicts = client.get_config_maps.map(&:to_h).select do |res_dict|
+          name = res_dict.dig(:metadata, :name)
+          name =~ Kerbi::State::Consts::CM_REGEX
+        end
+
+        res_dicts.map do |res_dict|
+          name, namespace = res_dict[:metadata].values_at(:name, :namespace)
+          release = name.match(Kerbi::State::Consts::CM_REGEX)[1]
+          self.new(auth_bundle, release, namespace)
+        end
+      end
+
       def self.mk_cm_name(release_name)
         "kerbi-#{release_name}-state-tracker"
       end
@@ -144,6 +162,10 @@ module Kerbi
           api_name,
           **auth_bundle[:options]
         )
+      end
+
+      def self.type_signature
+        "ConfigMap"
       end
 
     end

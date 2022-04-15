@@ -20,7 +20,9 @@ module Kerbi
       end
 
       def read_write_ready?
-        namespace_exists? && resource_exists?
+        namespace_exists? && \
+        resource_exists? && \
+        data_readable?
       end
 
       def test_connection(options={})
@@ -42,6 +44,10 @@ module Kerbi
           {
             method: :load_resource,
             message: "4. Resource #{namespace}/cm/#{cm_name} exists"
+          },
+          {
+            method: :entries,
+            message: "5. Data from resource is readable"
           }
         ]
 
@@ -56,9 +62,12 @@ module Kerbi
         end
 
         if exceptions.any? && options[:verbose]
+          #noinspection RubyResolve
           puts "\n---EXCEPTIONS---\n".colorize(:red).bold
           exceptions.each do |exc|
-            puts "[#{exc[:test]}] #{exc[:exception]}".to_s.colorize(:red).bold
+            base = "[#{exc[:test]}] #{exc[:exception]}"
+            #noinspection RubyResolve
+            puts base.to_s.colorize(:red).bold
             puts exc[:exception].backtrace
             puts "\n\n"
           end
@@ -66,11 +75,16 @@ module Kerbi
       end
 
       def test_list_namespaces
+        #noinspection RubyResolve
         client("v1").get_namespaces.any?
       end
 
       def test_target_ns_exists
         client.get_namespace namespace
+      end
+
+      def data_readable?
+        entries.is_a?(Array)
       end
 
       #noinspection RubyResolve
@@ -86,6 +100,7 @@ module Kerbi
           outcome_str = result.present? ? "Already existed" : "Created"
           color = result.present? ? :green : :blue
           outcome_str = outcome_str.colorize(color)
+          #noinspection RubyResolve
           puts "#{msg}: #{outcome_str}".bold
         end
       end

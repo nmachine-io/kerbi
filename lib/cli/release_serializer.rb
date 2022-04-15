@@ -15,7 +15,7 @@ module Kerbi
       end
 
       def backend
-        "later"
+        object.class.type_signature
       end
 
       def resource
@@ -23,13 +23,24 @@ module Kerbi
       end
 
       def states
-        object.entries.count
+        if object.working?
+          object.entries.count
+        else
+          broken_txt
+        end
       end
 
       def latest
-        object.entry_set.latest&.tag
+        if object.working?
+          object.entry_set.latest&.tag
+        else
+          broken_txt
+        end
       end
 
+      def broken_txt
+        "ERR"
+      end
     end
   end
 end

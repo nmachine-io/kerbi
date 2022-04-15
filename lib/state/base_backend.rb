@@ -2,6 +2,8 @@ module Kerbi
   module State
     class BaseBackend
 
+      attr_reader :is_working
+
       def initialize(options={})
       end
 
@@ -30,6 +32,34 @@ module Kerbi
         @_resource = nil
       end
 
+      def delete
+        delete_resource
+      end
+
+      def resource_signature
+        raise NotImplementedError
+      end
+
+      def prime
+        begin
+          resource
+          entries
+          @is_working = true
+        rescue
+          @is_working = false
+        end
+      end
+
+      # @return [TrueClass|FalseClass]
+      def working?
+        prime if @is_working.nil?
+        @is_working
+      end
+
+      def self.type_signature
+        raise NotImplementedError
+      end
+
       protected
 
       def resource
@@ -46,6 +76,10 @@ module Kerbi
       end
 
       def load_resource
+        raise NotImplementedError
+      end
+
+      def delete_resource
         raise NotImplementedError
       end
 

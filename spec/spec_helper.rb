@@ -63,6 +63,12 @@ def delete_ns(name)
   end
 end
 
+def corrupt_cm(backend)
+  cm_body = backend.template_resource([])
+  cm_body[:data][:entries] = "not json"
+  backend.send(:client).update_config_map(cm_body)
+end
+
 def new_state(tag, dict={})
   set = dict.delete(:state)
   dict[:tag] = tag
@@ -88,7 +94,7 @@ def cli(command, escaped: false)
 end
 
 def load_exp_file(dir, file, ext)
-  path = "#{__dir__}/expectations/#{dir}/#{file}.#{ext}"
+  path = "#{__dir__}/fixtures/expectations/#{dir}/#{file}.#{ext}"
   File.read(path)
 end
 
@@ -110,8 +116,13 @@ def exp_cli_eq_file(cmd, dir, file, ext='txt')
   if ext == 'json'
     expect(JSON.parse(actual_str)).to eq(expected)
   elsif ext == 'yaml'
-    actual = YAML.load_stream(actual_str)
-    expect(actual).to eq(expected)
+    actual = YAML.load_stream(actual_str) rescue 0
+    if actual != 0
+      expect(actual).to eq(expected)
+    else
+      puts actual_str
+      raise "CMD #{cmd} echoed non-YAML (above)"
+    end
   else
     actual = actual_str.gsub(/\s+/, "").gsub("\e", "\\e")
     expect(actual).to eq(expected)

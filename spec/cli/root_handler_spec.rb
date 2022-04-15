@@ -3,6 +3,7 @@ require 'io/console'
 
 RSpec.describe "$ kerbi [COMMAND]" do
   let(:namespace) { "kerbi-spec" }
+  let(:release_name) { "kerbi-spec" }
   let(:exps_dir) { "root" }
   let(:root_dir) { "#{__dir__}/../../examples/hello-kerbi" }
 
@@ -25,14 +26,13 @@ RSpec.describe "$ kerbi [COMMAND]" do
       end
     end
 
-    context "with with state" do
+    context "with state" do
 
-      let(:backend){ make_backend(namespace) }
+      let(:backend){ make_backend(release_name, namespace) }
 
       before :each do
         create_ns(namespace)
-        delete_cm(backend.cm_name, namespace)
-        backend = make_backend(namespace)
+        delete_cm(backend.resource_name, namespace)
         backend.provision_missing_resources(quiet: true)
       end
 
@@ -42,8 +42,10 @@ RSpec.describe "$ kerbi [COMMAND]" do
       end
 
       def template_write_cmd(pod_image)
-        base_cmd = "template foo --set pod.image=#{pod_image} --write-state foo"
-        hello_kerbi(base_cmd, namespace)
+        base_cmd = "template #{release_name} " \
+                    "--set pod.image=#{pod_image}" \
+                    " --write-state foo"
+        hello_kerbi(base_cmd)
       end
 
       context "with writing" do
@@ -80,15 +82,15 @@ RSpec.describe "$ kerbi [COMMAND]" do
 
         context "without inline overrides" do
           it "echos the expected text" do
-            cmd = hello_kerbi("template foo --read-state foo", namespace)
+            cmd = hello_kerbi("template #{release_name} --read-state foo")
             exp_cli_eq_file(cmd, "root", "template-read", "yaml")
           end
         end
 
         context "with inline overrides" do
           it "echos the expected text, preferring the inline over the state" do
-            base = "template foo --read-state foo --set pod.image=busybox"
-            cmd = hello_kerbi(base, namespace)
+            base = "template #{release_name} --read-state foo --set pod.image=busybox"
+            cmd = hello_kerbi(base)
             exp_cli_eq_file(cmd, "root", "template-read-inlines", "yaml")
           end
         end

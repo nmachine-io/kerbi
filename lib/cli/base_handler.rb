@@ -172,6 +172,18 @@ module Kerbi
         true
       end
 
+      def user_confirmed?(message='Are you sure?')
+        unless run_opts.confirmed?
+          end_with = "Enter 'yes' to confirm or re-run with --confirm."
+          echo("#{message} #{end_with}")
+          unless STDIN.gets.strip.downcase == "yes"
+            echo("Aborted")
+            return false
+          end
+        end
+        true
+      end
+
       private
 
       def utils

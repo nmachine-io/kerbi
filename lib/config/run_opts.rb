@@ -146,6 +146,11 @@ module Kerbi
       options[consts::K8S_AUTH_TYPE] == 'in-cluster'
     end
 
+    # @return [TrueClass, FalseClass]
+    def confirmed?
+      options[consts::PRE_CONFIRM].present?
+    end
+
     private
 
     # @return [Module<Kerbi::Consts::OptionKeys>]

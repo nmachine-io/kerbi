@@ -34,6 +34,7 @@ module Kerbi
       cmd_meta Kerbi::Consts::CommandSchemas::TEMPLATE
       # @param [String] release_name helm-like Kubernetes release name
       def template(release_name)
+        mem_release_name(release_name)
         utils::Cli.load_kerbifile(run_opts.project_root)
         values = compile_values
         persist_compiled_values
