@@ -1,4 +1,4 @@
-# Kerbi: Templating & State Management for K8s Apps
+# Kerbi: Kubernetes Templating and Release Management
 
 [![codecov](https://codecov.io/gh/nectar-cs/kerbi/branch/master/graph/badge.svg)](https://codecov.io/gh/nectar-cs/kerbi)
 [![Gem Version](https://badge.fury.io/rb/kerbi.svg)](https://badge.fury.io/rb/kerbi)
