@@ -19,7 +19,7 @@ RSpec.describe "$ kerbi [COMMAND]" do
       spec_bundles.each do |bundle|
         context "with #{bundle[0].presence || "no args"}" do
           it "echos the expected text" do
-            cmd = hello_kerbi("template foo #{bundle[0]}")
+            cmd = hello_kerbi("template foo . #{bundle[0]}")
             exp_cli_eq_file(cmd, "root", bundle[1], "yaml")
           end
         end

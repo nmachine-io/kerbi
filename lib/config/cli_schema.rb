@@ -3,6 +3,7 @@ module Kerbi
 
     module OptionKeys
       PROJECT_ROOT = "project-root"
+      REVISION_TAG = "revision"
 
       OUTPUT_FMT = "output-format"
       INLINE_ASSIGNMENT = "inline-value"
@@ -66,6 +67,13 @@ module Kerbi
         aliases: "-p"
       }
 
+      REVISION_TAG = {
+        key: OptionKeys::REVISION_TAG,
+        desc: "Use this version of the Kerbi templating "\
+              "engine (given by [PROJECT_URI]).",
+        aliases: "-p"
+      }
+
       K8S_AUTH_TYPE = {
         key: OptionKeys::K8S_AUTH_TYPE,
         desc: "Strategy for connecting to target cluster "\
@@ -80,8 +88,8 @@ module Kerbi
 
       KUBE_CONFIG_CONTEXT = {
         key: OptionKeys::KUBE_CONFIG_CONTEXT,
-        desc: "context to use in your kube config,
-defaults to $(kubectl config current-context)"
+        desc: "context to use in your kube config, "\
+              "defaults to $(kubectl config current-context)"
       }.freeze
 
       K8S_USERNAME = {
@@ -147,8 +155,8 @@ defaults to $(kubectl config current-context)"
       NAMESPACE = {
         key: OptionKeys::NAMESPACE,
         aliases: "-n",
-        desc: "for state operations, tell kerbi that the state
-               configmap/secret is in this namespace"
+        desc: "for state operations, tell kerbi that the state "\
+              "configmap/secret is in this namespace"
       }.freeze
 
       VALUE_FNAMES = {
@@ -220,8 +228,8 @@ defaults to $(kubectl config current-context)"
       }.freeze
 
       TEMPLATE = {
-        name: "template [KERBIFILE] [RELEASE_NAME]",
-        desc: "Runs mixers for RELEASE_NAME",
+        name: "template [RELEASE_NAME] [PROJECT_URI]",
+        desc: "Templates to YAML/JSON, using [RELEASE_NAME] for state I/O",
         options: [
           OptionSchemas::PROJECT_ROOT,
           OptionSchemas::OUTPUT_FMT,
@@ -376,7 +384,7 @@ defaults to $(kubectl config current-context)"
       }.freeze
 
       SHOW_VALUES = {
-        name: "show",
+        name: "show [RELEASE_NAME] [REVISION_OR_PATH]",
         desc: "Print out loaded values as YAML",
         options: [
           OptionSchemas::PROJECT_ROOT,

@@ -7,12 +7,13 @@ module Kerbi
 
       CANDIDATE_PREFIX = "[cand]-"
 
-      ATTRS = %i[tag message values default_values created_at]
+      ATTRS = %i[tag revision message values default_values created_at]
       SETTABLE_ATTRS = %i[message created_at]
 
       attr_accessor :set
 
       attr_accessor :tag
+      attr_accessor :revision
       attr_accessor :message
       attr_accessor :default_values
       attr_accessor :values

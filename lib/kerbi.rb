@@ -58,6 +58,8 @@ require_relative './state/base_backend'
 require_relative './state/mixers'
 require_relative './state/config_map_backend'
 
+require_relative './revision/fetcher'
+
 require_relative './main/errors'
 require_relative './cli/base_handler'
 require_relative './cli/config_handler'

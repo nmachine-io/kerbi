@@ -8,6 +8,7 @@ module Kerbi
 
     attr_reader :options
     attr_accessor :release_name
+    attr_accessor :project_uri
 
     # @param [Hash{Symbol, Object}] cli_opts CLI args as a hash via Thor
     # @param [Hash{Symbol, Object}] defaults contextual defaults (per cmd)
@@ -139,6 +140,19 @@ module Kerbi
     # @return [String]
     def project_root
       options[consts::PROJECT_ROOT].presence
+    end
+
+    # @return [?String]
+    def revision_tag
+      options[consts::REVISION_TAG].presence
+    end
+
+    def remote_engine?
+      revision_tag.present?
+    end
+
+    def local_engine?
+      !remote_engine?
     end
 
     # @return [TrueClass, FalseClass]

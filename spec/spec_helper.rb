@@ -142,6 +142,7 @@ def cmd_group_spec(cmd, dir, file, opts={})
       it "echos the expected text" do
         extension = format == 'table' ? "txt" :  format
         cmd_with_fmt = "#{cmd} -o #{format}"
+        # puts cli(cmd_with_fmt, escaped: true)
         exp_cli_eq_file(cmd_with_fmt, dir, file, extension)
       end
     end

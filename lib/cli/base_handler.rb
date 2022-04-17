@@ -15,8 +15,38 @@ module Kerbi
         @_state_backend ||= generate_state_backend(**opts)
       end
 
-      def mem_release_name(release_name)
-        self.run_opts.release_name = release_name
+      ##
+      # Sets two very commonly used variables in the run_opts
+      # object, available to all subclasses.
+      def mem_dna(release_name, project_uri=nil)
+        run_opts.release_name = release_name
+        run_opts.project_uri = project_uri
+      end
+
+      def perform_templating
+        if run_opts.local_engine?
+          perform_local_templating
+        else
+          perform_remote_templating
+        end
+      end
+
+      def perform_local_templating
+        Kerbi::Utils::Cli.run_mixers(
+          Kerbi::Globals.mixers,
+          compile_values,
+          run_opts.release_name
+        )
+      end
+
+      def perform_remote_templating
+        Kerbi::Revision::Fetcher.post_template(
+          remote_engine_root_url,
+          run_opts.revision_tag
+        )
+      end
+
+      def remote_engine_root_url
       end
 
       ##
@@ -84,6 +114,7 @@ module Kerbi
 
             fname_exprs = run_opts.fname_exprs
             fname_exprs = ["values", *fname_exprs] if run_opts.load_defaults?
+            fname_exprs = fname_exprs.reject{ |f| f.start_with?("r:") }
 
             file_values = utils.from_files(
               fname_exprs,

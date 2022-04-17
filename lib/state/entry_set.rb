@@ -10,10 +10,12 @@ module Kerbi
       include Kerbi::Mixins::EntryTagLogic
 
       attr_reader :entries
+      attr_reader :release_name
 
       # @param [Array<Hash>] dicts
-      def initialize(dicts)
+      def initialize(dicts, **opts)
         @entries = dicts.map { |h| Entry.from_dict(self, h) }
+        @release_name = opts[:release_name]
         sort_by_created_at
       end
 

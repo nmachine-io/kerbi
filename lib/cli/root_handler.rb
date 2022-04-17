@@ -33,13 +33,12 @@ module Kerbi
 
       cmd_meta Kerbi::Consts::CommandSchemas::TEMPLATE
       # @param [String] release_name helm-like Kubernetes release name
-      def template(release_name)
-        mem_release_name(release_name)
+      # @param [String] project_uri local path like '.' or remote URI
+      def template(release_name, project_uri)
+        mem_dna(release_name, project_uri)
         utils::Cli.load_kerbifile(run_opts.project_root)
-        values = compile_values
+        res_dicts = perform_templating
         persist_compiled_values
-        mixer_classes = Kerbi::Globals.mixers
-        res_dicts = utils::Cli.run_mixers(mixer_classes, values, release_name)
         echo_data(res_dicts, coerce_type: "Array")
       end
 

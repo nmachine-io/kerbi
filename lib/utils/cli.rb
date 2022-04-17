@@ -1,5 +1,9 @@
 module Kerbi
   module Utils
+
+    ##
+    # Mechanical work for all things CLI that does not deserve
+    # to be in the CLI helper mixin.
     module Cli
       ##
       # Convenience method for running and compiling the output
@@ -135,6 +139,10 @@ module Kerbi
         else
           raise "Bad k8s connect type '#{run_opts.k8s_auth_type}'"
         end
+      end
+
+      def resolve_remote_engine_url
+        ""
       end
 
       LIST_TABLE_STYLE = {

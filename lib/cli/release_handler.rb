@@ -5,7 +5,7 @@ module Kerbi
       cmd_meta Kerbi::Consts::CommandSchemas::INIT_RELEASE
       # @param [String] release_name refers to a Kubernetes namespace
       def init(release_name)
-        mem_release_name(release_name)
+        mem_dna(release_name)
         state_backend.provision_missing_resources(verbose: run_opts.verbose?)
         ns_key = Kerbi::Consts::OptionSchemas::NAMESPACE
         Kerbi::ConfigFile.patch({ns_key => release_name})
@@ -13,7 +13,7 @@ module Kerbi
 
       cmd_meta Kerbi::Consts::CommandSchemas::RELEASE_STATUS
       def status(release_name)
-        mem_release_name(release_name)
+        mem_dna(release_name)
         backend = state_backend
         backend.test_connection(verbose: run_opts.verbose?)
       end
@@ -29,7 +29,7 @@ module Kerbi
 
       cmd_meta Kerbi::Consts::CommandSchemas::RELEASE_DELETE
       def delete(release_name)
-        mem_release_name(release_name)
+        mem_dna(release_name)
         backend = state_backend
         return unless user_confirmed?
         old_signature = backend.resource_signature

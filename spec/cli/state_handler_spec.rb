@@ -28,7 +28,7 @@ RSpec.describe "$ kerbi state [COMMAND]" do
     cmd_group_spec("state list kerbi-spec", "state", "list")
   end
 
-  describe "$ kerbi state show [TAG]" do
+  describe "$ kerbi state show [RELEASE_NAME] [TAG]" do
     cmd_group_spec(
       "state show kerbi-spec one",
       "state",
@@ -39,7 +39,7 @@ RSpec.describe "$ kerbi state [COMMAND]" do
       "state show kerbi-spec @oldest",
       "state",
       "show",
-      context_append: " using @oldest instead of a literal tag"
+      context_append: "using @oldest instead of a literal tag"
     )
   end
 

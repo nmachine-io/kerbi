@@ -43,6 +43,8 @@ module Kerbi
 
       has_attributes(
         :tag,
+        :release,
+        :revision,
         :message,
         :created_at,
         :values,
@@ -54,6 +56,10 @@ module Kerbi
         #noinspection RubyResolve
         colored_tag.bold
       end
+
+      def release
+        object&.set&.release_name
+      end
     end
 
     class EntryRowSerializer < Kerbi::Cli::BaseSerializer
@@ -61,6 +67,7 @@ module Kerbi
 
       has_attributes(
         :tag,
+        :revision,
         :message,
         :assignments,
         :overrides,

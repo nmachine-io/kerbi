@@ -2,6 +2,7 @@ module Kerbi
   module State
     class BaseBackend
 
+      attr_reader :release_name
       attr_reader :is_working
 
       def initialize(options={})
@@ -9,7 +10,10 @@ module Kerbi
 
       # @return [Kerbi::State::EntrySet]
       def entry_set
-        @_entry_set ||= EntrySet.new(read_entries)
+        @_entry_set ||= EntrySet.new(
+          read_entries,
+          release_name: release_name
+        )
       end
 
       # @return [Array<Kerbi::State::Entry>]
