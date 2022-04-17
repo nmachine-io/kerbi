@@ -1,6 +1,6 @@
 # Releases & States
 
-Kerbi's state management system lets you store the values it computes as part of certain commands (`template` and `values)`, and then retrieve those values again. Kerbi uses a `ConfigMap`, `Secret`, or database in your cluster to store the data.
+Kerbi's state management system lets you store the values it computes during `$ kerbi template` or `$ kerbi values`, and then retrieve those values again. Kerbi uses a `ConfigMap`, `Secret`, or database in your cluster to store the data.
 
 To build an intuitive understanding of state management, see the [Walkthrough](simple-kubernetes-example.md#6.-writing-state).&#x20;
 
@@ -12,7 +12,7 @@ Your goal as a developer using variable-based templating in a modern CD pipeline
 
 {% tabs %}
 {% tab title="In English" %}
-1. **Template** a new manifest using new values (e.g a new image name) plus the old values
+1. **Template** a new manifest using new values merged onto the last set of values you used
 2. **Try applying** that new manifest to the Kubernetes cluster
 3. **If the apply worked**:
    1. **Store the values** you just used to generate this manifest for next time
@@ -49,14 +49,14 @@ $ helm install foo . \
     --set pod.image=v2
 ```
 
-This is great, but there are some downsides, namely that you are delegating arguably the most critical command Kubernetes in all of Kubernetes - `kubectl apply` - to another tool.
+This is great, but there are some downsides, namely that you are delegating the most critical command in Kubernetes - `kubectl apply` - to another tool.
 
 ### Kerbi Workflow
 
-Kerbi, on the other hand, is designed to never run critical operations like `kubectl apply` on your behalf. So with Kerbi, you can implement this workflow as follows:
+Kerbi, on the other hand, is designed to never run critical operations like `kubectl apply` on your behalf. So with Kerbi, you can implement conceptual workflow as follows:
 
 ```
-$ kerbi template \
+$ kerbi template foo \
     --set pod.image=v2 \
     --read-state @latest \
     --write-state @new-candidate \
@@ -64,9 +64,149 @@ $ kerbi template \
 
 $ kubectl apply --dry-run=server -f manifest.yaml \
   && kerbi state promote @candidate
+  && kubectl apply -f manifest.yaml
 ```
 
 Running `kubectl apply` with `--dry=run-server` will yield a status code of `"0"` if all resources were accepted, and `"1"` otherwise.  Therefore, the statement that comes after the `&&` only gets evaluated if Kubernetes accepted all our resources -  what we wanted.
+
+## What is a State?
+
+A state is a record that stores the values (aka variables) that were computed during a `$ kerbi template` operation, provided a `--write state [TAG]` flag is passed.&#x20;
+
+State records have the following attributes:
+
+* `tag` - its unique name, which can be anything
+* `message` any human readable note, or perhaps a git commit id
+* `values` the final values computed by `template` or `values show`
+* `default_values` the final **default** values computed by `template` or `values show`
+* `created_at` an ISO8601 timestamp
+
+You can easily inspect any state with the CLI:
+
+{% tabs %}
+{% tab title="Table output" %}
+```
+$ kerbi state show antelope @latest
+
+--------------------------------------------
+ RELEASE          antelope
+--------------------------------------------
+ TAG              1.0.0
+--------------------------------------------
+ MESSAGE
+--------------------------------------------
+ CREATED_AT       2022-04-12 14:43:24 +0100
+--------------------------------------------
+ VALUES           pod.image: centos          
+                  service.type: ClusterIP
+--------------------------------------------
+ DEFAULT_VALUES   pod.image: nginx          
+                  service.type: ClusterIP
+--------------------------------------------
+ OVERRIDDEN_KEYS  pod.image
+--------------------------------------------
+```
+{% endtab %}
+
+{% tab title="JSON output" %}
+```json
+$ kerbi state show demo @latest -o json
+
+{
+  "tag": "0.0.1",
+  "message": null,
+  "created_at": "2022-04-13 10:32:55 +0100",
+  "values": {
+    "pod": {
+      "image": "centos"
+    },
+    "service": {
+      "type": "ClusterIP"
+    }
+  },
+  "default_values": {
+    "pod": {
+      "image": "nginx"
+    },
+    "service": {
+      "type": "ClusterIP"
+    }
+  },
+  "overridden_keys": [
+    "pod.image"
+  ]
+}
+```
+{% endtab %}
+{% endtabs %}
+
+## What is a Release?
+
+A release is a collection of states. Conceptually, a release also means "one instance of the app".&#x20;
+
+### Name, Namespace, and Resource Name
+
+In a world where a Kubernetes namespace was a reliable boundary for an application's perimeter, we (and probably Helm) would just use namespaces. But this is unfortunately not the case.
+
+A release is identified by its name and its namespace. Unless you pass `--namespace [NAME]`, its namespace will automatically be set to its name. Let's build an intuition:
+
+{% tabs %}
+{% tab title="Kerbi" %}
+```
+$ kerbi release init antelope
+namespaces/antelope: Created
+configmaps/antelope/kerbi-antelope-db: Created
+
+$ kerbi release init zebra --namespace antelope
+namespaces/antelope: Already existed
+configmaps/antelope/kerbi-zebra-db: Created
+
+$ kerbi release init antelope --namespace default
+namespaces/default: Already existed
+configmaps/default/kerbi-antelope-db: Created
+```
+{% endtab %}
+
+{% tab title="Kubectl" %}
+```
+$ kubectl get configmap --all-namespaces
+NAMESPACE            NAME                                 DATA   AGE
+antelope             kerbi-antelope-db                    1      4m14s
+antelope             kerbi-zebra-db                       1      4m14s
+default              kerbi-antelope-db                    1      3m3s
+```
+{% endtab %}
+{% endtabs %}
+
+### Referring to Releases
+
+When you run a command like `$ kerbi template [RELEASE_NAME]`, Kerbi will look for a `ConfigMap` called `kerbi-[RELEASE_NAME]-db` in the namespace `[RELEASE_NAME]`.&#x20;
+
+If you pass an explicit namespace, e.g `$ kerbi template [RELEASE_NAME] --namespace [NAMESPACE]` then it will look for the `ConfigMap` in the namespace `[NAMESPACE]`.
+
+Remember you can easily figure out what's where with:
+
+```
+$ kerbi release list
+NAME      BACKEND    NAMESPACE  RESOURCE           STATES  LATEST
+antelope   ConfigMap  antelope   kerbi-antelope-db  0
+zebra      ConfigMap  antelope   kerbi-zebra-db     0
+antelope   ConfigMap  default    kerbi-antelope-db  0
+```
+
+### Subtle Difference with Helm
+
+Release names and namespaces are confusing. If you're used to Helm, it's important to highlight the difference. Illustrative <mark style="color:yellow;">**pseudocode**</mark>:
+
+```
+# HOW KERBI DOES IT
+release_name = read('release_name')
+namespace = release_name || read('namespace')
+
+# HOW HELM DOES IT
+release_name = read('release_name')
+namespace = read(namespace) || 'default'
+```
 
 ## Configuration
 
@@ -143,39 +283,7 @@ ca_crt_path = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
 
 Note that each configuration above can also be passed as a flag in any state touching operation, e.g `$ kerbi template --k8s-auth-type in-cluster`.
 
-### Release Name versus Namespace
-
-It makes sense for most Kubernetes apps to define their logical perimeters using a Kubernetes namespace, e.g "all of app 'X''s resources live in namespace 'X',  and all resources in namespace 'X' belong to app 'X'".
-
-For others apps though, this doesn't make sense, either because their resources span multiple namespaces, or because the app is fundamentally cluster-scoped, i.e non-namespaced.&#x20;
-
-When Kerbi or Helm do state operations, they need to to unambiguously reference _exactly one_ app. We use a `release_name`, because as we have just seem, namespace is not powerful enough.&#x20;
-
-But at the same time, **we need to know what namespace** we should read/write the state tracker. This is where our convention differs from Helm's. We say "we'll assume your app fundamentally lives in the namespace `release_name` unless you explicitly give us a `namespace`.
-
-Illustrative <mark style="color:yellow;">**pseudocode**</mark>:
-
-```bash
-# HOW KERBI DOES IT
-release_name = read('release_name')
-namespace = release_name || read('namespace')
-
-# HOW HELM DOES IT
-release_name = read('release_name')
-namespace = read(namespace) || 'default'
-```
-
-This is the actual source code for Kerbi's state `ConfigMap`:
-
-```yaml
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: kerbi-<%= release_name %>-db
-  namespace: <%= values[:namespace] || release_name %>
-```
-
-## Tag Substitutions
+## State Tag Substitutions
 
 We can feed the CLI special expressions instead of literals tag. When Kerbi encounters a special keyword, formatted as `@<keyword>`, it will attempt to resolve it to a literal tag name. Depending on the keyword, the resolved tag may or may not refer to an existing state tag.&#x20;
 
@@ -183,13 +291,13 @@ We can feed the CLI special expressions instead of literals tag. When Kerbi enco
 
 Resolves to the tag of the **newest **_**non**_**-candidate** state (as given by `created_at`). Behavior is the same during read and write operations.&#x20;
 
-Example: `$ kerbi state show @latest`
+Example: `$ kerbi state show zebra @latest`
 
 ### The `@candidate` keyword
 
 Resolves to the tag of the **newest candidate** state (as given by `created_at`). Behavior is the same during read and write operations.&#x20;
 
-Example: `$ kerbi state retag @candidate 1.2.3`
+Example: `$ kerbi state retag zebra @candidate 1.2.3`
 
 ### The `@new-candidate` keyword
 
@@ -202,73 +310,6 @@ Example: `$ kerbi values show -f v2.yaml --write-state @new-candidate`. The name
 Resolves to a random, free (not yet taken by existing states) tag **without a candidate status prefix**. Only works for write operations.&#x20;
 
 Example: `$ kerbi values show -f v2.yaml --write-state @random`. The name of the new state in this case resolved to `"spiky-goose"`
-
-## State Attributes
-
-What attributes make up a state record? Kerbi strives to be lightweight, and thus only stores a small amount of data for each state record, namely:
-
-* `tag` - its unique name, which can be anything
-* `message` any human readable note, or perhaps a git commit id
-* `values` the final values computed by `template` or `values show`
-* `default_values` the final **default** values computed by `template` or `values show`
-* `created_at` an ISO8601 timestamp
-
-You can easily inspect any state with the CLI:
-
-{% tabs %}
-{% tab title="Table output" %}
-```
-$ kerbi state show @latest
-
- --------------------------------------------
- TAG              1.0.0
---------------------------------------------
- MESSAGE
---------------------------------------------
- CREATED_AT       2022-04-12 14:43:24 +0100
---------------------------------------------
- VALUES           pod.image: centos          
-                  service.type: ClusterIP
---------------------------------------------
- DEFAULT_VALUES   pod.image: nginx          
-                  service.type: ClusterIP
---------------------------------------------
- OVERRIDDEN_KEYS  pod.image
---------------------------------------------
-```
-{% endtab %}
-
-{% tab title="JSON output" %}
-```json
-$ kerbi state show @latest -o json
-
-{
-  "tag": "0.0.1",
-  "message": null,
-  "created_at": "2022-04-13 10:32:55 +0100",
-  "values": {
-    "pod": {
-      "image": "centos"
-    },
-    "service": {
-      "type": "ClusterIP"
-    }
-  },
-  "default_values": {
-    "pod": {
-      "image": "nginx"
-    },
-    "service": {
-      "type": "ClusterIP"
-    }
-  },
-  "overridden_keys": [
-    "pod.image"
-  ]
-}
-```
-{% endtab %}
-{% endtabs %}
 
 ## Candidate Status
 
