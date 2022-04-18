@@ -17,7 +17,7 @@ elif [[ "$1" == "release" ]]; then
 payload=$(cat <<EOF
 {
   "tag_name": "v$TAG_NAME",
-  "name": "v$TAG_NAME",
+  "name": "v$TAG_NAME"
 }
 EOF
 )
