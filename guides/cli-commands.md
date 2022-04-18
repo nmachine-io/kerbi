@@ -509,11 +509,59 @@ TAG                REVISION MESSAGE ASSIGNMENTS OVERRIDES CREATED_AT
 1.2.3                               2           1         a minute ago
 ```
 
+## Config Commands
+
+### `$ kerbi config show`
+
+Prints the final compiled configuration kerbi will use.&#x20;
+
+{% hint style="warning" %}
+**Not the exact contents of the config file**
+
+This command shows what Kerbi sees after it has loaded your config file **and** processed it, e.g sanitized it with fallback values. If you need to read your config file, just read it normally: `cat ~/.kerbi/config`.
+{% endhint %}
+
+```yaml
+$ kerbi config show
+load-defaults: true
+inline-value: []
+values-file: []
+output-format: yaml
+state-backend: configmap
+k8s-auth-type: kube-config
+```
+
+### `$ kerbi config set [KEY] [VALUE]`
+
+Updates one attribute in your global config file. This command will fail if you attempt to set an attribute not supported in the config file.&#x20;
+
+```
+$ kerbi config set output-format json
+```
+
+### `$ kerbi config reset`
+
+Deletes your global configuration file and creates an empty one.
+
+```
+$ kerbi config reset
+Config reset
+See /home/xavier/.kerbi/config.json
+```
+
 ## Project Commands
 
-### `$ kerbi project new [NAME] [options]`
+### `$ kerbi project new [NAME]`
 
 Creates a boilerplate project called `[NAME]` in the current directory. While a Gemfile fill be generated, you do not technically need to run `bundle install` to get started, although you will need to at some point if your project becomes more serious.
+
+```
+$ kerbi project new rhino
+Created project at /home/xavier/rhino
+Created file rhino/Gemfile
+Created file rhino/kerbifile.rb
+Created file rhino/values.yaml
+```
 
 <details>
 
