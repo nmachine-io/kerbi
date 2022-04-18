@@ -113,7 +113,7 @@ module Kerbi
     # @param [String] chart_id using format 'jetstack/cert-manager'
     # @param [Hash] opts filtering and other options for #dicts
     # @return [Array<Hash>] processed and filtered dicts
-    def chart(chart_id, **opts)
+    def helm_chart(chart_id, **opts)
       release = opts[:release] || release_name
       helm_output = Utils::Helm.template(release, chart_id, **opts)
       dicts(helm_output)
@@ -137,7 +137,7 @@ module Kerbi
     end
 
     ##
-    # Any x-to-dict statements (e.g #dicts, #dir, #chart) executed
+    # Any x-to-dict statements (e.g #dicts, #dir, #helm_chart) executed
     # in the &block passed to this method will have their return values
     # deep merged with the dict(s) passed.
     # @param [Array<Hash>|Hash] dict

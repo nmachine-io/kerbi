@@ -2,7 +2,14 @@ module Kerbi
   module State
     class BaseBackend
 
+      ##
+      # Made available to states, as a convenience
+      # @return [String] release name
       attr_reader :release_name
+
+      ##
+      # Whether the last connection attempt succeeded or failed
+      # @return [TrueClass|FalseClass] list of hashes
       attr_reader :is_working
 
       def initialize(options={})

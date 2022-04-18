@@ -5,20 +5,61 @@ module Kerbi
     # Represents a single Kerbi state entry.
     class Entry
 
+      ##
+      # Tag prefix that identifies candidate states
+      # @return [String]
       CANDIDATE_PREFIX = "[cand]-"
 
+      ##
+      # Array of record attribute names in symbol form
+      # @return [Array<Symbol>]
       ATTRS = %i[tag revision message values default_values created_at]
+
+      ##
+      # Subset of attribute names (symbol form) that
+      # the user can mass update (i.e Rails' attr_accessible)
       SETTABLE_ATTRS = %i[message created_at]
 
+      ##
+      # Parent collection. Necessary for computation that involve
+      # comparision.
+      # @return [Array<Kerbi::State::EntrySet>]
       attr_accessor :set
 
+      ##
+      # Human readable string that identifies this state
+      # @return [String]
       attr_accessor :tag
+
+      ##
+      # SemVer of chart/mixer, for user info purposes only
+      # @return [String]
       attr_accessor :revision
+
+      ##
+      # Message for/by user, for user info purposes only
+      # @return [String]
       attr_accessor :message
+
+      ##
+      # The default values computed at templating time
+      # @return [Hash]
       attr_accessor :default_values
+
+      ##
+      # The final values computed at templating time
+      # @return [Hash]
       attr_accessor :values
+
+      ##
+      # The default values computed at templating time
+      # @return [Time]
       attr_accessor :created_at
 
+      ##
+      # List of errors, encoded in a simple struct, picked
+      # up during a validation run
+      # @return [Array<Hash>]
       attr_reader :validation_errors
 
       def initialize(set, dict)
@@ -137,6 +178,10 @@ module Kerbi
         (delta = overrides_delta) ? delta.keys.map(&:to_s) : []
       end
 
+      ##
+      # Serializes the instance's recordable attributes to
+      # a string-keyed Hash
+      # @return Hash
       def to_h
         special_ser = {
           values: values || {},
@@ -147,11 +192,18 @@ module Kerbi
       end
       alias_method :serialize, :to_h
 
+      ##
+      # Serializes the instance's recordable attributes to a
+      # JSON string
+      # @return [String]
       def to_json
         JSON.dump(serialize)
       end
 
-      # @param [Hash] dict
+      ##
+      # Deserializes a record in dict-form and returns the
+      # corresponding Entry instance.
+      # @param [Hash] serialized record
       # @return [Kerbi::State::Entry]
       def self.from_dict(set, dict={})
         dict.deep_symbolize_keys!

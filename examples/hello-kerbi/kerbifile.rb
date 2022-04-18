@@ -16,3 +16,4 @@ module HelloKerbi
 end
 
 Kerbi::Globals.mixers << HelloKerbi::Mixer
+Kerbi::Globals.revision = "1.0.0"

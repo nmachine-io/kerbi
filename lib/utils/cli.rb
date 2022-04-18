@@ -151,7 +151,8 @@ module Kerbi
         border_top: false,
         border_x: "",
         border_y: "",
-        border_i: ""
+        border_i: '',
+        padding_left: 0,
       }.freeze
 
       DESCRIBE_TABLE_STYLE = {

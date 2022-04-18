@@ -104,7 +104,7 @@ class MyApp::Backend::Mixer < Kerbi::Mixer
     push(mixer(ServiceMixer) + file("ingress"))
     
     patched_with file("annotations") do
-      push chart("my-legacy/helm-chart")
+      push helm_chart("my-legacy/helm-chart")
       push dir("./../rbac", only: [{kind: 'ClusterRole.*'}])
     end
   end 

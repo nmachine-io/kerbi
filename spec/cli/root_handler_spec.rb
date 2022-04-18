@@ -42,7 +42,7 @@ RSpec.describe "$ kerbi [COMMAND]" do
       end
 
       def template_write_cmd(pod_image)
-        base_cmd = "template #{release_name} " \
+        base_cmd = "template #{release_name} . " \
                     "--set pod.image=#{pod_image}" \
                     " --write-state foo"
         hello_kerbi(base_cmd)
@@ -82,14 +82,17 @@ RSpec.describe "$ kerbi [COMMAND]" do
 
         context "without inline overrides" do
           it "echos the expected text" do
-            cmd = hello_kerbi("template #{release_name} --read-state foo")
+            base = "template #{release_name} . --read-state foo"
+            cmd = hello_kerbi(base)
             exp_cli_eq_file(cmd, "root", "template-read", "yaml")
           end
         end
 
         context "with inline overrides" do
           it "echos the expected text, preferring the inline over the state" do
-            base = "template #{release_name} --read-state foo --set pod.image=busybox"
+            base = "template #{release_name} . " \
+                    "--read-state foo " \
+                    "--set pod.image=busybox"
             cmd = hello_kerbi(base)
             exp_cli_eq_file(cmd, "root", "template-read-inlines", "yaml")
           end

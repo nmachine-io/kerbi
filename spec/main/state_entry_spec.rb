@@ -10,6 +10,7 @@ RSpec.describe Kerbi::State::Entry do
       tag: "tag",
       message: "message",
       values: {x: {y: "z"}},
+      revision: nil,
       default_values: {y: "z"},
       created_at: "2020-01-02T03:04:00",
     }

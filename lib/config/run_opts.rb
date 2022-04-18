@@ -139,7 +139,7 @@ module Kerbi
 
     # @return [String]
     def project_root
-      options[consts::PROJECT_ROOT].presence
+      options[consts::PROJECT_ROOT].presence || project_uri
     end
 
     # @return [?String]

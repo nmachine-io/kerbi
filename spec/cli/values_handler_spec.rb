@@ -7,7 +7,7 @@ RSpec.describe "$ kerbi values [COMMAND]" do
   describe "$ kerbi values show" do
     context "without state" do
       it "respects --set > -f > defaults" do
-        base = "values show foo . -f v2 -f production --set service.type=NodePort"
+        base = "values show -f v2 -f production --set service.type=NodePort"
         cmd = hello_kerbi(base)
         exp_cli_eq_file(cmd, "values", "order-of-precedence", "yaml")
       end

@@ -9,7 +9,14 @@ module Kerbi
 
       include Kerbi::Mixins::EntryTagLogic
 
+      ##
+      # Memoized list of state entries
+      # @return [Array<Kerbi::State::Entry>]
       attr_reader :entries
+
+      ##
+      # Made available to states, as a convenience
+      # @return [String]
       attr_reader :release_name
 
       # @param [Array<Hash>] dicts
@@ -19,6 +26,10 @@ module Kerbi
         sort_by_created_at
       end
 
+      ##
+      # Performs simple validation logic, checking if each
+      # state is valid, doing noting if all are valid,
+      # and raising an exception otherwise.
       def validate!
         entries.each(&:validate)
         if (bad_entries = entries.reject(&:valid?)).any?
@@ -34,7 +45,7 @@ module Kerbi
       # ones that are NOT candidates.
       # @return [Array<Kerbi::State::Entry>]
       def committed
-        entries.select(&:committed?)
+        entries.select(&:committed?).to_a
       end
 
       ##
@@ -42,7 +53,7 @@ module Kerbi
       # ones that ARE candidates.
       # @return [Array<Kerbi::State::Entry>]
       def candidates
-        entries.reject(&:committed?)
+        entries.reject(&:committed?).to_a
       end
 
       ##
@@ -123,11 +134,15 @@ module Kerbi
       end
       alias_method :get, :find_by_literal_tag
 
-
+      ##
+      # Updates internal list of state entries to itself minus
+      # states marked as candidates. Does NOT save to backend.
       def prune_candidates
-        entries.select!(&:committed?)
+        entries.reject!(&:candidate?)
       end
 
+      ##
+      # Sorts internal list of candidates by age.
       def sort_by_created_at
         entries.sort! do |a, b|
           both_defined = a.created_at && b.created_at

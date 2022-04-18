@@ -7,3 +7,4 @@ module <%= (module_name = data[:user_module_name]) %>
 end
 
 Kerbi::Globals.mixers << <%= module_name %>::RootMixer
+Kerbi::Globals.revision = "0.0.1"

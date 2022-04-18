@@ -13,16 +13,19 @@ module Kerbi
       CANDIDATE_WORD = "candidate"
       NEW_CANDIDATE_WORD = "new-candidate"
       LATEST_WORD = "latest"
+      LATEST_PLUS_WORD = "latest+\\."
       OLDEST_WORD = "oldest"
       RANDOM_WORD = "random"
 
       SPECIAL_READ_WORDS = [
         CANDIDATE_WORD,
+        LATEST_PLUS_WORD,
         LATEST_WORD,
         OLDEST_WORD
       ]
 
       SPECIAL_WRITE_WORDS = [
+        LATEST_PLUS_WORD,
         LATEST_WORD,
         OLDEST_WORD,
         CANDIDATE_WORD,
