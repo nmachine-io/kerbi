@@ -2,7 +2,7 @@
 
 ## Root Commands
 
-### $ `kerbi template [RELEASE`\_NAME`] [PROJECT_URI]`
+### $ `kerbi template [RELEASE_NAME] [PROJECT_URI]`
 
 Template the project given by `[PROJECT_URI]`, where `[RELEASE_NAME]` is used for any state I/O (enabled with `--read-state` and `--write-state)`, and is made available to mixers as the instance variable `release_name`.&#x20;
 
@@ -125,6 +125,17 @@ Starts an interactive console powered by [IRB](https://www.digitalocean.com/comm
 * `values` - the same bundle of values available to `$ kerbi template`
 * `default_values` the subset of values taken only from `values.yaml`
 
+```
+kerbi console --set pod.image=python
+
+irb(kerbi):001:0> values
+=> {:pod=>{:image=>"python"}, :service=>{:type=>"ClusterIP"}}
+irb(kerbi):002:0> 
+
+irb(kerbi):003:0> Kerbi::Globals.mixers
+=> [HelloKerbi::Mixer]
+```
+
 <details>
 
 <summary>Options</summary>
@@ -141,7 +152,42 @@ Starts an interactive console powered by [IRB](https://www.digitalocean.com/comm
 
 ### `$ kerbi values show`
 
-Prints out all values compiled by Kerbi for the project in the current directory. Useful to preview the data that your mixers will be receiving. You cannot write the compiled values to state with this command.&#x20;
+Prints out all values compiled by Kerbi for the project in the current directory. Useful to preview the data that your mixers will be consuming.&#x20;
+
+If you need to merge in state values, specify which release to use with `--release-name` along with the usual state parameters (found in `$ kerbi state`, `$ kerbi template`, etc...).
+
+{% tabs %}
+{% tab title="Trivial" %}
+```yaml
+$ kerbi values show
+
+pod:
+  image: nginx
+service:
+  type: ClusterIP
+```
+{% endtab %}
+
+{% tab title="With state" %}
+```
+$ kerbi release init demo > /dev/null
+
+$ kerbi template demo . \
+    --set backend.image=node
+    --write-state 1.0.0 \
+    > /dev/null
+
+$ kerbi values show \
+    --release-name demo \ 
+    --read-state 1.0.0
+
+pod:
+  image: node
+service:
+  type: ClusterIP
+```
+{% endtab %}
+{% endtabs %}
 
 <details>
 
