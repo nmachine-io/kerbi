@@ -3,6 +3,9 @@ availableSecrets:
     - versionName: "projects/nectar-bazaar/secrets/rubygems-api-key/versions/latest"
       env: 'RUBYGEMS_API_KEY'
 
+    - versionName: "projects/nectar-bazaar/secrets/gh-token-personal-acct/versions/latest"
+      env: 'GH_TOKEN'
+
 steps:
 
   - id: "Build base image"
@@ -38,7 +41,7 @@ steps:
     entrypoint: 'bash'
     waitFor:
       - "Build base image"
-      - 'Run tests and push coverage'
+      - 'Run Tests in kind cluster'
 
     secretEnv: ['RUBYGEMS_API_KEY']
 
@@ -48,3 +51,20 @@ steps:
       --env RUBYGEMS_API_KEY=$$RUBYGEMS_API_KEY
       test-image:1.0.0
       publish'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'Create GH release'
+    entrypoint: 'bash'
+    waitFor:
+      - "Build base image"
+      - 'Run Tests in kind cluster'
+
+    secretEnv: ['GH_TOKEN']
+
+    args:
+      - '-c'
+      - 'docker run
+      --env GH_TOKEN=$$GH_TOKEN
+      --env TAG_NAME=$TAG_NAME
+      test-image:1.0.0
+      release'

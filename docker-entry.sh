@@ -13,6 +13,22 @@ elif [[ "$1" == "publish" ]]; then
   chmod 0600 /root/.gem/credentials
   gem build kerbi.gemspec
   gem push $(ls | grep ".gem$"); exit 0
+elif [[ "$1" == "release" ]]; then
+payload=$(cat <<EOF
+{
+  "tag_name": "v$TAG_NAME",
+  "name": "v$TAG_NAME",
+}
+EOF
+)
+echo "$payload" > payload.txt
+
+curl \
+  -X POST \
+  -H "Accept: application/vnd.github.v3+json" \
+  -H "Authorization:Bearer $GH_TOKEN" \
+  https://api.github.com/repos/xavier-r-millot/kerbi/releases \
+  -d @payload.txt
 elif [[ "$1" == "sleep" ]]; then
   echo "Going to sleep..."
   while true; do sleep 30; done;
