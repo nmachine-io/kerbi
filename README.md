@@ -6,8 +6,8 @@
 
 Kerbi is a Kubernetes tool most similar to [Helm](https://helm.sh/), with the following key differences:
 - Templating: also variable-based, but aspires to be more powerful, flexible, and delightful
-- State management: aspires to be less opinionated, less invasive, more deliberate/explict
-- Packaging: Kerbi does not have an "artifact hub" or central registry
+- State management: aspires to be less invasive, more deliberate, explict, and transparent
+- Packaging: a central registry for managing your own chart's revisions is in the works
 
 [Documentation.](https://xavier-9.gitbook.io/untitled/walkthroughs/getting-started)
 
@@ -29,7 +29,7 @@ $ cd hello-kerbi
 Voila. You can now generate templates and manage state:
 
 ```yaml
-$ kerbi template demo --set message=special
+$ kerbi template demo . --set message=special
 text: special demo message
 ```
 
@@ -46,10 +46,7 @@ Your have a baseline `values.yaml` file and then three possible sources of extra
 - previously committed values, e.g `--read-state @latest` via state management (covered later)
 
 ```yaml
-$ kerbi values show demo \
-        -f production.yaml \
-        --set backend.image=centos \
-        --read-state 1.2.3
+$ kerbi values show -f production.yaml --set backend.image=centos
 pod:
   image: centos
 service:
@@ -117,7 +114,7 @@ end
 
 
 
-### 📀 Explicit & Non-Invasive State Management
+### 📀 Explicit & Non Invasive State Management
 
 Kerbi lets you persist and retreive the bundles of the variables you generate your manifests 
 with to a `ConfigMap` or `Secret`. Unlike Helm, which couples state with a heavy 
@@ -128,35 +125,34 @@ for a simple, deliberate, and non-invasive API: `--read-state` and `--write-stat
 ```
 $ kerbi release init tuna
 
-$ kerbi template tuna \
+$ kerbi template tuna . \
         --set some.deployment.image=v2 \
         --read-state @latest \
         --write-state @new-candidate \
         > manifest.yaml
 
 $ kubectl apply --dry-run=server -f manifest.yaml \
-  && kerbi state retag @candidate 1.0.0 \
+  && kerbi state retag @candidate @latest+0.0.1 \
   && kubectl apply -f manifest.yaml  
 ```
 
+List states for the `tuna` release:
+```
+$ kerbi state list tuna
+TAG              REVISION  MESSAGE  ASSIGNMENTS  OVERRIDES  CREATED_AT
+0.2.2            0.2.0                        1          3  seconds ago
+0.2.1            0.2.0                        1          5  seconds ago
+keen-ethyl       0.1.0                        0          8  seconds ago
+0.1.1            0.1.0                        1          2  minutes ago
+```
 
-For human operators:
+List all releases:
 ```
 $ kerbi release list
 NAME  BACKEND    NAMESPACE  RESOURCE       STATES  LATEST
-bass  ConfigMap  bass       kerbi-bass-db  4       3.43.3
+bass  ConfigMap  bass       kerbi-bass-db  4       0.0.2
 tuna  ConfigMap  default    kerbi-tuna-db  2       baser-mitre
 tuna  ConfigMap  tuna       kerbi-tuna-db  1       0.0.1
-```
-
-For human operators:
-```
-$ kerbi state list bass
-TAG               MESSAGE  ASSIGNMENTS  OVERRIDES  CREATED_AT
-3.43.3                     2            1          3 seconds ago
-3.43.2                     2            1          5 seconds ago
-keen-ethyl                 2            0          8 seconds ago
-3.43.1                     2            1          2 minutes ago
 ```
 
 
