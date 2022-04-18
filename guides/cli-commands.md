@@ -6,6 +6,8 @@
 
 Loads the project at `[PROJECT]`, and runs any mixers registered in `Kerbi::Globals.mixers`, making `[RELEASE]` available to all mixers.
 
+
+
 <details>
 
 <summary>Options</summary>
@@ -32,6 +34,11 @@ Options:
 </details>
 
 ### `$ kerbi console`
+
+Starts an interactive console powered by [IRB](https://www.digitalocean.com/community/tutorials/how-to-use-irb-to-explore-ruby). The entire SDK is loaded into memory, plus your `kerbifile` and everything it requires. The following variables are available in the current binding:
+
+* `values` - the same bundle of values available to `$ kerbi template`
+* `default_values` the subset of values taken only from `values.yaml`
 
 <details>
 
@@ -210,13 +217,123 @@ Deleted configmaps/demo/kerbi-demo-db
 
 ### `$ kerbi state show [RELEASE_NAME] [TAG]`
 
-Prints out all information about the state named \[TAG] under `[RELEASE_NAME]`.&#x20;
+Prints out summaries of all the states recorded under `[RELEASE_NAME]`.&#x20;
 
-adasdaasdsa
+```
+$ kerbi state list tuna
+TAG              REVISION  MESSAGE  ASSIGNMENTS  OVERRIDES  CREATED_AT
+0.2.2            0.2.0                        1          3  seconds ago
+0.2.1            0.2.0                        1          5  seconds ago
+keen-ethyl       0.1.0                        0          8  seconds ago
+0.1.1            0.1.0                        1          2  minutes ago
+```
+
+<details>
+
+<summary>Options</summary>
+
+```
+  -n, [--namespace=NAMESPACE]                      # Use this Kubernetes namespace instead of [RELEASE_NAME] for state I/O.
+      [--state-backend=STATE-BACKEND]              # Type of persistent store to read/write this release's state.
+                                                   # Possible values: configmap, secret
+      [--read-state=READ-STATE]                    # Merge values from state with this tag.
+      [--write-state=WRITE-STATE]                  # Write compiled values into new or existing state recordwith this tag.
+      [--k8s-auth-type=K8S-AUTH-TYPE]              # Kubernetes cluster authentication type. Uses kube-config if unspecified.
+                                                   # Possible values: kube-config, in-cluster, token
+      [--kube-config-path=KUBE-CONFIG-PATH]        # Path to your kube-config file. Uses ~/.kube/config if unspecified.
+      [--kube-config-context=KUBE-CONFIG-CONTEXT]  # Context to use in your kube config. Uses current context if unspecified.
+  -o, [--output-format=OUTPUT-FORMAT]              # In what format resulting data should be printed
+                                                   # Possible values: yaml, json, table
+```
+
+</details>
+
+### `$ kerbi state list [RELEASE_NAME]`
+
+Prints out all information about the state named `[TAG]` under `[RELEASE_NAME]`.&#x20;
+
+```
+$ kerbi state show @latest
+--------------------------------------------
+ RELEASE_NAME     demo
+--------------------------------------------
+ TAG              0.0.1
+--------------------------------------------
+ MESSAGE
+--------------------------------------------
+ CREATED_AT       2022-04-13 10:32:55 +0100
+--------------------------------------------
+ VALUES           pod.image: ruby           
+                  service.type: ClusterIP
+--------------------------------------------
+ DEFAULT_VALUES   pod.image: nginx          
+                  service.type: ClusterIP
+--------------------------------------------
+ OVERRIDDEN_KEYS  pod
+--------------------------------------------
+```
+
+<details>
+
+<summary>Options</summary>
+
+```
+  -n, [--namespace=NAMESPACE]                      # Use this Kubernetes namespace instead of [RELEASE_NAME] for state I/O.
+      [--state-backend=STATE-BACKEND]              # Type of persistent store to read/write this release's state.
+                                                   # Possible values: configmap, secret
+      [--read-state=READ-STATE]                    # Merge values from state with this tag.
+      [--write-state=WRITE-STATE]                  # Write compiled values into new or existing state recordwith this tag.
+      [--k8s-auth-type=K8S-AUTH-TYPE]              # Kubernetes cluster authentication type. Uses kube-config if unspecified.
+                                                   # Possible values: kube-config, in-cluster, token
+      [--kube-config-path=KUBE-CONFIG-PATH]        # Path to your kube-config file. Uses ~/.kube/config if unspecified.
+      [--kube-config-context=KUBE-CONFIG-CONTEXT]  # Context to use in your kube config. Uses current context if unspecified.
+  -o, [--output-format=OUTPUT-FORMAT]              # In what format resulting data should be printed
+                                                   # Possible values: yaml, json, table
+```
+
+</details>
+
+### `$ kerbi state promote [RELEASE_NAME] [TAG]`
+
+Remove the candidate flag from the state given by `[TAG]`'s name (`[cand]-`). This commands fails if the given state was not a candidate.
+
+```
+$ kerbi state promote hello @candidate
+Updated state[banal-north].tag from [cand]-banal-north => banal-north
+
+$ kerbi state promote hello @latest
+Non-candidate states cannot be promoted
+```
+
+<details>
+
+<summary>Options</summary>
+
+```
+  -n, [--namespace=NAMESPACE]                      # Use this Kubernetes namespace instead of [RELEASE_NAME] for state I/O.
+      [--state-backend=STATE-BACKEND]              # Type of persistent store to read/write this release's state.
+                                                   # Possible values: configmap, secret
+      [--read-state=READ-STATE]                    # Merge values from state with this tag.
+      [--write-state=WRITE-STATE]                  # Write compiled values into new or existing state recordwith this tag.
+      [--k8s-auth-type=K8S-AUTH-TYPE]              # Kubernetes cluster authentication type. Uses kube-config if unspecified.
+                                                   # Possible values: kube-config, in-cluster, token
+      [--kube-config-path=KUBE-CONFIG-PATH]        # Path to your kube-config file. Uses ~/.kube/config if unspecified.
+      [--kube-config-context=KUBE-CONFIG-CONTEXT]  # Context to use in your kube config. Uses current context if unspecified.
+```
+
+</details>
+
+### `$ kerbi state demote [RELEASE_NAME] [TAG]`
+
+`Add` the candidate flag to a state's name (`[cand]-`). This commands fails if the given state was already a candidate.
+
+
+
+
 
 ## Project Commands
 
-### `kerbi project new [NAME] [options]`
+### `$ kerbi project new [NAME] [options]`
 
 Creates a boilerplate project called `[NAME]` in the current directory. While a Gemfile fill be generated, you do not technically need to run `bundle install` to get started, although you will need to at some point if your project becomes more serious.
 
