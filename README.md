@@ -46,10 +46,7 @@ Your have a baseline `values.yaml` file and then three possible sources of extra
 - previously committed values, e.g `--read-state @latest` via state management (covered later)
 
 ```yaml
-$ kerbi values show demo \
-        -f production.yaml \
-        --set backend.image=centos \
-        --read-state 1.2.3
+$ kerbi values show -f production.yaml --set backend.image=centos
 pod:
   image: centos
 service:
