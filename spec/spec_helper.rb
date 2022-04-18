@@ -1,7 +1,12 @@
 require 'tempfile'
-require 'simplecov'
 
+require 'simplecov'
 SimpleCov.start
+
+if ENV['UPLOAD_CODECOV']
+  require 'codecov'
+  SimpleCov.formatter = SimpleCov::Formatter::Codecov
+end
 
 require_relative './../lib/kerbi'
 

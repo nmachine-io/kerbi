@@ -12,7 +12,7 @@ gem 'spicy-proton'
 
 group :test do
   gem 'rspec', '~> 3.0'
-  gem 'simplecov'
+  gem 'codecov'
 end
 
 group :test, :development do

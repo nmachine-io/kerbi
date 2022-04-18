@@ -1,7 +1,7 @@
 
 Gem::Specification.new do |s|
   s.name          = 'kerbi'
-  s.version       = '0.0.13'
+  s.version       = '0.0.14'
 
   s.summary       = "Multi-strategy Kubernetes manifest templating engine."
   s.description   = "Kerbi is a multi-strategy Kubernetes manifest templating engine."

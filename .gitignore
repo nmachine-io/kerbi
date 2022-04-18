@@ -4,3 +4,4 @@
 .yardoc
 regem.sh
 doc
+codecov

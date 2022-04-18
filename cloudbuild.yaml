@@ -6,6 +6,9 @@ availableSecrets:
     - versionName: "projects/nectar-bazaar/secrets/gh-token-personal-acct/versions/latest"
       env: 'GH_TOKEN'
 
+    - versionName: "projects/nectar-bazaar/secrets/code-cov-token-personal-acct/versions/latest"
+      env: 'CODECOV_TOKEN'
+
 steps:
 
   - id: "Build base image"
@@ -26,6 +29,7 @@ steps:
 
   - id: "Run Tests in kind cluster"
     name: 'gcr.io/cloud-builders/docker'
+    secretEnv: ['CODECOV_TOKEN']
     waitFor:
       - "Build base image"
       - "Pull Kind Test Runner Image"
@@ -34,16 +38,17 @@ steps:
       - "-v"
       - "/var/run/docker.sock:/var/run/docker.sock"
       - "--net=host"
+      - "--env"
+      - "CODECOV_TOKEN=$$CODECOV_TOKEN"
       - "us-central1-docker.pkg.dev/nectar-bazaar/public/kind-test-runner:0.0.2"
 
   - name: 'gcr.io/cloud-builders/docker'
     id: 'Publish Gem'
     entrypoint: 'bash'
+    secretEnv: ['RUBYGEMS_API_KEY']
     waitFor:
       - "Build base image"
       - 'Run Tests in kind cluster'
-
-    secretEnv: ['RUBYGEMS_API_KEY']
 
     args:
       - '-c'
@@ -55,12 +60,8 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     id: 'Create GH release'
     entrypoint: 'bash'
-    waitFor:
-      - "Build base image"
-      - 'Run Tests in kind cluster'
-
     secretEnv: ['GH_TOKEN']
-
+    waitFor: ['Publish Gem']
     args:
       - '-c'
       - 'docker run
