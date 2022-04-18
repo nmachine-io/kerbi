@@ -397,6 +397,7 @@ module Kerbi
         options: [
           OptionSchemas::OUTPUT_FMT,
           OptionSchemas::PROJECT_ROOT,
+          OptionSchemas::RELEASE_NAME,
           *OptionSchemas::VALUES_OPTIONS,
           *OptionSchemas::KUBERNETES_OPTIONS
         ]

@@ -26,6 +26,10 @@ module Kerbi
       value || default
     end
 
+    def release_name
+      @release_name || options[consts::RELEASE_NAME]
+    end
+
     # @return [TrueClass, FalseClass]
     def output_yaml?
       self.output_format == 'yaml'

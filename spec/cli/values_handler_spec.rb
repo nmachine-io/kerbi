@@ -12,5 +12,13 @@ RSpec.describe "$ kerbi values [COMMAND]" do
         exp_cli_eq_file(cmd, "values", "order-of-precedence", "yaml")
       end
     end
+
+    context "with state" do
+      it "parses RELEASE_NAME correctly" do
+        # base = "values show --release-name foo"
+        # puts cli(base)
+
+      end
+    end
   end
 end

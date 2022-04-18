@@ -2,9 +2,11 @@ module Kerbi
 
   class Console
     attr_reader :values
+    attr_reader :default_values
 
-    def initialize(values)
+    def initialize(values, default_values)
       @values = values
+      @default_values = default_values
     end
 
     def to_s
@@ -46,9 +48,11 @@ module Kerbi
       def console
         utils::Cli.load_kerbifile(run_opts.project_root)
         values = compile_values
+        default_values = compile_default_values
         ARGV.clear
         IRB.setup(eval("__FILE__"), argv: [])
-        workspace = IRB::WorkSpace.new(Console.new(values))
+        wrapper = Console.new(values, default_values)
+        workspace = IRB::WorkSpace.new(wrapper)
         IRB::Irb.new(workspace).run(IRB.conf)
       end
 
