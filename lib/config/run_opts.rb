@@ -92,11 +92,6 @@ module Kerbi
     end
 
     # @return [String]
-    def k8s_auth_type
-      options[consts::K8S_AUTH_TYPE]
-    end
-
-    # @return [String]
     def kube_config_path
       options[consts::KUBE_CONFIG_PATH]
     end
@@ -155,9 +150,14 @@ module Kerbi
       !remote_engine?
     end
 
+    # @return [String]
+    def k8s_auth_type
+      options[consts::K8S_AUTH_TYPE]
+    end
+
     # @return [TrueClass, FalseClass]
     def in_cluster?
-      options[consts::K8S_AUTH_TYPE] == 'in-cluster'
+      k8s_auth_type == 'in-cluster'
     end
 
     # @return [TrueClass, FalseClass]

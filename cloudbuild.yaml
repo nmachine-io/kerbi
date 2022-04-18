@@ -1,3 +1,8 @@
+availableSecrets:
+  secretManager:
+    - versionName: "projects/nectar-bazaar/secrets/rubygems-api-key/versions/latest"
+      env: 'RUBYGEMS_API_KEY'
+
 steps:
 
   - id: "Build base image"
@@ -7,14 +12,14 @@ steps:
       - "build"
       - "."
       - "-t"
-      - "test-image:latest"
+      - "test-image:1.0.0"
 
   - id: "Pull Kind Test Runner Image"
     name: 'gcr.io/cloud-builders/docker'
     waitFor: []
     args:
       - "pull"
-      - "us-central1-docker.pkg.dev/nectar-bazaar/public/kind-test-runner:latest"
+      - "us-central1-docker.pkg.dev/nectar-bazaar/public/kind-test-runner:0.0.2"
 
   - id: "Run Tests in kind cluster"
     name: 'gcr.io/cloud-builders/docker'
@@ -26,33 +31,20 @@ steps:
       - "-v"
       - "/var/run/docker.sock:/var/run/docker.sock"
       - "--net=host"
-      - "us-central1-docker.pkg.dev/nectar-bazaar/public/kind-test-runner:latest"
+      - "us-central1-docker.pkg.dev/nectar-bazaar/public/kind-test-runner:0.0.2"
 
-#  - id: 'Run tests and push coverage'
-#    name: 'gcr.io/cloud-builders/docker'
-#    waitFor:
-#      - 'Build base image'
-#      - 'Fetch Secrets'
-#    entrypoint: 'bash'
-#    args:
-#      - '-c'
-#      - 'docker run
-#        --env CODECOV_TOKEN="$(cat kerbi-codecov-token.txt)"
-#        --env VCS_COMMIT_ID="$COMMIT_SHA"
-#        --env VCS_BRANCH_NAME="$BRANCH_NAME"
-#        --env CI_BUILD_ID="$BUILD_ID"
-#        --env CODECOV_TOKEN="$(cat kerbi-codecov-token.txt)"
-#        kerbi test
-#      '
-#
-#  - name: 'gcr.io/cloud-builders/docker'
-#    id: 'Publish Gem'
-#    entrypoint: 'bash'
-#    waitFor:
-#      - 'Run tests and push coverage'
-#    args:
-#      - '-c'
-#      - 'docker run
-#         --env RUBYGEMS_API_KEY=$(cat rubygems-api-key.txt)
-#         kerbi publish
-#         '
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'Publish Gem'
+    entrypoint: 'bash'
+    waitFor:
+      - "Build base image"
+      - 'Run tests and push coverage'
+
+    secretEnv: ['RUBYGEMS_API_KEY']
+
+    args:
+      - '-c'
+      - 'docker run
+      --env RUBYGEMS_API_KEY=$$RUBYGEMS_API_KEY
+      test-image:1.0.0
+      publish'

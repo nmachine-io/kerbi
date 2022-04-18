@@ -66,6 +66,7 @@ end
 def corrupt_cm(backend)
   cm_body = backend.template_resource([])
   cm_body[:data][:entries] = "not json"
+  #noinspection RubyResolve
   backend.send(:client).update_config_map(cm_body)
 end
 

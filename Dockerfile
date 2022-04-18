@@ -11,6 +11,8 @@ WORKDIR /app
 #RUN rm helm_bin.tar.gz
 #RUN rm -rf linux-amd64
 
+ENV RUBYGEMS_API_KEY $RUBYGEMS_API_KEY
+
 RUN gem install bundler:2.1.4
 COPY Gemfile Gemfile.lock ./
 RUN bundle install

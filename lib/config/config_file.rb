@@ -3,7 +3,7 @@ module Kerbi
   module ConfigFile
 
     DIR_NAME = ".kerbi"
-    FILE_NAME = "config.yaml"
+    FILE_NAME = "config.json"
 
     def self.file_path
       "#{Dir.home}/#{DIR_NAME}/#{FILE_NAME}"
@@ -26,10 +26,11 @@ module Kerbi
     def self.read
       begin
         create_file_if_missing
-        contents = YAML.load_file(file_path)
-        contents.slice(*legal_keys)
+        contents = File.read(file_path)
+        dict = JSON.parse(contents)
+        dict.slice(*legal_keys)
       rescue StandardError => e
-        puts "[WARN] failed to read config #{file_path} (#{e})"
+        $stderr.puts "[WARN] failed to read config #{file_path} (#{e})"
         {}
       end
     end
@@ -38,7 +39,7 @@ module Kerbi
     def self.write(config, skip_check: false)
       create_file_if_missing unless skip_check
       config = config.deep_dup.stringify_keys.slice(*legal_keys)
-      File.write(file_path, YAML.dump(config))
+      File.write(file_path, JSON.dump(config))
     end
 
     # @param [Hash] config
