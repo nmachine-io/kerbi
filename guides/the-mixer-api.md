@@ -4,11 +4,11 @@ description: How to make the most of your MIxer subclasses
 
 # The Mixer API
 
-Mixers are your templating orchestration layer**.** Inside a mixer, you load various types of dict-yielding things, like YAML/ERB files, Helm charts, or other mixers, then manipulate their output if need be, and submit their final output.&#x20;
+Mixers are your templating orchestration layer. Inside a mixer, you load various types of dict-yielding things, like YAML/ERB files, Helm charts, or other mixers, then manipulate their output if need be, and submit their final output.
 
 This page is about the [**`Kerbi::Mixer`**](https://github.com/nmachine-io/kerbi/blob/main/lib/main/mixer.rb) which is class. Find the complete method-level [**documentation here**](https://www.rubydoc.info/gems/kerbi/1.1.47/Kerbi/Mixer).
 
-## The essentials: [`mix()`](https://www.rubydoc.info/gems/kerbi/1.1.47/Kerbi/Mixer#mix-instance\_method) and [`push()`](https://www.rubydoc.info/gems/kerbi/1.1.47/Kerbi/Mixer#push-instance\_method)``
+## The essentials: [`mix()`](https://www.rubydoc.info/gems/kerbi/1.1.47/Kerbi/Mixer#mix-instance\_method) and [`push()`](https://www.rubydoc.info/gems/kerbi/1.1.47/Kerbi/Mixer#push-instance\_method)
 
 When you subclass a `Kerbi::Mixer`, you _have_ to call `mix` and `push` if you want to do anything useful. The `mix` method is what the engine invokes at runtime. Inside your `mix` method, you call `push` to say "include this dict or these dicts in the final output".
 
@@ -47,13 +47,13 @@ bonjour: Monsieur Ke
 
 `push(dicts: Hash | Array<Hash>)` adds the dict(s) you give it to the mixer's final output.
 
-## Attributes: [`values`](https://www.rubydoc.info/gems/kerbi/1.1.47/Kerbi/Mixer#values-instance\_method) and [`release_name`](https://www.rubydoc.info/gems/kerbi/1.1.47/Kerbi/Mixer#release\_name-instance\_method)``
+## Attributes: [`values`](https://www.rubydoc.info/gems/kerbi/1.1.47/Kerbi/Mixer#values-instance\_method) and [`release_name`](https://www.rubydoc.info/gems/kerbi/1.1.47/Kerbi/Mixer#release\_name-instance\_method)
 
-Mixers are instantiated with two important attributes: `values` and `release_name`.&#x20;
+Mixers are instantiated with two important attributes: `values` and `release_name`.
 
 **`values: Hash`** is an immutable dict containing the values compiled by Kerbi at start time (gathered from `values.yaml`, extra values files, and inline `--set x=y` assignments).
 
-**`release_name: String`** holds the `release_name` value, which is the second argument you pass in the CLI in the `template` command.&#x20;
+**`release_name: String`** holds the `release_name` value, which is the second argument you pass in the CLI in the `template` command.
 
 Accessing `values` and `release_name` is straightforward:
 
@@ -128,8 +128,6 @@ mixer.have_fun!
 => I'm just an Array of Hash!
 => Containing: [{key: value, more_key: more_value}, {key: value}]
 ```
-
-
 {% endtab %}
 {% endtabs %}
 
@@ -246,7 +244,7 @@ file_two: two
 
 ### The [`patched_with()`](https://www.rubydoc.info/gems/kerbi/1.1.47/Kerbi/Mixer#patched\_with-instance\_method) method
 
-As a convenience, you can have dicts patched onto the dicts that you emit. This is a common pattern for things like annotations and labels on Kubernetes resources. With `patched_with()`, all invokations of `file()`, `dir()`, `chart()`,  `mixer()`,  or `http`()  you place inside the block will have the specified dicts merged onto their outputs.
+As a convenience, you can have dicts patched onto the dicts that you emit. This is a common pattern for things like annotations and labels on Kubernetes resources. With `patched_with()`, all invokations of `file()`, `dir()`, `chart()`, `mixer()`, or `http`() you place inside the block will have the specified dicts merged onto their outputs.
 
 Below are several examples:
 
@@ -278,8 +276,6 @@ end
 ```
 {% endcode %}
 
-
-
 Assuming the annotations file:
 
 {% code title="annotations.yaml.erb" %}
@@ -290,8 +286,6 @@ metadata:
     author: <%= ENV["USER"] %>
 ```
 {% endcode %}
-
-
 
 And the Kubernetes namespace/cm file:
 
@@ -351,7 +345,7 @@ metadata:
 
 ### The [`chart()`](https://www.rubydoc.info/gems/kerbi/1.1.47/Kerbi/Mixer#chart-instance\_method) method
 
-You can use Kerbi to run Helm as well . The `chart()` method is more or less a wrapper that calls Helm's [template command](https://helm.sh/docs/helm/helm\_template/), i.e `helm template <release-name> <location>`.&#x20;
+You can use Kerbi to run Helm as well . The `chart()` method is more or less a wrapper that calls Helm's [template command](https://helm.sh/docs/helm/helm\_template/), i.e `helm template <release-name> <location>`.
 
 Here is an example using [JetStack's cert-manager chart](https://artifacthub.io/packages/helm/cert-manager/cert-manager)
 
@@ -411,7 +405,7 @@ You can filter the outputs of the extraction methods seen above by using the `on
 {% hint style="info" %}
 **Important**
 
-* Omiting `name` or `kind` is the same as saying "any" for that attribute.&#x20;
+* Omiting `name` or `kind` is the same as saying "any" for that attribute.
 * You can pass a _quasi_ regex, which will get interpreted as `"^#{your_expr}$`
 {% endhint %}
 
@@ -429,8 +423,6 @@ end
 
 Kerbi::Globals.mixers << FilteringExample
 ```
-
-
 {% endtab %}
 
 {% tab title="Template" %}
@@ -454,14 +446,13 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: "also-unwanted"
-
 ```
 {% endcode %}
 {% endtab %}
 
 {% tab title="Output" %}
 ```yaml
-$ kerbi template default
+$ kerbi template default .
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -469,9 +460,3 @@ metadata:
 ```
 {% endtab %}
 {% endtabs %}
-
-
-
-
-
-&#x20;

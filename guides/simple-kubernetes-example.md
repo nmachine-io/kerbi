@@ -2,10 +2,9 @@
 
 Let's do something useful: generate some Kubernetes-bound YAML. We'll create the resource descriptors for a tiny [Pod](https://kubernetes.io/docs/concepts/workloads/pods/) running `nginx` along with a [Service](https://kubernetes.io/docs/concepts/services-networking/service/).
 
-We will recreate the [**hello-kerbi project**](https://github.com/nmachine-io/kerbi/tree/main/examples) from the examples folder. Read along or clone the folder to play with it locally. The directory structure by the end of the tutorial will be:
+We will recreate the [**hello-kerbi project**](https://github.com/nmachine-io/kerbi/tree/main/examples) from the examples folder. Read along or clone the folder to play with it locally. The directory structure **by the end of the tutorial** will be:
 
 ```
-<project root>
 ├───kerbifile.rb
 ├───pod-and-service.yaml.erb
 ├───consts.rb
@@ -60,7 +59,7 @@ spec:
 {% endtab %}
 
 {% tab title="Output" %}
-{% code title="$ kerbi template default" %}
+{% code title="$ kerbi template demo ." %}
 ```yaml
 apiVersion: v1
 kind: Pod
@@ -90,25 +89,25 @@ spec:
 
 {% tab title="Kubernetes" %}
 ```bash
-$ kerbi template demo > manifest.yaml
+$ kerbi template demo . > manifest.yaml
 $ kubectl apply -f manifest.yaml
 ```
 {% endtab %}
 {% endtabs %}
 
-**A few Observations:**
+A few Observations:
 
-`release_name` **** gets its value - `default` - from our command line argument
+**`release_name`** gets its value - `demo` - from our command line argument
 
-`file("pod-and-service")` omits the `.yaml.erb` extension and still works.
+**`file`**`("pod-and-service")` omits the `.yaml.erb` extension and still works.
 
-`push file()` is just passing an `Array<Hash>` returned by `file()`, explained [here](the-mixer-api.md#the-essentials-mix-and-push).
+**`push`**` ``file()` is just passing an `Array<Hash>` returned by `file()`, explained [here](the-mixer-api.md#the-essentials-mix-and-push).
 
-`require "kerbi"` is nowwhere to be found. That's normal, the `kerbi` executable handles it.
+**`require`**` ``"kerbi"` is nowwhere to be found. That's normal, the `kerbi` executable handles it.
 
 ## 2. Adding Values
 
-The whole point of templating engines is to modulate the output based on information passed at runtime. Like in Helm, the primary mechanism for this is **values**.&#x20;
+The whole point of templating engines is to modulate the output based on information passed at runtime. Like in Helm, the primary mechanism for this is **values**.
 
 {% tabs %}
 {% tab title="values/values.yaml" %}
@@ -159,7 +158,7 @@ service:
 Running `kerbi template default .` yields the output you would expect. We can also choose to also apply our `production.yaml` by using `-f` flag in the command:
 
 ```
-$ kerbi template demo -f production.yaml
+$ kerbi template demo . -f production.yaml
 ```
 
 This makes our Service become a LoadBalancer:
@@ -175,7 +174,7 @@ spec:
 Finally, we can use `--set` to achieve the same effect, but without creating a new values file:
 
 ```
-$ kerbi template demo --set service.type=LoadBalancer
+$ kerbi template demo . --set service.type=LoadBalancer
 ```
 
 ## 3. Patching After Loading
@@ -240,12 +239,11 @@ spec:
     app: hello-kerbi
   ports:
   - port: 80
-
 ```
 {% endtab %}
 {% endtabs %}
 
-Notice how `patched_with()` method accepts the same `Hash | Array<Hash>` as `push()` that we have been using up to now. This means you can use the same methods to construct arbitrarily complex patches.&#x20;
+Notice how `patched_with()` method accepts the same `Hash | Array<Hash>` as `push()` that we have been using up to now. This means you can use the same methods to construct arbitrarily complex patches.
 
 ## 4. Getting DRY & Organized
 
@@ -354,25 +352,52 @@ irb(kerbi):005:0> mixer.run
 {:apiVersion=>"v1", :kind=>"Service", :metadata=>{:name=>"hello-kerbi", :namespace=>"default", :annotations=>{:author=>"xavier"}, :labels=>{:app=>"hello-kerbi"}}, :spec=>{:type=>"ClusterIP", :selector=>{:app=>"hello-kerbi"}, :ports=>[{:port=>80}]}}
 ```
 
-## 6. Writing State
+## 6. State &#x20;
 
 You need a way to keep track of the values you use to generate your latest manifest. If you applied a templated manifest that used `--set backend.image=2` and then later `--set frontend.image=2`, then the second invokation would revert `backend.image` to its default from `values.yaml`. Big problem.
 
-Kerbi has an [**inbuilt state mechanism**](the-state-system.md) that lets you store the values it computes as part of certain commands (`template` and `values)`, and then retrieve those values again. Kerbi uses a `ConfigMap` in your cluster to store the data. Tell Kerbi to create that `ConfigMap`:
+Kerbi has an [**inbuilt state mechanism**](the-state-system.md) that lets you store the values it computes during `$ kerbi template`, and then retrieve those values again. Kerbi uses a `ConfigMap` (or `Secret` if you tell it to)in your cluster to store the data. Tell Kerbi to create that `ConfigMap`:
 
 ```
-$ kerbi state init demo
+$ kerbi release init demo
 
 namespaces/demo: Created
 demo/configmaps/kerbi-db: Created
 ```
 
-Now let's template again, but with a new option `--write-state`: &#x20;
+We now have one release:
+
+{% tabs %}
+{% tab title="First Tab" %}
+```
+$ kerbi release list
+
+NAME BACKEND   NAMESPACE RESOURCE      STATES LATEST
+demo ConfigMap demo      kerbi-demo-db 0
+```
+{% endtab %}
+
+{% tab title="Second Tab" %}
+```
+$ kerbi release status demo
+
+1. Create Kubernetes client: Success
+2. List cluster namespaces: Success
+3. Target namespace demo exists: Success
+4. Resource demo/cm/kerbi-demo-db exists: Success
+5. Data from resource is readable: Success
+```
+{% endtab %}
+{% endtabs %}
+
+## 6. Writing State
+
+Now let's template again, but with a new option `--write-state`:
 
 {% tabs %}
 {% tab title="Template Command" %}
 ```
-$ kerbi template demo \
+$ kerbi template demo . \
         --set pod.image=ruby \
         --write-state @new-candidate \
         > manifest.yaml
@@ -419,21 +444,25 @@ spec:
 Let's use Kerbi's state inspection commands: `list` and `show`:
 
 {% tabs %}
-{% tab title="$ kerbi state list" %}
+{% tab title="List" %}
 ```
-$ kerbi state list
+$ kerbi state list demo
 
-  TAG                 MESSAGE  ASSIGNMENTS  OVERRIDES  CREATED_AT
- [cand]-brave-toner           2            1          4 seconds ago
+TAG                 REVISION MESSAGE  ASSIGNMENTS  OVERRIDES  CREATED_AT
+[cand]-brave-toner                    2            1          4 seconds ago
 ```
 {% endtab %}
 
-{% tab title="$ kerbi state show" %}
+{% tab title="Show" %}
 ```
-$ kerbi state show @candidate
+$ kerbi state show demo @candidate
 
 --------------------------------------------
  TAG              [cand]-brave-toner
+--------------------------------------------
+ RELEASE          demo
+--------------------------------------------
+ REVISION
 --------------------------------------------
  MESSAGE
 --------------------------------------------
@@ -451,24 +480,24 @@ $ kerbi state show @candidate
 {% endtab %}
 {% endtabs %}
 
-The meanings of special words like `@candidate`, `@new-candidate`, and `@latest` are covered in the [State System guide](the-state-system.md).&#x20;
+The meanings of special words like `@candidate`, `@new-candidate`, and `@latest` are covered in the [State System guide](the-state-system.md).
 
-## 7. Promoting and Retagging States
+## 7. Promoting the Candidate State
 
 Now for the sake of realism, let's run `kubectl apply -f manifest`. That worked, so we feel good about these values. Let's promote our latest state:
 
 {% tabs %}
-{% tab title="$ kerbi state promote" %}
+{% tab title="Promote" %}
 ```
-$ kerbi state promote @candidate
+$ kerbi state promote demo @candidate
 
 Updated state[brave-toner].tag from [cand]-brave-toner => brave-toner
 ```
 {% endtab %}
 
-{% tab title="$ kerbi state retag  (optional)" %}
+{% tab title="Retag" %}
 ```
-$ kerbi state retag @latest 0.0.1
+$ kerbi state retag demo @latest 0.0.1
 
 Updated state[0.0.1].tag from brave-toner => 0.0.1
 ```
@@ -478,16 +507,16 @@ Updated state[0.0.1].tag from brave-toner => 0.0.1
 The name of our state has changed:
 
 {% tabs %}
-{% tab title="$ kerbi state list" %}
+{% tab title="List" %}
 ```
-$ kerbi state list
+$ kerbi state list demo
 
  TAG    MESSAGE  ASSIGNMENTS  OVERRIDES  CREATED_AT
  0.0.1           2            1          a minute ago
 ```
 {% endtab %}
 
-{% tab title="$ kerbi state show" %}
+{% tab title="Show" %}
 ```
 $ kerbi state show @latest
 
@@ -506,7 +535,6 @@ $ kerbi state show @latest
 --------------------------------------------
  OVERRIDDEN_KEYS  pod
 --------------------------------------------
-
 ```
 {% endtab %}
 {% endtabs %}
@@ -516,9 +544,9 @@ $ kerbi state show @latest
 It's finally time to make use of the state we saved. Let's template the manifest again, with a new value assignment, but also with the old `pod.image=ruby` assignment:
 
 {% tabs %}
-{% tab title="$ kerbi template" %}
+{% tab title="Template" %}
 ```
-$ kerbi template demo \
+$ kerbi template demo . \
         --read-state @latest \
         --write-state @new-candidate \
         > manifest.yaml
@@ -562,14 +590,14 @@ spec:
 {% endtab %}
 {% endtabs %}
 
-We see in the manifest that the values from the old state (`pod.image=ruby`) were successfully applied which is what we wanted to do. Inspecting the state shows we have a new entry, as expected:&#x20;
+We see in the manifest that the values from the old state (`pod.image=ruby`) were successfully applied which is what we wanted to do. Inspecting the state shows we have a new entry, as expected:
 
 ```
 $ kerbi state list
 
-  TAG              MESSAGE  ASSIGNMENTS  OVERRIDES  CREATED_AT
- [cand]-warm-tap           2            2          11 seconds ago
- 0.0.1                     2            1          10 minutes ago
+TAG               REVISION   MESSAGE  ASSIGNMENTS  OVERRIDES  CREATED_AT
+[cand]-warm-tap                       2            2          11 seconds ago
+0.0.1                                 2            1          10 minutes ago
 ```
 
 ## 9. In Your CD Pipeline
@@ -578,18 +606,18 @@ Putting it all together, the following shows what a simple Kubernetes deployment
 
 {% code title="my-cd-pipeline.sh" %}
 ```
-$ kerbi state init demo --backend=ConfigMap
+$ kerbi state init demo .
 
 $ kerbi config set k8s-auth-type <your-strategy>
 
-$ kerbi template <release_name> \
+$ kerbi template demo . \
         --set <however you get your vars in> \
         --read-state @latest \
         --write-state @new-candidate \
         > manifest.yaml
 
 $ kubectl apply --dry-run=server -f manifest.yaml \
-  && kerbi state promote @candidate \
+  && kerbi state promote demo @candidate \
   && kubectl apply -f manifest.yaml  
 ```
 {% endcode %}
