@@ -25,7 +25,9 @@ module Kerbi
 
       cmd_meta Kerbi::Consts::CommandSchemas::CONFIG_SHOW
       def show
-        echo_data(run_opts.options)
+        src = run_opts.options
+        hash = Hash[legal_keys.map { |k| [k, src[k]] }]
+        echo_data(hash)
       end
 
       cmd_meta Kerbi::Consts::CommandSchemas::CONFIG_RESET

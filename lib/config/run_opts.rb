@@ -128,7 +128,7 @@ module Kerbi
 
     # @return [String]
     def k8s_auth_token
-      options[consts::K8S_TOKEN]
+      options[consts::KUBE_ACCESS_TOKEN]
     end
 
     # @return [String]

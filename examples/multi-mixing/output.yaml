@@ -1,0 +1,9 @@
+mixer_says: OuterMixer {:x=>{:y=>"z"}}
+
+---
+
+mixer_says: MixerOne {:x=>{:y=>"z"}}
+
+---
+
+mixer_says: MixerTwo {:y=>"z"}

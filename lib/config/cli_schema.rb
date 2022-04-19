@@ -28,15 +28,15 @@ module Kerbi
       KUBE_ACCESS_TOKEN = "k8s-access-token"
       K8S_USERNAME = "k8s-username"
       K8S_PASSWORD = "k8s-password"
-      K8S_TOKEN = "k8s-access-token"
 
       LEGAL_CONFIG_FILE_KEYS = [
+        LOAD_DEFAULT_VALUES,
+        OUTPUT_FMT,
         STATE_BACKEND_TYPE,
         K8S_AUTH_TYPE,
+        KUBE_CONFIG_PATH,
         KUBE_CONFIG_CONTEXT,
-        K8S_USERNAME,
-        K8S_PASSWORD,
-        KUBE_ACCESS_TOKEN
+        KUBE_ACCESS_TOKEN,
       ]
     end
 
@@ -111,8 +111,8 @@ module Kerbi
         default: true
       }.freeze
 
-      K8S_TOKEN = {
-        key: OptionKeys::K8S_TOKEN,
+      KUBE_ACCESS_TOKEN = {
+        key: OptionKeys::KUBE_ACCESS_TOKEN,
         desc: "Kubernetes auth bearer token for token auth"
       }.freeze
 
@@ -199,7 +199,8 @@ module Kerbi
         WRITE_STATE,
         K8S_AUTH_TYPE,
         KUBE_CONFIG_PATH,
-        KUBE_CONFIG_CONTEXT
+        KUBE_CONFIG_CONTEXT,
+        KUBE_ACCESS_TOKEN
       ].freeze
 
       VALUES_OPTIONS = [
