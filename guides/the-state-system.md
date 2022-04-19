@@ -2,7 +2,7 @@
 
 Kerbi's state management system lets you store the values it computes during `$ kerbi template` or `$ kerbi values`, and then retrieve those values again. Kerbi uses a `ConfigMap`, `Secret`, or database in your cluster to store the data.
 
-To build an intuitive understanding of state management, see the [Walkthrough](simple-kubernetes-example.md#6.-writing-state).&#x20;
+To build an intuitive understanding of state management, see the [Walkthrough](simple-kubernetes-example.md#6.-writing-state).
 
 ## Kubernetes Workflow
 
@@ -17,7 +17,7 @@ Your goal as a developer using variable-based templating in a modern CD pipeline
 3. **If the apply worked**:
    1. **Store the values** you just used to generate this manifest for next time
 4. Otherwise:
-   1. **Stop everything**, ping devs, etc...&#x20;
+   1. **Stop everything**, ping devs, etc...
 {% endtab %}
 
 {% tab title="In Pseudo code" %}
@@ -56,7 +56,7 @@ This is great, but there are some downsides, namely that you are delegating the 
 Kerbi, on the other hand, is designed to never run critical operations like `kubectl apply` on your behalf. So with Kerbi, you can implement conceptual workflow as follows:
 
 ```
-$ kerbi template foo \
+$ kerbi template foo . \
     --set pod.image=v2 \
     --read-state @latest \
     --write-state @new-candidate \
@@ -67,15 +67,16 @@ $ kubectl apply --dry-run=server -f manifest.yaml \
   && kubectl apply -f manifest.yaml
 ```
 
-Running `kubectl apply` with `--dry=run-server` will yield a status code of `"0"` if all resources were accepted, and `"1"` otherwise.  Therefore, the statement that comes after the `&&` only gets evaluated if Kubernetes accepted all our resources -  what we wanted.
+Running `kubectl apply` with `--dry=run-server` will yield a status code of `"0"` if all resources were accepted, and `"1"` otherwise. Therefore, the statement that comes after the `&&` only gets evaluated if Kubernetes accepted all our resources - what we wanted.
 
 ## What is a State?
 
-A state is a record that stores the values (aka variables) that were computed during a `$ kerbi template` operation, provided a `--write state [TAG]` flag is passed.&#x20;
+A state is a record that stores the values (aka variables) that were computed during a `$ kerbi template` operation, provided a `--write state [TAG]` flag is passed.
 
 State records have the following attributes:
 
 * `tag` - its unique name, which can be anything
+* `revision` -  the semantic version number of your project ([see guide](revisions.md))
 * `message` any human readable note, or perhaps a git commit id
 * `values` the final values computed by `template` or `values show`
 * `default_values` the final **default** values computed by `template` or `values show`
@@ -89,9 +90,11 @@ You can easily inspect any state with the CLI:
 $ kerbi state show antelope @latest
 
 --------------------------------------------
+ TAG              1.0.0
+--------------------------------------------
  RELEASE          antelope
 --------------------------------------------
- TAG              1.0.0
+ REVISION         1.0.0
 --------------------------------------------
  MESSAGE
 --------------------------------------------
@@ -114,6 +117,8 @@ $ kerbi state show demo @latest -o json
 
 {
   "tag": "0.0.1",
+  "release": "demo",
+  "revision": null,
   "message": null,
   "created_at": "2022-04-13 10:32:55 +0100",
   "values": {
@@ -142,7 +147,7 @@ $ kerbi state show demo @latest -o json
 
 ## What is a Release?
 
-A release is a collection of states. Conceptually, a release also means "one instance of the app".&#x20;
+A release is a collection of states. Conceptually, a release also means "one instance of the app".
 
 ### Name, Namespace, and Resource Name
 
@@ -180,7 +185,7 @@ default              kerbi-antelope-db                    1      3m3s
 
 ### Referring to Releases
 
-When you run a command like `$ kerbi template [RELEASE_NAME]`, Kerbi will look for a `ConfigMap` called `kerbi-[RELEASE_NAME]-db` in the namespace `[RELEASE_NAME]`.&#x20;
+When you run a command like `$ kerbi template [RELEASE_NAME]`, Kerbi will look for a `ConfigMap` called `kerbi-[RELEASE_NAME]-db` in the namespace `[RELEASE_NAME]`.
 
 If you pass an explicit namespace, e.g `$ kerbi template [RELEASE_NAME] --namespace [NAMESPACE]` then it will look for the `ConfigMap` in the namespace `[NAMESPACE]`.
 
@@ -212,7 +217,7 @@ namespace = read(namespace) || 'default'
 
 ### **State management backends**
 
-Kerbi can store the compiled values data in a `ConfigMap`, a `Secret`, or an arbitrary database. **** You can set this behavior either with a flag e.g `--backend ConfigMap` or in the global Kerbi config e.g `$ kerbi config set state-backend: Secret`.&#x20;
+Kerbi can store the compiled values data in a `ConfigMap`, a `Secret`, or an arbitrary database. \*\*\*\* You can set this behavior either with a flag e.g `--backend ConfigMap` or in the global Kerbi config e.g `$ kerbi config set state-backend: Secret`.
 
 {% hint style="warning" %}
 **Only `ConfigMap` currently works**
@@ -220,7 +225,7 @@ Kerbi can store the compiled values data in a `ConfigMap`, a `Secret`, or an arb
 Secret and database are not yet finished.
 {% endhint %}
 
-If you use a `ConfigMap` or `Secret`, you'll need to give Kerbi **access your cluster**. The examples below show the three different ways to do that.&#x20;
+If you use a `ConfigMap` or `Secret`, you'll need to give Kerbi **access your cluster**. The examples below show the three different ways to do that.
 
 {% tabs %}
 {% tab title="KubeConfig Auth" %}
@@ -230,11 +235,7 @@ To use this auth mode:
 $ kerbi config set k8s-auth-type kube-config
 ```
 
-
-
 If you have a `~/.kube/config.yaml` on your machine, then this should work without any further configuration. The following settings are available:
-
-
 
 ```
 $ kerbi config set kube-config-path /path/to/your/kube/config
@@ -252,8 +253,6 @@ $ kerbi config set k8s-auth-type access-token
 \
 Probably what you want in CI/CD if you have a [ServiceAccount](the-state-system.md#kubernetes-workflow) and a remote cluster. You need to supply an access token, a.k.a bearer token:
 
-
-
 ```
 $ kerbi config set k8s-access-token <token>
 ```
@@ -266,11 +265,7 @@ To use this auth mode:
 $ kerbi config set k8s-auth-type in-cluster
 ```
 
-
-
 For running Kerbi inside a pod. You don't need to supply any additional auth credentials; Kerbi will authenticate using the following values:
-
-
 
 {% code title="pseudocode" %}
 ```
@@ -285,35 +280,35 @@ Note that each configuration above can also be passed as a flag in any state tou
 
 ## State Tag Substitutions
 
-We can feed the CLI special expressions instead of literals tag. When Kerbi encounters a special keyword, formatted as `@<keyword>`, it will attempt to resolve it to a literal tag name. Depending on the keyword, the resolved tag may or may not refer to an existing state tag.&#x20;
+We can feed the CLI special expressions instead of literals tag. When Kerbi encounters a special keyword, formatted as `@<keyword>`, it will attempt to resolve it to a literal tag name. Depending on the keyword, the resolved tag may or may not refer to an existing state tag.
 
 ### The `@latest` keyword
 
-Resolves to the tag of the **newest **_**non**_**-candidate** state (as given by `created_at`). Behavior is the same during read and write operations.&#x20;
+Resolves to the tag of the **newest \_non**\_**-candidate** state (as given by `created_at`). Behavior is the same during read and write operations.
 
 Example: `$ kerbi state show zebra @latest`
 
 ### The `@candidate` keyword
 
-Resolves to the tag of the **newest candidate** state (as given by `created_at`). Behavior is the same during read and write operations.&#x20;
+Resolves to the tag of the **newest candidate** state (as given by `created_at`). Behavior is the same during read and write operations.
 
 Example: `$ kerbi state retag zebra @candidate 1.2.3`
 
 ### The `@new-candidate` keyword
 
-Resolves to a random, free (not yet taken by existing states) tag **with a candidate status prefix**. Only works for write operations.&#x20;
+Resolves to a random, free (not yet taken by existing states) tag **with a candidate status prefix**. Only works for write operations.
 
 Example: `$ kerbi values show -f v2.yaml --write-state @new-candidate`. The name of the new state in this case resolved to `"[cand]-purple-purse"`
 
 ### The `@random` keyword
 
-Resolves to a random, free (not yet taken by existing states) tag **without a candidate status prefix**. Only works for write operations.&#x20;
+Resolves to a random, free (not yet taken by existing states) tag **without a candidate status prefix**. Only works for write operations.
 
 Example: `$ kerbi values show -f v2.yaml --write-state @random`. The name of the new state in this case resolved to `"spiky-goose"`
 
 ## Candidate Status
 
-States have a "candidate" flag to make it possible to implement the conceptual workflow described in the first section. In short, you want a state to be in candidate mode until you know it has been successfully applied to the cluster.&#x20;
+States have a "candidate" flag to make it possible to implement the conceptual workflow described in the first section. In short, you want a state to be in candidate mode until you know it has been successfully applied to the cluster.
 
 ### Designation
 

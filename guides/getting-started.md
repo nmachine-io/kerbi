@@ -19,10 +19,15 @@ You can now run the `kerbi` executable from anywhere:
 ```bash
 $ kerbi
 Commands:
-  kerbi help [COMMAND]                       # Describe available commands or one specific command
-  kerbi project                              # Command group for project actions: new, info
-  kerbi template [KERBIFILE] [RELEASE_NAME]  # Runs mixers for RELEASE_NAME
-  kerbi values                               # Command group for values actions: show, get
+  kerbi config                                 # Command group for config actions (see $ kerbi config help)
+  kerbi console                                # Opens an IRB console so you can play with your mixers
+  kerbi help [COMMAND]                         # Describe available commands or one specific command
+  kerbi project                                # Command group for project actions (see $ kerbi project help)
+  kerbi release                                # Command group for release actions (see $ kerbi release help)
+  kerbi state                                  # Command group for state actions (see $ kerbi state help)
+  kerbi template [RELEASE_NAME] [PROJECT_URI]  # Templates to YAML/JSON, using [RELEASE_NAME] for state I/O
+  kerbi values                                 # Command group for values actions (see $ kerbi values help)
+  kerbi version                                # Print the kerbi gem's version.
 ```
 
 ## 2. Generate a Boilerplate Project
@@ -51,9 +56,7 @@ $ kerbi template hello .
 And then `values show` to see compiled values in action:
 
 ```
-$ kerbi values show --set foo-bar
+$ kerbi values show --set pod.image=ruby
 ```
-
-
 
 ##

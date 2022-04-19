@@ -1,8 +1,27 @@
 # CLI Reference
 
+## Overview
+
+The Kerbi CLI should be available to you anywhere on the system provided you installed the Gem using `gem install`, as opposed adding it in a particular project's Gemfile.
+
+The information below can be found by running `kerbi` in your command line:
+
+```
+Commands:
+  kerbi config                                 # Command group for config actions (see $ kerbi config help)
+  kerbi console                                # Opens an IRB console so you can play with your mixers
+  kerbi help [COMMAND]                         # Describe available commands or one specific command
+  kerbi project                                # Command group for project actions (see $ kerbi project help)
+  kerbi release                                # Command group for release actions (see $ kerbi release help)
+  kerbi state                                  # Command group for state actions (see $ kerbi state help)
+  kerbi template [RELEASE_NAME] [PROJECT_URI]  # Templates to YAML/JSON, using [RELEASE_NAME] for state I/O
+  kerbi values                                 # Command group for values actions (see $ kerbi values help)
+  kerbi version                                # Print the kerbi gem's version.
+```
+
 ## Root Commands
 
-### $ `kerbi template [RELEASE`\_NAME`] [PROJECT_URI]`
+### $ `kerbi template [RELEASE_NAME] [PROJECT_URI]`
 
 Template the project given by `[PROJECT_URI]`, where `[RELEASE_NAME]` is used for any state I/O (enabled with `--read-state` and `--write-state)`, and is made available to mixers as the instance variable `release_name`.&#x20;
 
@@ -125,6 +144,17 @@ Starts an interactive console powered by [IRB](https://www.digitalocean.com/comm
 * `values` - the same bundle of values available to `$ kerbi template`
 * `default_values` the subset of values taken only from `values.yaml`
 
+```
+kerbi console --set pod.image=python
+
+irb(kerbi):001:0> values
+=> {:pod=>{:image=>"python"}, :service=>{:type=>"ClusterIP"}}
+irb(kerbi):002:0> 
+
+irb(kerbi):003:0> Kerbi::Globals.mixers
+=> [HelloKerbi::Mixer]
+```
+
 <details>
 
 <summary>Options</summary>
@@ -141,7 +171,42 @@ Starts an interactive console powered by [IRB](https://www.digitalocean.com/comm
 
 ### `$ kerbi values show`
 
-Prints out all values compiled by Kerbi for the project in the current directory. Useful to preview the data that your mixers will be receiving. You cannot write the compiled values to state with this command.&#x20;
+Prints out all values compiled by Kerbi for the project in the current directory. Useful to preview the data that your mixers will be consuming.&#x20;
+
+If you need to merge in state values, specify which release to use with `--release-name` along with the usual state parameters (found in `$ kerbi state`, `$ kerbi template`, etc...).
+
+{% tabs %}
+{% tab title="Trivial" %}
+```yaml
+$ kerbi values show
+
+pod:
+  image: nginx
+service:
+  type: ClusterIP
+```
+{% endtab %}
+
+{% tab title="With state" %}
+```
+$ kerbi release init demo > /dev/null
+
+$ kerbi template demo . \
+    --set backend.image=node
+    --write-state 1.0.0 \
+    > /dev/null
+
+$ kerbi values show \
+    --release-name demo \ 
+    --read-state 1.0.0
+
+pod:
+  image: node
+service:
+  type: ClusterIP
+```
+{% endtab %}
+{% endtabs %}
 
 <details>
 
@@ -444,6 +509,24 @@ $ kerbi state retag hello @candidate 1.2.3
 Updated state[1.2.3].tag from [cand]-burly-robin => 1.2.3
 ```
 
+<details>
+
+<summary>Options</summary>
+
+```
+  -n, [--namespace=NAMESPACE]                      # Use this Kubernetes namespace instead of [RELEASE_NAME] for state I/O.
+      [--state-backend=STATE-BACKEND]              # Type of persistent store to read/write this release's state.
+                                                   # Possible values: configmap, secret
+      [--read-state=READ-STATE]                    # Merge values from state with this tag.
+      [--write-state=WRITE-STATE]                  # Write compiled values into new or existing state recordwith this tag.
+      [--k8s-auth-type=K8S-AUTH-TYPE]              # Kubernetes cluster authentication type. Uses kube-config if unspecified.
+                                                   # Possible values: kube-config, in-cluster, token
+      [--kube-config-path=KUBE-CONFIG-PATH]        # Path to your kube-config file. Uses ~/.kube/config if unspecified.
+      [--kube-config-context=KUBE-CONFIG-CONTEXT]  # Context to use in your kube config. Uses current context if unspecified.
+```
+
+</details>
+
 ### `$ kerbi state prune-candidates [RELEASE_NAME]`
 
 Deletes all state records under `[RELEASE_NAME]` that are flagged as candidates.
@@ -463,11 +546,77 @@ TAG                REVISION MESSAGE ASSIGNMENTS OVERRIDES CREATED_AT
 1.2.3                               2           1         a minute ago
 ```
 
+<details>
+
+<summary>Options</summary>
+
+```
+  -n, [--namespace=NAMESPACE]                      # Use this Kubernetes namespace instead of [RELEASE_NAME] for state I/O.
+      [--state-backend=STATE-BACKEND]              # Type of persistent store to read/write this release's state.
+                                                   # Possible values: configmap, secret
+      [--read-state=READ-STATE]                    # Merge values from state with this tag.
+      [--write-state=WRITE-STATE]                  # Write compiled values into new or existing state recordwith this tag.
+      [--k8s-auth-type=K8S-AUTH-TYPE]              # Kubernetes cluster authentication type. Uses kube-config if unspecified.
+                                                   # Possible values: kube-config, in-cluster, token
+      [--kube-config-path=KUBE-CONFIG-PATH]        # Path to your kube-config file. Uses ~/.kube/config if unspecified.
+      [--kube-config-context=KUBE-CONFIG-CONTEXT]  # Context to use in your kube config. Uses current context if unspecified.
+```
+
+</details>
+
+## Config Commands
+
+### `$ kerbi config show`
+
+Prints the final compiled configuration kerbi will use.&#x20;
+
+{% hint style="warning" %}
+**Not the exact contents of the config file**
+
+This command shows what Kerbi sees after it has loaded your config file **and** processed it, e.g sanitized it with fallback values. If you need to read your config file, just read it normally: `cat ~/.kerbi/config`.
+{% endhint %}
+
+```yaml
+$ kerbi config show
+load-defaults: true
+inline-value: []
+values-file: []
+output-format: yaml
+state-backend: configmap
+k8s-auth-type: kube-config
+```
+
+### `$ kerbi config set [KEY] [VALUE]`
+
+Updates one attribute in your global config file. This command will fail if you attempt to set an attribute not supported in the config file.&#x20;
+
+```
+$ kerbi config set output-format json
+```
+
+### `$ kerbi config reset`
+
+Deletes your global configuration file and creates an empty one.
+
+```
+$ kerbi config reset
+Config reset
+See /home/xavier/.kerbi/config.json
+```
+
 ## Project Commands
 
-### `$ kerbi project new [NAME] [options]`
+### `$ kerbi project new [NAME]`
 
 Creates a boilerplate project called `[NAME]` in the current directory. While a Gemfile fill be generated, you do not technically need to run `bundle install` to get started, although you will need to at some point if your project becomes more serious.
+
+```
+$ kerbi project new rhino
+Created project at /home/xavier/rhino
+Created file rhino/Gemfile
+Created file rhino/kerbifile.rb
+Created file rhino/values.yaml
+```
 
 <details>
 

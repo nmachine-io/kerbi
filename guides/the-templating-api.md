@@ -8,7 +8,7 @@ Most of the methods here come from [**`Kerbi::Mixins::Mixer`**](https://github.c
 
 In addition to the methods listed in the next sections, you have access to:
 
-* Every public method from the [Mixer API](the-mixer-api.md) (e.g `values`,  `file()`, etc...), except `#push()`
+* Every public method from the [Mixer API](the-mixer-api.md) (e.g `values`, `file()`, etc...), except `#push()`
 * Any custom methods you define in your Mixer subclass, including those included from modules
 
 See both in action below with **`file()`** and **`ingress_enabled?()`**:
@@ -37,9 +37,7 @@ nginx.ingress.kubernetes.io/cors-expose-headers: "*, X-CustomResponseHeader"
 {% endtab %}
 
 {% tab title="Output" %}
-Running `kerbi template default --set ingress.enabled=true`:
-
-
+Running `kerbi template default . --set ingress.enabled=true`:
 
 ```yaml
 apiVersion: networking.k8s.io/v1
@@ -123,7 +121,7 @@ data:
 
 ### The [`embed()`](https://www.rubydoc.info/gems/kerbi/1.1.47/Kerbi/Mixins/Mixer#embed-instance\_method) and [`embed_array()`](https://www.rubydoc.info/gems/kerbi/1.1.47/Kerbi/Mixins/Mixer#embed\_array-instance\_method) methods
 
-The `embed()` and `embed_array()` methods convert, respectively, a `Hash` and an `Array<Hash>`, into an appropriately indented `String` that can be embedded into a YAML file.&#x20;
+The `embed()` and `embed_array()` methods convert, respectively, a `Hash` and an `Array<Hash>`, into an appropriately indented `String` that can be embedded into a YAML file.
 
 {% tabs %}
 {% tab title="Template" %}
@@ -156,7 +154,7 @@ spec:
 
 Both methods assume that what you're trying to embed should appear as far "right" as possible. If this is not what you need, you can pass the optional **`indent: Integer`** option. If the indent is wrong, e.g it is too small, YAML parsing will raise an exception and templating will fail.
 
-#### Embedding items into a List&#x20;
+#### Embedding items into a List
 
 If you have a YAML-defined list and need to add individual items, the best known way to do this (although this is not ideal), is to call `embed_array()` with an explicit `indent: Integer` that you find by counting, or more realistically by trial and error.
 
@@ -195,7 +193,5 @@ spec:
 ```
 {% endtab %}
 {% endtabs %}
-
-
 
 ###
