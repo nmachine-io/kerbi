@@ -56,7 +56,7 @@ This is great, but there are some downsides, namely that you are delegating the 
 Kerbi, on the other hand, is designed to never run critical operations like `kubectl apply` on your behalf. So with Kerbi, you can implement conceptual workflow as follows:
 
 ```
-$ kerbi template foo \
+$ kerbi template foo . \
     --set pod.image=v2 \
     --read-state @latest \
     --write-state @new-candidate \

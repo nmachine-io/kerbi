@@ -1,5 +1,24 @@
 # CLI Reference
 
+## Overview
+
+The Kerbi CLI should be available to you anywhere on the system provided you installed the Gem using `gem install`, as opposed adding it in a particular project's Gemfile.
+
+The information below can be found by running `kerbi` in your command line:
+
+```
+Commands:
+  kerbi config                                 # Command group for config actions (see $ kerbi config help)
+  kerbi console                                # Opens an IRB console so you can play with your mixers
+  kerbi help [COMMAND]                         # Describe available commands or one specific command
+  kerbi project                                # Command group for project actions (see $ kerbi project help)
+  kerbi release                                # Command group for release actions (see $ kerbi release help)
+  kerbi state                                  # Command group for state actions (see $ kerbi state help)
+  kerbi template [RELEASE_NAME] [PROJECT_URI]  # Templates to YAML/JSON, using [RELEASE_NAME] for state I/O
+  kerbi values                                 # Command group for values actions (see $ kerbi values help)
+  kerbi version                                # Print the kerbi gem's version.
+```
+
 ## Root Commands
 
 ### $ `kerbi template [RELEASE_NAME] [PROJECT_URI]`
