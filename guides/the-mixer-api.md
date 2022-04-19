@@ -6,7 +6,7 @@ description: How to make the most of your MIxer subclasses
 
 Mixers are your templating orchestration layer. Inside a mixer, you load various types of dict-yielding things, like YAML/ERB files, Helm charts, or other mixers, then manipulate their output if need be, and submit their final output.
 
-This page is about the [**`Kerbi::Mixer`**](https://github.com/nmachine-io/kerbi/blob/main/lib/main/mixer.rb) which is class. Find the complete method-level [**documentation here**](https://www.rubydoc.info/gems/kerbi/Kerbi/Mixer).
+This page is about the [**`Kerbi::Mixer`**](https://github.com/nmachine-io/kerbi/blob/main/lib/main/mixer.rb) which is a class. Find the complete [**documentation here**](https://www.rubydoc.info/gems/kerbi/Kerbi/Mixer).
 
 {% hint style="info" %}
 **We use the words "Dict" and "**[**Hash**](https://ruby-doc.org/core-3.1.1/Hash.html)**" interchangeably**
@@ -47,9 +47,9 @@ bonjour: Monsieur Ke
 
 **Some Observations:**
 
-`mix()` is the method for all your mixer's logic.
+**`mix()`** is the method for all your mixer's logic.
 
-`push(dicts: Hash | Array<Hash>)` adds the dict(s) you give it to the mixer's final output.
+**`push(dicts: Hash | Array<Hash>)`** adds the dict(s) you give it to the mixer's final output.
 
 ## Attributes: [`values`](https://www.rubydoc.info/gems/kerbi/1.1.47/Kerbi/Mixer#values-instance\_method) and [`release_name`](https://www.rubydoc.info/gems/kerbi/1.1.47/Kerbi/Mixer#release\_name-instance\_method)
 
@@ -135,9 +135,7 @@ key: value
 
 ### The [`dicts()`](https://www.rubydoc.info/gems/kerbi/Kerbi/Mixer#dicts-instance\_method) method (aka [`dict()`](https://www.rubydoc.info/gems/kerbi/Kerbi/Mixer#dicts-instance\_method) )
 
-The core dict-loading method, called by every other dict loading method (`file()` etc...).&#x20;
-
-Has two purposes:&#x20;
+The core dict-loading method, called by every other dict loading method (`file()` etc...). Has two purposes:&#x20;
 
 1. Sanitizing its inputs, turning a single `Hash`, into an `Array<Hash>`, transforming non-symbol keys into symbols, raising errors if its inputs are not Hash-like, etc...
 2. Performing post processing according to the options it receives, [**covered below**](the-mixer-api.md#post-processing).
@@ -268,7 +266,7 @@ file_two: two
 
 {% tab title="Output" %}
 ```yaml
-$ kerbi template default .
+$ kerbi template demo .
 
 file_one: one
 ---
@@ -281,12 +279,70 @@ file_two: two
 
 Instantiates the given mixer, runs it, and returns its output as an `Array<Hash>`.&#x20;
 
+{% tabs %}
+{% tab title="Main" %}
+{% code title="kerbifile.rb" %}
+```ruby
+require_relative 'other_mixer'
+
+module MultiMixing
+  class MixerOne < Kerbi::Mixer
+    def mix
+      push(mixer_says: "MixerOne #{values}")
+    end
+  end
+
+  class OuterMixer < Kerbi::Mixer
+    def mix
+      push mixer_says: "OuterMixer #{values}"
+      push mixer(MultiMixing::MixerOne)
+      push mixer(MultiMixing::MixerTwo, values: values[:x])
+    end
+  end
+end
+
+Kerbi::Globals.mixers << MultiMixing::OuterMixer
+Kerbi::Globals.revision = "1.0.0"
+```
+{% endcode %}
+{% endtab %}
+
+{% tab title="Mixer in second file" %}
+{% code title="other_mixer.rb" %}
+```ruby
+module MultiMixing
+  class MixerTwo < Kerbi::Mixer
+    def mix
+      push(mixer_says: "MixerTwo #{values}")
+    end
+  end
+end
+```
+{% endcode %}
+{% endtab %}
+
+{% tab title="Output" %}
+```yaml
+$ kerbi template demo . --set x.y=z
+
+mixer_says: OuterMixer {:x=>{:y=>"z"}}
+---
+mixer_says: MixerOne {:x=>{:y=>"z"}}
+---
+mixer_says: MixerTwo {:y=>"z"}
+```
+{% endtab %}
+{% endtabs %}
+
+Observations:
+
+* **`require_relative`** imports the other mixer in plain Ruby, no magic
+* **`mixer(MultiMixing::MixerOne)` ** takes a class, not an instance
+* **`values: values[:x]`** lets us customize the values the inner mixer gets
+
 ### The [`helm_chart()`](https://www.rubydoc.info/gems/kerbi/Kerbi/Mixer#helm\_chart-instance\_method) method
 
-Invokes Helm's [template command](https://helm.sh/docs/helm/helm\_template/), i.e `helm template [NAME] [CHART]` and returns the output as a standard `Array<Hash>`.  Your local Helm installation must be ready to accept this command, meaning:
-
-1. The `repo` must be available (see [helm repo add](https://helm.sh/docs/helm/helm\_repo\_add/))
-2. Your helm executable must be available ()
+Invokes Helm's [template command](https://helm.sh/docs/helm/helm\_template/), i.e `helm template [NAME] [CHART]` and returns the output as a standard `Array<Hash>`.&#x20;
 
 Here is an example using [JetStack's cert-manager chart](https://artifacthub.io/packages/helm/cert-manager/cert-manager)
 
@@ -300,7 +356,7 @@ class HelmExample < Kerbi::Mixer
   end
 
   def cert_manager_resources
-    chart(
+    helm_chart(
       'jetstack/cert-manager',
       release: release_name,
       values: values.dig(:cert_manager)
@@ -330,10 +386,15 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     helm.sh/chart: cert-manager-v1.7.1
 ---
-# on and o
+# on and on
 ```
 {% endtab %}
 {% endtabs %}
+
+Your local Helm installation must be ready to accept this command, meaning:
+
+1. The `repo` must be available to Helm (see [helm repo add](https://helm.sh/docs/helm/helm\_repo\_add/))
+2. Your helm executable must be available (see [Global Configuration](global-configuration.md))
 
 ## Post Processing
 
