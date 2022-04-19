@@ -140,10 +140,10 @@ List states for the `tuna` release:
 ```
 $ kerbi state list tuna
 TAG              REVISION  MESSAGE  ASSIGNMENTS  OVERRIDES  CREATED_AT
-0.2.2            0.2.0                        1          3  seconds ago
-0.2.1            0.2.0                        1          5  seconds ago
-keen-ethyl       0.1.0                        0          8  seconds ago
-0.1.1            0.1.0                        1          2  minutes ago
+0.2.2            0.2.0              1            3          seconds ago
+0.2.1            0.2.0              1            5          seconds ago
+keen-ethyl       0.1.0              0            8          seconds ago
+0.1.1            0.1.0              1            2          minutes ago
 ```
 
 List all releases:
