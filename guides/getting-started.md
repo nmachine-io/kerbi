@@ -56,7 +56,7 @@ $ kerbi template hello .
 And then `values show` to see compiled values in action:
 
 ```
-$ kerbi values show --set foo-bar
+$ kerbi values show --set pod.image=ruby
 ```
 
 ##
