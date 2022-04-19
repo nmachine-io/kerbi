@@ -10,3 +10,4 @@
 * [The Templating API](guides/the-templating-api.md)
 * [Releases & States](guides/the-state-system.md)
 * [CLI Reference](guides/cli-commands.md)
+* [Global Configuration](guides/global-configuration.md)
