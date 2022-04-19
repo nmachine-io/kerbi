@@ -490,6 +490,24 @@ $ kerbi state retag hello @candidate 1.2.3
 Updated state[1.2.3].tag from [cand]-burly-robin => 1.2.3
 ```
 
+<details>
+
+<summary>Options</summary>
+
+```
+  -n, [--namespace=NAMESPACE]                      # Use this Kubernetes namespace instead of [RELEASE_NAME] for state I/O.
+      [--state-backend=STATE-BACKEND]              # Type of persistent store to read/write this release's state.
+                                                   # Possible values: configmap, secret
+      [--read-state=READ-STATE]                    # Merge values from state with this tag.
+      [--write-state=WRITE-STATE]                  # Write compiled values into new or existing state recordwith this tag.
+      [--k8s-auth-type=K8S-AUTH-TYPE]              # Kubernetes cluster authentication type. Uses kube-config if unspecified.
+                                                   # Possible values: kube-config, in-cluster, token
+      [--kube-config-path=KUBE-CONFIG-PATH]        # Path to your kube-config file. Uses ~/.kube/config if unspecified.
+      [--kube-config-context=KUBE-CONFIG-CONTEXT]  # Context to use in your kube config. Uses current context if unspecified.
+```
+
+</details>
+
 ### `$ kerbi state prune-candidates [RELEASE_NAME]`
 
 Deletes all state records under `[RELEASE_NAME]` that are flagged as candidates.
@@ -508,6 +526,24 @@ $ kerbi state list hello
 TAG                REVISION MESSAGE ASSIGNMENTS OVERRIDES CREATED_AT
 1.2.3                               2           1         a minute ago
 ```
+
+<details>
+
+<summary>Options</summary>
+
+```
+  -n, [--namespace=NAMESPACE]                      # Use this Kubernetes namespace instead of [RELEASE_NAME] for state I/O.
+      [--state-backend=STATE-BACKEND]              # Type of persistent store to read/write this release's state.
+                                                   # Possible values: configmap, secret
+      [--read-state=READ-STATE]                    # Merge values from state with this tag.
+      [--write-state=WRITE-STATE]                  # Write compiled values into new or existing state recordwith this tag.
+      [--k8s-auth-type=K8S-AUTH-TYPE]              # Kubernetes cluster authentication type. Uses kube-config if unspecified.
+                                                   # Possible values: kube-config, in-cluster, token
+      [--kube-config-path=KUBE-CONFIG-PATH]        # Path to your kube-config file. Uses ~/.kube/config if unspecified.
+      [--kube-config-context=KUBE-CONFIG-CONTEXT]  # Context to use in your kube config. Uses current context if unspecified.
+```
+
+</details>
 
 ## Config Commands
 

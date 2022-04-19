@@ -76,6 +76,7 @@ A state is a record that stores the values (aka variables) that were computed du
 State records have the following attributes:
 
 * `tag` - its unique name, which can be anything
+* `revision` -  the semantic version number of your project ([see guide](revisions.md))
 * `message` any human readable note, or perhaps a git commit id
 * `values` the final values computed by `template` or `values show`
 * `default_values` the final **default** values computed by `template` or `values show`
@@ -89,9 +90,11 @@ You can easily inspect any state with the CLI:
 $ kerbi state show antelope @latest
 
 --------------------------------------------
+ TAG              1.0.0
+--------------------------------------------
  RELEASE          antelope
 --------------------------------------------
- TAG              1.0.0
+ REVISION         1.0.0
 --------------------------------------------
  MESSAGE
 --------------------------------------------

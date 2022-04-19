@@ -9,5 +9,6 @@
 * [The Mixer API](guides/the-mixer-api.md)
 * [The Templating API](guides/the-templating-api.md)
 * [Releases & States](guides/the-state-system.md)
+* [Revisions](guides/revisions.md)
 * [CLI Reference](guides/cli-commands.md)
 * [Global Configuration](guides/global-configuration.md)
