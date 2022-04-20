@@ -622,14 +622,14 @@ $ kubectl apply --dry-run=server -f manifest.yaml \
 ```
 {% endcode %}
 
-## 10. Managing Releases
+## 10. Revisions
 
-If you start tracking more states for more apps, you'll need to start thinking about releases.
+{% hint style="warning" %}
+**Work in progress**.
+
+The following is a preview. The command group `$ kerbi revision` does not work.
+{% endhint %}
 
 ```
-$ kerbi release list
-NAME    BACKEND    NAMESPACE   RESOURCE
-demo    ConfigMap  demo        kerbi-demo-db
-demo    ConfigMap  default     kerbi-demo-db
-omed    ConfigMap  demo        kerbi-omed-db
+$ kerbi revision push 1.0.1
 ```
