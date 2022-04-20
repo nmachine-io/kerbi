@@ -5,9 +5,9 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Kerbi is a Kubernetes tool most similar to [Helm](https://helm.sh/), with the following key differences:
-- Templating: also variable-based, but aspires to be more powerful, flexible, and delightful
-- State management: aspires to be less invasive, more deliberate, explict, and transparent
-- Packaging: a central registry for managing your own chart's revisions is in the works
+- **Templating**: also variable-based, but aspires to be more powerful, flexible, and delightful
+- **State mgmt**: aspires to be less invasive, more deliberate, explict, and transparent
+- **Revision mgmt**: `$ kerbi publish` makes the templating logic invokable over HTTP/JSON (W.I.P)
 
 [Documentation.](https://xavier-9.gitbook.io/untitled/walkthroughs/getting-started)
 
