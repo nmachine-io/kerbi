@@ -9,7 +9,7 @@ Kerbi is a Kubernetes tool most similar to [Helm](https://helm.sh/), with the fo
 - **State mgmt**: aspires to be less invasive, more deliberate, explict, and transparent
 - **Revision mgmt**: publishing makes your templating logic invokable over HTTP/JSON (W.I.P)
 
-[Documentation.](https://xavier-9.gitbook.io/untitled/walkthroughs/getting-started)
+**[Docs](https://xavier-9.gitbook.io/untitled/walkthroughs/getting-started) • [Repo](https://github.com/xavier-mt/kerbi)**
 
 ## Getting Started
 
