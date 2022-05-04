@@ -35,7 +35,7 @@ text: special demo message
 
 **[Documentation.](https://xavier-9.gitbook.io/untitled/walkthroughs/getting-started)**
 
-## Features
+## At a Glance
 
 ### 💲 Variable based like Helm
 
